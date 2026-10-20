@@ -13,6 +13,18 @@ updates:
         patterns:
           - "org.jetbrains.kotlin-wrappers*"
 
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    versioning-strategy: increase
+    groups:
+      iconify:
+        patterns:
+          - "@iconify/*"
+          - "iconify-icon"
+
   - package-ecosystem: github-actions
     directory: "/"
     schedule:

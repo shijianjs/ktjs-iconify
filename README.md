@@ -24,14 +24,15 @@ shared icon types along.
 
 ## Versioning
 
-Each module is versioned as `{upstream npm version}-kt.{revision}`, declared in the module's
-`build.gradle.kts`:
+Each module is versioned as `{upstream npm version}-kt.{revision}`. The upstream npm versions are
+declared once in the root [`package.json`](package.json); Gradle reads them and derives each
+module's base version and `npm(...)` dependency:
 
 - Only `-kt.N` versions are published; a version without the suffix never exists.
-- Upstream upgrade: the base version follows upstream and the revision resets to `kt.1`, even when
-  the wrapper code itself did not change.
+- Upstream upgrade: change the version in `package.json`; the base version follows automatically
+  and the revision resets to `kt.1`, even when the wrapper code itself did not change.
 - Wrapper-only fix: the revision increments (`kt.2`, `kt.3`, ...) while the base version stays.
-- Bumping an `npm(...)` dependency requires updating the base version in the same change.
+- The revision is the only part declared in each module's `build.gradle.kts`.
 
 ## Requirements
 

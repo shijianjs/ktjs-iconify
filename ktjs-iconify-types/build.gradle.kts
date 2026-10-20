@@ -5,7 +5,10 @@ plugins {
 }
 
 // Wrapper version = {upstream npm version}-kt.{revision}. See the versioning section in AGENTS.md.
-version = "2.0.0-kt.1"
+@Suppress("UNCHECKED_CAST")
+val npmVersions = rootProject.extra["npmVersions"] as Map<String, String>
+val upstreamVersion = npmVersions.getValue("@iconify/types")
+version = "$upstreamVersion-kt.1"
 
 kotlin {
     js {

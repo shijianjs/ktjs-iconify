@@ -33,8 +33,19 @@ jobs:
       - name: Install browser test dependencies
         run: npx --yes playwright install-deps chromium
 
+      - name: Refresh npm lock file
+        if: github.actor == 'dependabot[bot]'
+        run: ./gradlew kotlinUpgradePackageLock
+
       - name: Build and test
         run: ./gradlew build --stacktrace
+
+      - name: Upload refreshed npm lock file
+        if: github.actor == 'dependabot[bot]'
+        uses: actions/upload-artifact@v7
+        with:
+          name: npm-lock
+          path: kotlin-js-store/package-lock.json
 
       - name: Upload test reports
         if: failure()

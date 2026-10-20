@@ -6,7 +6,10 @@ plugins {
 }
 
 // Wrapper version = {upstream npm version}-kt.{revision}. See the versioning section in AGENTS.md.
-version = "3.0.4-kt.1"
+@Suppress("UNCHECKED_CAST")
+val npmVersions = rootProject.extra["npmVersions"] as Map<String, String>
+val upstreamVersion = npmVersions.getValue("iconify-icon")
+version = "$upstreamVersion-kt.1"
 
 kotlin {
     js {
@@ -26,7 +29,7 @@ kotlin {
         jsMain.dependencies {
             api(project(":ktjs-iconify-types"))
             api("org.jetbrains.kotlin-wrappers:kotlin-browser:2026.10.1")
-            implementation(npm("iconify-icon", "3.0.4"))
+            implementation(npm("iconify-icon", upstreamVersion))
         }
         jsTest.dependencies {
             implementation(kotlin("test"))

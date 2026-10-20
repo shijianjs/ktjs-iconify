@@ -37,12 +37,12 @@ gh repo clone <owner>/<repo> S:/workspace/github/<owner>/<repo>
 
 ## 版本约定
 
-每个子模块独立版本，格式为 `{上游 npm 版本}-kt.{修订号}`，在各模块 `build.gradle.kts` 的 `version` 中声明：
+每个子模块独立版本，格式为 `{上游 npm 版本}-kt.{修订号}`。上游 npm 版本只在根目录 `package.json` 的 `dependencies` 中声明，根 `build.gradle.kts` 解析后放入 `extra["npmVersions"]`，各子模块读取它来声明 `npm(...)` 并推导版本基础部分：
 
 - 只发布带 `-kt.N` 后缀的版本，不存在不带后缀的版本。
-- 上游升级：基础版本跟随上游，修订号重置为 `kt.1`；即使 wrapper 代码没变，也要按新上游版本发布。
-- 上游不变、只修订 wrapper：递增修订号（`kt.2`、`kt.3`…）。
-- 改动模块 `npm(...)` 依赖版本时，必须同步修改 `version` 的基础版本部分。
+- 上游升级：只改 `package.json`，基础版本自动跟随，修订号重置为 `kt.1`；即使 wrapper 代码没变，也要按新上游版本发布。
+- 上游不变、只修订 wrapper：递增 `build.gradle.kts` 里的修订号（`kt.2`、`kt.3`…）。
+- 不要再把 npm 版本硬编码回 `build.gradle.kts`。
 - `-kt.N` 在 SemVer 中是预发布标识，优先级低于同基础版本的无后缀版本；因为永不发布无后缀版本，发布序列内部不会冲突。
 
 ## 仓库与本地镜像
@@ -57,8 +57,9 @@ gh repo clone <owner>/<repo> S:/workspace/github/<owner>/<repo>
 
 - `.github/workflows/ci.yml` 在 push 到 `master` 和所有 PR 上运行 `./gradlew build`（JDK 21，Ubuntu）。
 - `.github/workflows/dependabot-auto-merge.yml` 在 CI 成功后自动 squash 合并 Dependabot 的 PR。它用 `workflow_run` 而不是直接由 Dependabot PR 触发，因为后者拿到的 `GITHUB_TOKEN` 只读。
-- `.github/dependabot.yml` 只覆盖 `gradle` 和 `github-actions` 两个生态。Dependabot 看不懂 `kotlin { sourceSets { ... npm("pkg", "ver") } }` 里的 npm 版本，因此 `@iconify/*`、`iconify-icon` 依赖需要手工升级：同时改 `build.gradle.kts` 的 `npm(...)`、模块 `version` 的基础版本，并运行 `./gradlew kotlinUpgradePackageLock` 更新 `kotlin-js-store/package-lock.json`。
-- `kotlin-js-store` 里只有 Gradle 生成的锁文件，没有 `package.json`，所以不要给该目录配置 npm 生态的 Dependabot；即使配上，单独改锁文件也会与 `build.gradle.kts` 中的版本声明不一致，下一次 `kotlinUpgradePackageLock` 会把它覆盖掉。
+- `.github/dependabot.yml` 覆盖 `gradle`、`npm`（根目录 `package.json`）和 `github-actions` 三个生态。npm 版本由 Dependabot 改 `package.json`，Gradle 自动读取，不再手工改 `npm(...)`。
+- Dependabot 的 npm PR 不会带 Gradle 生成的锁文件更新，所以 CI 对 Dependabot PR 先跑 `kotlinUpgradePackageLock` 再构建，并把校验过的锁文件作为 `npm-lock` artifact 上传；自动合并 job 下载该 artifact、提交到 PR 分支，然后 squash 合并。普通 PR 仍然严格校验锁文件。
+- `kotlin-js-store` 里只有 Gradle 生成的锁文件，没有也不应该有 `package.json`；根目录的 `package.json` 才是版本清单，不要给 `kotlin-js-store` 配置 npm 生态的 Dependabot。
 - 本地增量构建后，`jsPackageJson` / `rootPackageJson` 可能残留旧输出（模块版本变成 `0.0.0-unspecified`、漏掉 `packages_imported/*`），此时 CI 会报 `Lock file was changed`。执行 `./gradlew kotlinUpgradePackageLock --rerun-tasks` 重新生成锁文件并提交。
 
 ## 文档约定

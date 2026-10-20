@@ -1,0 +1,11 @@
+{
+  "name": "ktjs-iconify-npm-versions",
+  "private": true,
+  "description": "Source of truth for npm package versions used by the Kotlin/JS build. Read by build.gradle.kts and updated by Dependabot.",
+  "dependencies": {
+    "@iconify/tools": "5.0.14",
+    "@iconify/types": "2.0.0",
+    "@iconify/utils": "3.1.7",
+    "iconify-icon": "3.0.4"
+  }
+}
