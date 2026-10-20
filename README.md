@@ -81,3 +81,7 @@ dependencies {
     implementation(project(":ktjs-iconify-utils"))
 }
 ```
+
+## License
+
+Released under the [MIT License](LICENSE).
