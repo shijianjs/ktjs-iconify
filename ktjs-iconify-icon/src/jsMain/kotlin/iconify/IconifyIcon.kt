@@ -1,7 +1,7 @@
 package iconify
 
-import kotlin.js.unsafeCast
-import kotlinx.browser.document
+import web.dom.TagName
+import web.dom.document
 
 /**
  * Imports `iconify-icon`, which registers the `<iconify-icon>` custom element.
@@ -15,8 +15,7 @@ fun createIconifyIcon(
     icon: String,
     configure: IconifyIconElement.() -> Unit = {},
 ): IconifyIconElement =
-    document.createElement("iconify-icon")
-        .unsafeCast<IconifyIconElement>()
+    document.createElement(TagName<IconifyIconElement>("iconify-icon"))
         .apply {
             registerIconifyIcon()
             this.icon = icon

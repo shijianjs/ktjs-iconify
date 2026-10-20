@@ -5,8 +5,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import kotlinx.browser.document
-import org.w3c.dom.HTMLUnknownElement
+import web.dom.document
+import web.html.HTMLUnknownElement
 
 class IconifyIconTest {
     @Test

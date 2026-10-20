@@ -1,6 +1,6 @@
 package iconify
 
-import org.w3c.dom.HTMLElement
+import web.html.HTMLElement
 
 /**
  * The `<iconify-icon>` custom element.
