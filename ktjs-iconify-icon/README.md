@@ -5,6 +5,9 @@ Component.
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
+**Wrapper version:** `3.0.4-kt.1`, tracking upstream `iconify-icon` 3.0.4. See the
+[versioning rule](../README.md#versioning).
+
 Browser only. Importing the module loads `iconify-icon`, which registers the `<iconify-icon>`
 custom element; icons can come from the Iconify API or from locally registered icon data.
 

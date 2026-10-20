@@ -5,6 +5,9 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
+**Wrapper 版本：** `3.1.7-kt.1`，对应上游 `@iconify/utils` 3.1.7。规则见
+[版本约定](../README.zh-CN.md#版本约定)。
+
 依赖 [`ktjs-iconify-types`](../ktjs-iconify-types/README.zh-CN.md)，并通过 `api` 转出其中的
 类型。npm 依赖通过 Kotlin/JS 的 `npm(...)` 引入。
 

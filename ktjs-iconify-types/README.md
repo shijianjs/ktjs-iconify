@@ -5,6 +5,9 @@ Kotlin/JS type declarations for [`@iconify/types`](https://www.npmjs.com/package
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
+**Wrapper version:** `2.0.0-kt.1`, tracking upstream `@iconify/types` 2.0.0. See the
+[versioning rule](../README.md#versioning).
+
 This module contains types only. `@iconify/types` ships no runtime code, so there is no npm
 dependency; the declarations describe the JSON structures used by Iconify icon sets and the
 Iconify API.

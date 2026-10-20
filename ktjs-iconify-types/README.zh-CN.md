@@ -4,6 +4,9 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
+**Wrapper 版本：** `2.0.0-kt.1`，对应上游 `@iconify/types` 2.0.0。规则见
+[版本约定](../README.zh-CN.md#版本约定)。
+
 本模块只有类型。`@iconify/types` 不包含运行时代码，因此这里没有 npm 依赖；这些声明描述了
 Iconify 图标集与 Iconify API 使用的 JSON 结构。
 

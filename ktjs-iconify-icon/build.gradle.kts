@@ -5,6 +5,9 @@ plugins {
     kotlin("multiplatform")
 }
 
+// Wrapper version = {upstream npm version}-kt.{revision}. See the versioning section in AGENTS.md.
+version = "3.0.4-kt.1"
+
 kotlin {
     js {
         compilerOptions {

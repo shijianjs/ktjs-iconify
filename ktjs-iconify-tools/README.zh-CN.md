@@ -4,6 +4,9 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
+**Wrapper 版本：** `5.0.14-kt.1`，对应上游 `@iconify/tools` 5.0.14。规则见
+[版本约定](../README.zh-CN.md#版本约定)。
+
 仅面向 Node.js。浏览器侧的图标解析与 SVG/CSS 生成请使用
 [`ktjs-iconify-utils`](../ktjs-iconify-utils/README.zh-CN.md)，本模块依赖它。
 

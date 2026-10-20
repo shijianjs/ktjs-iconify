@@ -35,6 +35,16 @@ gh repo clone <owner>/<repo> S:/workspace/github/<owner>/<repo>
 
 两套类型在运行时指向同一个对象，但编译器不视为同一类型；wrapper 的公开 API 一旦用 `org.w3c.dom.*`，kotlin-browser 项目就无法直接使用。
 
+## 版本约定
+
+每个子模块独立版本，格式为 `{上游 npm 版本}-kt.{修订号}`，在各模块 `build.gradle.kts` 的 `version` 中声明：
+
+- 只发布带 `-kt.N` 后缀的版本，不存在不带后缀的版本。
+- 上游升级：基础版本跟随上游，修订号重置为 `kt.1`；即使 wrapper 代码没变，也要按新上游版本发布。
+- 上游不变、只修订 wrapper：递增修订号（`kt.2`、`kt.3`…）。
+- 改动模块 `npm(...)` 依赖版本时，必须同步修改 `version` 的基础版本部分。
+- `-kt.N` 在 SemVer 中是预发布标识，优先级低于同基础版本的无后缀版本；因为永不发布无后缀版本，发布序列内部不会冲突。
+
 ## Maven 镜像
 
 阿里云镜像的 `kotlin-wrappers` 同步滞后，且有时只有 POM 没有 klib，而 Gradle 一旦在某个仓库找到元数据就不会回退。`settings.gradle.kts` 已用 `exclusiveContent` 把 `org.jetbrains.kotlin-wrappers` 和 `kotlin-js-plain-objects` 固定到 Maven Central；新增 wrapper 依赖时如遇 `Could not find ... .klib`，把对应 group/module 加进去。

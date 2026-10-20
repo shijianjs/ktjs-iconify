@@ -4,6 +4,9 @@ Kotlin/JS wrapper for [`@iconify/tools`](https://www.npmjs.com/package/@iconify/
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
+**Wrapper version:** `5.0.14-kt.1`, tracking upstream `@iconify/tools` 5.0.14. See the
+[versioning rule](../README.md#versioning).
+
 Node.js only. For browser-side icon parsing and SVG/CSS generation use
 [`ktjs-iconify-utils`](../ktjs-iconify-utils/README.md), which this module depends on.
 

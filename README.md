@@ -11,16 +11,27 @@ duplicated.
 
 ## Modules
 
-| Module | npm package | Version | Runtime |
-| --- | --- | --- | --- |
-| [ktjs-iconify-types](ktjs-iconify-types/README.md) | `@iconify/types` | 2.0.0 | Types only, no runtime code |
-| [ktjs-iconify-utils](ktjs-iconify-utils/README.md) | `@iconify/utils` | 3.1.7 | Browser and Node.js |
-| [ktjs-iconify-tools](ktjs-iconify-tools/README.md) | `@iconify/tools` | 5.0.14 | Node.js only |
-| [ktjs-iconify-icon](ktjs-iconify-icon/README.md) | `iconify-icon` | 3.0.4 | Browser, Web Component |
+| Module | npm package | Upstream version | Wrapper version | Runtime |
+| --- | --- | --- | --- | --- |
+| [ktjs-iconify-types](ktjs-iconify-types/README.md) | `@iconify/types` | 2.0.0 | 2.0.0-kt.1 | Types only, no runtime code |
+| [ktjs-iconify-utils](ktjs-iconify-utils/README.md) | `@iconify/utils` | 3.1.7 | 3.1.7-kt.1 | Browser and Node.js |
+| [ktjs-iconify-tools](ktjs-iconify-tools/README.md) | `@iconify/tools` | 5.0.14 | 5.0.14-kt.1 | Node.js only |
+| [ktjs-iconify-icon](ktjs-iconify-icon/README.md) | `iconify-icon` | 3.0.4 | 3.0.4-kt.1 | Browser, Web Component |
 
 `ktjs-iconify-utils` depends on `ktjs-iconify-types`, and `ktjs-iconify-tools` depends on
 `ktjs-iconify-utils`; the dependencies are exposed with `api`, so a single dependency brings the
 shared icon types along.
+
+## Versioning
+
+Each module is versioned as `{upstream npm version}-kt.{revision}`, declared in the module's
+`build.gradle.kts`:
+
+- Only `-kt.N` versions are published; a version without the suffix never exists.
+- Upstream upgrade: the base version follows upstream and the revision resets to `kt.1`, even when
+  the wrapper code itself did not change.
+- Wrapper-only fix: the revision increments (`kt.2`, `kt.3`, ...) while the base version stays.
+- Bumping an `npm(...)` dependency requires updating the base version in the same change.
 
 ## Requirements
 

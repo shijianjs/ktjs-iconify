@@ -5,6 +5,9 @@ wrapper。
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
+**Wrapper 版本：** `3.0.4-kt.1`，对应上游 `iconify-icon` 3.0.4。规则见
+[版本约定](../README.zh-CN.md#版本约定)。
+
 仅面向浏览器。导入模块即加载 `iconify-icon` 并注册 `<iconify-icon>` 自定义元素；图标既可来自
 Iconify API，也可来自本地注册的图标数据。
 
