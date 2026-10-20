@@ -17,7 +17,8 @@ hs_err_pid*
 replay_pid*
 
 target
-.idea
+/.idea/*
+!/.idea/icon.svg
 build
 .gradle
 .kotlin
