@@ -1,0 +1,1 @@
+fun getWorld() = "Js World"
