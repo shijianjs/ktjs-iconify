@@ -1,1 +1,0 @@
-fun getWorld() = "Js World"

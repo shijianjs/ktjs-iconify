@@ -16,3 +16,8 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "ktjs-iconify"
+
+include(":ktjs-iconify-types")
+include(":ktjs-iconify-utils")
+include(":ktjs-iconify-tools")
+include(":ktjs-iconify-icon")

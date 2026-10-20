@@ -1,26 +1,8 @@
-import org.jetbrains.kotlin.gradle.ExperimentalJsTestDsl
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.targets.js.npm.NpmExtension
 
 plugins {
-    kotlin("multiplatform") version "2.4.21"
-}
-
-kotlin {
-    js {
-        browser {
-            @OptIn(ExperimentalJsTestDsl::class)
-            test {
-                chromium()
-            }
-        }
-    }
-
-    sourceSets {
-        jsTest.dependencies {
-            implementation(kotlin("test"))
-        }
-    }
+    kotlin("multiplatform") version "2.4.21" apply false
 }
 
 // Keep a single webpack instance across the npm workspace; npm otherwise installs
