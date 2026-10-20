@@ -63,6 +63,54 @@ gh repo clone <owner>/<repo> S:/workspace/github/<owner>/<repo>
 - `kotlin-js-store` 里只有 Gradle 生成的锁文件，没有也不应该有 `package.json`；根目录的 `package.json` 才是版本清单，不要给 `kotlin-js-store` 配置 npm 生态的 Dependabot。
 - 本地增量构建后，`jsPackageJson` / `rootPackageJson` 可能残留旧输出（模块版本变成 `0.0.0-unspecified`、漏掉 `packages_imported/*`），此时 CI 会报 `Lock file was changed`。执行 `./gradlew kotlinUpgradePackageLock --rerun-tasks` 重新生成锁文件并提交。
 
+## 发布到 Maven Central
+
+发布配置统一在根 `build.gradle.kts` 的 `subprojects {}` 里，使用
+`com.vanniktech.maven.publish`，所以 group、POM、签名和 Central Portal 目标不会被各模块改乱。
+group 固定为 `io.github.shijianjs`（GitHub 命名空间，Central 可自动验证）；`subprojects` 的
+group 必须单独设置，根项目的 `group` 不会自动继承。
+
+一次性准备：
+
+1. 在 [Central Portal](https://central.sonatype.com/) 注册账号，添加并验证 `io.github.shijianjs`
+   namespace（选择 GitHub 验证，用户名 `shijianjs`）。
+2. 生成 GPG 密钥并把公钥发布到 `keys.openpgp.org` / `keyserver.ubuntu.com`。当前发布密钥指纹
+   为 `BE2F 2272 947D 5C0D 119A F7FE 5F86 E41B 23AE 8164`（ed25519，2029-10-19 到期），
+   公钥见 `https://keys.openpgp.org/vks/v1/by-fingerprint/BE2F2272947D5C0D119AF7FE5F86E41B23AE8164`。
+3. 在 Central Portal 生成 **User Token**（不是登录密码）。
+4. 在 GitHub 仓库 Secrets 中配置：
+   `MAVEN_CENTRAL_USERNAME`、`MAVEN_CENTRAL_PASSWORD`（即 User Token 的两部分）、
+   `MAVEN_CENTRAL_SIGNING_KEY`（`gpg --export-secret-keys --armor <key id>` 的完整输出）、
+   `MAVEN_CENTRAL_SIGNING_KEY_PASSWORD`（密钥没有密码时留空）。
+
+发布时手动运行 **Publish to Maven Central** workflow（`.github/workflows/publish.yml`），可以选
+单个模块或 `all`。DSL 里用的是 `publishToMavenCentral(automaticRelease = true)`，上传后会等待
+Central 校验并自动发布。Maven Central 的版本不可覆盖，发布前务必确认版本号没有被用过；同一
+版本重复发布会失败。选 `all` 只有在四个模块的当前版本都从未发布过时才安全；日常发布应只选
+版本有变化的模块。
+
+本地检查发布内容时，`publishToMavenLocal` 对非 `-SNAPSHOT` 版本也强制签名，需要提供
+`signingInMemoryKey` 等属性。只想看 POM 和构件清单时，可以临时把模块版本改成 `-SNAPSHOT`，
+或者只运行 `generatePomFileForKotlinMultiplatformPublication`、`buildKotlinToolingMetadata`。
+
+### klibs.io 自动发现
+
+klibs.io 没有需要提交的元数据文件，它从 Maven Central 和 GitHub 自动抓取，满足以下条件即可被收录：
+
+- 项目开源且托管在 GitHub。
+- 至少一个构件发布到 Maven Central，且确切版本已同步到 Google 的 Maven Central 镜像（同步有延迟）。
+- 至少一个构件是 Kotlin Multiplatform 项目，并发布 `kotlin-tooling-metadata.json`。Kotlin
+  Multiplatform 插件会自动生成该文件，`maven-publish` 会把它附到根 publication 上；当前四个
+  模块虽然只有 JS target，也属于 KMP 并满足此条件。
+- POM 的 `url` 或 `scm.url` 是有效的 GitHub 仓库链接。根 `build.gradle.kts` 已统一设置，
+  改仓库地址时要同步修改，否则 klibs.io 无法关联源码。
+
+发布后可以在 `https://klibs.io/package/{GROUP_ID}/{ARTIFACT_ID}/{VERSION}/status` 查看索引状态，
+例如 `https://klibs.io/package/io.github.shijianjs/ktjs-iconify-utils/3.1.7-kt.1/status`。镜像同步
+完成后仍未被发现，可以在
+[klibs-io-issue-management](https://github.com/JetBrains/klibs-io-issue-management/issues/new?template=index_request.yml)
+提交 index request。
+
 ## 文档约定
 
 - 需要跨会话、跨上下文感知的信息（环境约定、构建方式、模块结构、容易踩的坑）记录在本文件。

@@ -9,6 +9,7 @@ plugins {
 val npmVersions = rootProject.extra["npmVersions"] as Map<String, String>
 val upstreamVersion = npmVersions.getValue("@iconify/tools")
 version = "$upstreamVersion-kt.1"
+description = "Kotlin/JS wrapper for the @iconify/tools package (Node.js only)."
 
 kotlin {
     js {

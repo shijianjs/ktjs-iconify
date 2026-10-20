@@ -72,16 +72,29 @@ After adding or upgrading an npm dependency in a module, refresh the shared lock
   `settings.gradle.kts`, because the Aliyun mirror lags behind and sometimes serves metadata
   without the corresponding klibs.
 
-## Status
+## Installation
 
-The modules are not published to a Maven repository yet. Use them as project dependencies inside
-this build:
+Releases are published to Maven Central under the `io.github.shijianjs` group. Replace the
+version with the one you need (`{upstream version}-kt.{revision}`):
 
 ```kotlin
 dependencies {
-    implementation(project(":ktjs-iconify-utils"))
+    implementation("io.github.shijianjs:ktjs-iconify-utils:3.1.7-kt.1")
+    implementation("io.github.shijianjs:ktjs-iconify-tools:5.0.14-kt.1")
+    implementation("io.github.shijianjs:ktjs-iconify-icon:3.0.4-kt.1")
 }
 ```
+
+The POMs point at this GitHub repository (`url` and `scm.url`), and every module is a Kotlin
+Multiplatform project publishing `kotlin-tooling-metadata.json`. Those are the requirements for
+[klibs.io](https://klibs.io/) to discover the libraries automatically; indexing starts once the
+exact version reaches the Google Maven Central mirror.
+
+## Publishing
+
+Publishing is configured once in the root [`build.gradle.kts`](build.gradle.kts) for all modules
+and runs from the **Publish to Maven Central** GitHub Actions workflow. See the
+[publishing section](AGENTS.md#发布到-maven-central) for the one-time Central Portal and GPG setup.
 
 ## License
 

@@ -1,10 +1,16 @@
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import groovy.json.JsonSlurper
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.targets.js.npm.NpmExtension
 
 plugins {
     kotlin("multiplatform") version "2.4.21" apply false
+    id("com.vanniktech.maven.publish") version "0.37.0" apply false
 }
+
+// GitHub-backed namespace; verified once in the Central Portal. All modules share it.
+// Setting the root `group` alone does not propagate to subprojects.
+val publishedGroup = "io.github.shijianjs"
 
 // npm package versions live in package.json so that Dependabot can update them.
 // Subprojects read this map to declare npm(...) dependencies and derive their version.
@@ -19,4 +25,55 @@ extra["npmVersions"] = npmVersions
 // a second copy for source-map-loader's peer dependency.
 plugins.withType<NodeJsRootPlugin> {
     extensions.getByType(NpmExtension::class.java).override("webpack", "5.108.1")
+}
+
+// Publishing is configured once for every module so that coordinates, POM metadata, signing and
+// the Maven Central target cannot drift apart.
+//
+// klibs.io discovers libraries automatically: it reads the POM (url / scm.url must point at the
+// GitHub repository) and requires the kotlin-tooling-metadata.json produced by the Kotlin
+// Multiplatform plugin. Keep both intact when changing this block.
+subprojects {
+    val module = this
+
+    group = publishedGroup
+
+    apply(plugin = "com.vanniktech.maven.publish")
+
+    extensions.configure<MavenPublishBaseExtension> {
+        publishToMavenCentral(automaticRelease = true)
+        signAllPublications()
+
+        pom {
+            name.set(module.name)
+            description.set(
+                module.provider {
+                    module.description ?: "Kotlin/JS wrapper for the Iconify ecosystem."
+                }
+            )
+            url.set("https://github.com/shijianjs/ktjs-iconify")
+            inceptionYear.set("2026")
+
+            licenses {
+                license {
+                    name.set("MIT License")
+                    url.set("https://github.com/shijianjs/ktjs-iconify/blob/master/LICENSE")
+                }
+            }
+
+            developers {
+                developer {
+                    id.set("shijianjs")
+                    name.set("shijianjs")
+                    url.set("https://github.com/shijianjs")
+                }
+            }
+
+            scm {
+                url.set("https://github.com/shijianjs/ktjs-iconify")
+                connection.set("scm:git:git://github.com/shijianjs/ktjs-iconify.git")
+                developerConnection.set("scm:git:ssh://git@github.com/shijianjs/ktjs-iconify.git")
+            }
+        }
+    }
 }

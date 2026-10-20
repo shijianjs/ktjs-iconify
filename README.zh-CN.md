@@ -64,15 +64,28 @@
 - `kotlin-wrappers` 的构件通过 `settings.gradle.kts` 中的 `exclusiveContent` 从 Maven Central
   解析，因为阿里云镜像同步滞后，且有时只有元数据没有对应的 klib。
 
-## 状态
+## 安装
 
-各模块尚未发布到 Maven 仓库，当前作为构建内的 project 依赖使用：
+发布版本位于 Maven Central，group 为 `io.github.shijianjs`。把版本换成你需要的
+`{上游版本}-kt.{修订号}`：
 
 ```kotlin
 dependencies {
-    implementation(project(":ktjs-iconify-utils"))
+    implementation("io.github.shijianjs:ktjs-iconify-utils:3.1.7-kt.1")
+    implementation("io.github.shijianjs:ktjs-iconify-tools:5.0.14-kt.1")
+    implementation("io.github.shijianjs:ktjs-iconify-icon:3.0.4-kt.1")
 }
 ```
+
+各模块的 POM 包含指向本 GitHub 仓库的 `url` 与 `scm.url`，并且作为 Kotlin Multiplatform
+项目发布了 `kotlin-tooling-metadata.json`。这是 [klibs.io](https://klibs.io/) 自动发现库的
+条件；版本进入 Google 的 Maven Central 镜像后会被自动收录。
+
+## 发布
+
+发布配置统一写在根目录 [`build.gradle.kts`](build.gradle.kts)，通过 GitHub Actions 的
+**Publish to Maven Central** 工作流执行。一次性的 Central Portal 与 GPG 配置见
+[发布到 Maven Central](AGENTS.md#发布到-maven-central)。
 
 ## 许可证
 

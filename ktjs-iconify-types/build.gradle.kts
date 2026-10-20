@@ -9,6 +9,7 @@ plugins {
 val npmVersions = rootProject.extra["npmVersions"] as Map<String, String>
 val upstreamVersion = npmVersions.getValue("@iconify/types")
 version = "$upstreamVersion-kt.1"
+description = "Kotlin/JS type declarations for the @iconify/types package."
 
 kotlin {
     js {
