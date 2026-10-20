@@ -55,6 +55,7 @@ gh repo clone <owner>/<repo> S:/workspace/github/<owner>/<repo>
 - `.github/workflows/dependabot-auto-merge.yml` 在 CI 成功后自动 squash 合并 Dependabot 的 PR。它用 `workflow_run` 而不是直接由 Dependabot PR 触发，因为后者拿到的 `GITHUB_TOKEN` 只读。
 - `.github/dependabot.yml` 只覆盖 `gradle` 和 `github-actions` 两个生态。Dependabot 看不懂 `kotlin { sourceSets { ... npm("pkg", "ver") } }` 里的 npm 版本，因此 `@iconify/*`、`iconify-icon` 依赖需要手工升级：同时改 `build.gradle.kts` 的 `npm(...)`、模块 `version` 的基础版本，并运行 `./gradlew kotlinUpgradePackageLock` 更新 `kotlin-js-store/package-lock.json`。
 - `kotlin-js-store` 里只有 Gradle 生成的锁文件，没有 `package.json`，所以不要给该目录配置 npm 生态的 Dependabot；即使配上，单独改锁文件也会与 `build.gradle.kts` 中的版本声明不一致，下一次 `kotlinUpgradePackageLock` 会把它覆盖掉。
+- 本地增量构建后，`jsPackageJson` / `rootPackageJson` 可能残留旧输出（模块版本变成 `0.0.0-unspecified`、漏掉 `packages_imported/*`），此时 CI 会报 `Lock file was changed`。执行 `./gradlew kotlinUpgradePackageLock --rerun-tasks` 重新生成锁文件并提交。
 
 ## 文档约定
 
