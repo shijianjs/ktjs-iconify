@@ -23,3 +23,4 @@ build
 .gradle
 .kotlin
 node_modules
+/opencode.json
