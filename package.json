@@ -5,7 +5,7 @@
   "dependencies": {
     "@iconify/tools": "5.0.14",
     "@iconify/types": "2.0.0",
-    "@iconify/utils": "3.1.6",
+    "@iconify/utils": "3.1.7",
     "iconify-icon": "3.0.4"
   }
 }
