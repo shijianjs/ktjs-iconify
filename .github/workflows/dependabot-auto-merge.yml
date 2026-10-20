@@ -1,0 +1,42 @@
+name: Dependabot auto-merge
+
+# Runs after the CI workflow completes, in the context of the default branch, so the
+# token has write access. Workflows triggered directly by Dependabot only get a
+# read-only GITHUB_TOKEN, which cannot merge.
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: read
+
+jobs:
+  auto-merge:
+    if: >-
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Merge passing Dependabot pull request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          pr=$(gh api "repos/$REPO/commits/$HEAD_SHA/pulls" --jq '.[0].number // empty')
+          if [ -z "$pr" ]; then
+            echo "No pull request found for $HEAD_SHA"
+            exit 0
+          fi
+
+          author=$(gh api "repos/$REPO/pulls/$pr" --jq .user.login)
+          if [ "$author" != "dependabot[bot]" ]; then
+            echo "PR #$pr is authored by $author, not Dependabot; skipping"
+            exit 0
+          fi
+
+          echo "CI passed on Dependabot PR #$pr; merging"
+          gh pr merge "$pr" --repo "$REPO" --squash --delete-branch

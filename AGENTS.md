@@ -49,6 +49,13 @@ gh repo clone <owner>/<repo> S:/workspace/github/<owner>/<repo>
 
 阿里云镜像的 `kotlin-wrappers` 同步滞后，且有时只有 POM 没有 klib，而 Gradle 一旦在某个仓库找到元数据就不会回退。`settings.gradle.kts` 已用 `exclusiveContent` 把 `org.jetbrains.kotlin-wrappers` 和 `kotlin-js-plain-objects` 固定到 Maven Central；新增 wrapper 依赖时如遇 `Could not find ... .klib`，把对应 group/module 加进去。
 
+## CI 与依赖更新
+
+- `.github/workflows/ci.yml` 在 push 到 `master` 和所有 PR 上运行 `./gradlew build`（JDK 21，Ubuntu）。
+- `.github/workflows/dependabot-auto-merge.yml` 在 CI 成功后自动 squash 合并 Dependabot 的 PR。它用 `workflow_run` 而不是直接由 Dependabot PR 触发，因为后者拿到的 `GITHUB_TOKEN` 只读。
+- `.github/dependabot.yml` 只覆盖 `gradle` 和 `github-actions` 两个生态。Dependabot 看不懂 `kotlin { sourceSets { ... npm("pkg", "ver") } }` 里的 npm 版本，因此 `@iconify/*`、`iconify-icon` 依赖需要手工升级：同时改 `build.gradle.kts` 的 `npm(...)`、模块 `version` 的基础版本，并运行 `./gradlew kotlinUpgradePackageLock` 更新 `kotlin-js-store/package-lock.json`。
+- `kotlin-js-store` 里只有 Gradle 生成的锁文件，没有 `package.json`，所以不要给该目录配置 npm 生态的 Dependabot；即使配上，单独改锁文件也会与 `build.gradle.kts` 中的版本声明不一致，下一次 `kotlinUpgradePackageLock` 会把它覆盖掉。
+
 ## 文档约定
 
 - 需要跨会话、跨上下文感知的信息（环境约定、构建方式、模块结构、容易踩的坑）记录在本文件。
