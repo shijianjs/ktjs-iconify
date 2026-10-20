@@ -45,9 +45,13 @@ gh repo clone <owner>/<repo> S:/workspace/github/<owner>/<repo>
 - 改动模块 `npm(...)` 依赖版本时，必须同步修改 `version` 的基础版本部分。
 - `-kt.N` 在 SemVer 中是预发布标识，优先级低于同基础版本的无后缀版本；因为永不发布无后缀版本，发布序列内部不会冲突。
 
-## Maven 镜像
+## 仓库与本地镜像
 
-阿里云镜像的 `kotlin-wrappers` 同步滞后，且有时只有 POM 没有 klib，而 Gradle 一旦在某个仓库找到元数据就不会回退。`settings.gradle.kts` 已用 `exclusiveContent` 把 `org.jetbrains.kotlin-wrappers` 和 `kotlin-js-plain-objects` 固定到 Maven Central；新增 wrapper 依赖时如遇 `Could not find ... .klib`，把对应 group/module 加进去。
+仓库里提交的构建配置只使用官方源：`settings.gradle.kts` 用 Gradle Plugin Portal 与 Maven Central，`gradle/wrapper/gradle-wrapper.properties` 用 `services.gradle.org`。这样 GitHub Actions 和任何克隆仓库的人行为一致。
+
+国内加速只在本机生效，通过 `~/.gradle/init.d/aliyun-mirror.gradle.kts` 注入阿里云镜像，不提交到仓库；不要在 `settings.gradle.kts` 或 wrapper 配置里写镜像地址。
+
+`kotlin-wrappers` 同步滞后，且有时只有 POM 没有 klib，而 Gradle 一旦在某个仓库找到元数据就不会回退到下一个仓库。`settings.gradle.kts` 因此用 `exclusiveContent` 把 `org.jetbrains.kotlin-wrappers` 和 `kotlin-js-plain-objects` 固定到 Maven Central；新增 wrapper 依赖时如遇 `Could not find ... .klib`，把对应 group/module 加进去。
 
 ## CI 与依赖更新
 

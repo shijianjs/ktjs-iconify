@@ -1,7 +1,5 @@
 pluginManagement {
     repositories {
-        maven("https://maven.aliyun.com/repository/gradle-plugin")
-        maven("https://maven.aliyun.com/repository/public")
         gradlePluginPortal()
         mavenCentral()
     }
@@ -9,17 +7,17 @@ pluginManagement {
 
 dependencyResolutionManagement {
     repositories {
-        // 阿里云镜像的 kotlin-wrappers 版本经常滞后，wrapper 直接走 Maven Central。
+        // Maven Central is the source of truth for kotlin-wrappers: the Aliyun mirror lags behind
+        // and sometimes serves metadata without the corresponding klibs. Gradle does not fall back
+        // to the next repository once metadata is found, so pin these modules to Central even when
+        // a local mirror is active.
         exclusiveContent {
             forRepository { mavenCentral() }
             filter {
                 includeGroup("org.jetbrains.kotlin-wrappers")
-                // 阿里云有 POM 但缺 klib，Gradle 不会回退到下一个仓库。
                 includeModule("org.jetbrains.kotlin", "kotlin-js-plain-objects")
             }
         }
-        maven("https://maven.aliyun.com/repository/public")
-        maven("https://maven.aliyun.com/repository/central")
         mavenCentral()
     }
 }
