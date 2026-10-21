@@ -72,6 +72,12 @@ addIcon("test:home", data)
 `web.dom.document`。不要混入 `org.w3c.dom.*` 或 `kotlinx.browser.*`；使用这些声明的调用方需要
 在边界处做 `unsafeCast`。
 
+标签名通过 `IconifyIconTagName.iconifyIcon` 提供类型化常量，可直接传给 `createElement`：
+
+```kotlin
+val element = document.createElement(IconifyIconTagName.iconifyIcon)
+```
+
 ## 测试
 
 ```bash

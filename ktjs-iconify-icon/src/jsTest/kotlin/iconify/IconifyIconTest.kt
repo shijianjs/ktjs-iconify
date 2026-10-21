@@ -16,6 +16,14 @@ class IconifyIconTest {
     }
 
     @Test
+    fun createsElementFromTypedTagName() {
+        registerIconifyIcon()
+        val element = document.createElement(IconifyIconTagName.iconifyIcon)
+
+        assertEquals("iconify-icon", element.tagName.lowercase())
+    }
+
+    @Test
     fun createsElement() {
         val element = createIconifyIcon("mdi:home") {
             width = "1em"

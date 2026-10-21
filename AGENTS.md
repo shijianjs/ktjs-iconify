@@ -31,7 +31,8 @@ gh repo clone <owner>/<repo> S:/workspace/github/<owner>/<repo>
 
 - DOM 元素：`web.html.HTMLElement`
 - 全局 document：`web.dom.document`
-- 创建自定义元素：`document.createElement(TagName<IconifyIconElement>("iconify-icon"))`，无需 `unsafeCast`
+- 创建自定义元素：`document.createElement(IconifyIconTagName.iconifyIcon)`，无需 `unsafeCast`
+- 自定义元素标签名参照 kotlin-browser 的 `web.html.HtmlTagName`，为 Web Component 提供同风格的 `object XxxTagName { inline val xxx: TagName<XxxElement> }`，把 `TagName` 字符串集中在一处，调用方直接用类型化常量
 
 两套类型在运行时指向同一个对象，但编译器不视为同一类型；wrapper 的公开 API 一旦用 `org.w3c.dom.*`，kotlin-browser 项目就无法直接使用。
 
@@ -115,3 +116,4 @@ klibs.io 没有需要提交的元数据文件，它从 Maven Central 和 GitHub 
 
 - 需要跨会话、跨上下文感知的信息（环境约定、构建方式、模块结构、容易踩的坑）记录在本文件。
 - 只与某个目录强相关、篇幅较长的说明，放在该目录下的 `AGENTS.md`（如 `ktjs-iconify-tools/AGENTS.md`），根文件只保留指向它的简短索引。
+- 跨项目需要感知的信息也记录在本文件：本仓库会作为模板创建更多 wrapper 项目，约定应写成不依赖具体模块名的通用规则，而不是只活在当前模块或当前对话里。

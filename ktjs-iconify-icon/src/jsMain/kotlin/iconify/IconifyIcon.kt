@@ -1,6 +1,5 @@
 package iconify
 
-import web.dom.TagName
 import web.dom.document
 
 /**
@@ -15,7 +14,7 @@ fun createIconifyIcon(
     icon: String,
     configure: IconifyIconElement.() -> Unit = {},
 ): IconifyIconElement =
-    document.createElement(TagName<IconifyIconElement>("iconify-icon"))
+    document.createElement(IconifyIconTagName.iconifyIcon)
         .apply {
             registerIconifyIcon()
             this.icon = icon
