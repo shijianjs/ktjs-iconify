@@ -208,6 +208,8 @@ group 必须单独设置，根项目的 `group` 不会自动继承。
   推导，四个模块的版本可以各不相同。
 - Maven Central 的版本不可覆盖；探测已发布 POM 的跳过逻辑让重复运行幂等。发布失败时用
   workflow_dispatch 指定同一个 tag 重试即可。
+- 重试要等 `repo1` 上能看到已上传的版本再跑。工作流只认 `repo1` 的 POM，构件已经上传但还没
+  同步到 `repo1` 时，重试会把该模块再次提交，Central 会以版本重复为由拒绝，整批任务一起失败。
 - tag 必须打在 CI 验证过的 `master` 提交上（CI 不监听 tag），工作流会拒绝不在 `master` 上的
   tag；不要在推 tag 前遗漏 `wrapperRevision` 的递增。
 - DSL 里用的是 `publishToMavenCentral(automaticRelease = true)`，上传后会等待 Central 校验并
