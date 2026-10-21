@@ -9,12 +9,12 @@
 
 ## 模块
 
-| 模块 | npm 包 | 上游版本 | Wrapper 版本 | 运行环境 |
-| --- | --- | --- | --- | --- |
-| [ktjs-iconify-types](ktjs-iconify-types/README.zh-CN.md) | `@iconify/types` | 2.0.0 | 2.0.0-kt.1 | 纯类型，无运行时代码 |
-| [ktjs-iconify-utils](ktjs-iconify-utils/README.zh-CN.md) | `@iconify/utils` | 3.1.7 | 3.1.7-kt.1 | 浏览器与 Node.js |
-| [ktjs-iconify-tools](ktjs-iconify-tools/README.zh-CN.md) | `@iconify/tools` | 5.0.14 | 5.0.14-kt.1 | 仅 Node.js |
-| [ktjs-iconify-icon](ktjs-iconify-icon/README.zh-CN.md) | `iconify-icon` | 3.0.4 | 3.0.4-kt.2 | 浏览器，Web Component |
+| 模块 | npm 包 | 上游版本 | Wrapper 版本 | Maven Central | 运行环境 |
+| --- | --- | --- | --- | --- | --- |
+| [ktjs-iconify-types](ktjs-iconify-types/README.zh-CN.md) | `@iconify/types` | 2.0.0 | 2.0.0-kt.2 | [![Maven Central](https://img.shields.io/maven-central/v/io.github.shijianjs/ktjs-iconify-types?label=Maven%20Central&logo=apachemaven&logoColor=white)](https://central.sonatype.com/artifact/io.github.shijianjs/ktjs-iconify-types) | 纯类型，无运行时代码 |
+| [ktjs-iconify-utils](ktjs-iconify-utils/README.zh-CN.md) | `@iconify/utils` | 3.1.7 | 3.1.7-kt.2 | [![Maven Central](https://img.shields.io/maven-central/v/io.github.shijianjs/ktjs-iconify-utils?label=Maven%20Central&logo=apachemaven&logoColor=white)](https://central.sonatype.com/artifact/io.github.shijianjs/ktjs-iconify-utils) | 浏览器与 Node.js |
+| [ktjs-iconify-tools](ktjs-iconify-tools/README.zh-CN.md) | `@iconify/tools` | 5.0.14 | 5.0.14-kt.2 | [![Maven Central](https://img.shields.io/maven-central/v/io.github.shijianjs/ktjs-iconify-tools?label=Maven%20Central&logo=apachemaven&logoColor=white)](https://central.sonatype.com/artifact/io.github.shijianjs/ktjs-iconify-tools) | 仅 Node.js |
+| [ktjs-iconify-icon](ktjs-iconify-icon/README.zh-CN.md) | `iconify-icon` | 3.0.4 | 3.0.4-kt.2 | [![Maven Central](https://img.shields.io/maven-central/v/io.github.shijianjs/ktjs-iconify-icon?label=Maven%20Central&logo=apachemaven&logoColor=white)](https://central.sonatype.com/artifact/io.github.shijianjs/ktjs-iconify-icon) | 浏览器，Web Component |
 
 `ktjs-iconify-utils` 依赖 `ktjs-iconify-types`，`ktjs-iconify-tools` 依赖 `ktjs-iconify-utils`；
 依赖均以 `api` 暴露，引入一个模块即可同时获得共享的图标类型。
@@ -25,9 +25,9 @@
 [`package.json`](package.json) 中，Gradle 读取后自动推导各模块的基础版本与 `npm(...)` 依赖：
 
 - 只发布带 `-kt.N` 后缀的版本，不存在不带后缀的版本。
-- 上游升级：只改 `package.json`，基础版本自动跟随，修订号重置为 `kt.1`；即使 wrapper 代码没变，也按新上游版本发布。
+- 上游升级：只改 `package.json`，基础版本自动跟随，修订号保持不变；即使 wrapper 代码没变，也按新上游版本发布。
 - 上游不变、只修订 wrapper：修订号递增（`kt.2`、`kt.3`…），基础版本保持不变。
-- 各模块 `build.gradle.kts` 只声明修订号。
+- 修订号是整个项目共享的计数器，只在根 `build.gradle.kts` 声明一次，持续递增，永不重置为 `kt.1`。
 
 ## 环境要求
 
@@ -71,8 +71,8 @@
 
 ```kotlin
 dependencies {
-    implementation("io.github.shijianjs:ktjs-iconify-utils:3.1.7-kt.1")
-    implementation("io.github.shijianjs:ktjs-iconify-tools:5.0.14-kt.1")
+    implementation("io.github.shijianjs:ktjs-iconify-utils:3.1.7-kt.2")
+    implementation("io.github.shijianjs:ktjs-iconify-tools:5.0.14-kt.2")
     implementation("io.github.shijianjs:ktjs-iconify-icon:3.0.4-kt.2")
 }
 ```

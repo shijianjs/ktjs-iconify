@@ -5,7 +5,9 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
-**Wrapper 版本：** `3.1.7-kt.1`，对应上游 `@iconify/utils` 3.1.7。规则见
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.shijianjs/ktjs-iconify-utils?label=Maven%20Central&logo=apachemaven&logoColor=white)](https://central.sonatype.com/artifact/io.github.shijianjs/ktjs-iconify-utils)
+
+**Wrapper 版本：** `3.1.7-kt.2`，对应上游 `@iconify/utils` 3.1.7。规则见
 [版本约定](../README.zh-CN.md#版本约定)。
 
 依赖 [`ktjs-iconify-types`](../ktjs-iconify-types/README.zh-CN.md)，并通过 `api` 转出其中的

@@ -11,12 +11,12 @@ duplicated.
 
 ## Modules
 
-| Module | npm package | Upstream version | Wrapper version | Runtime |
-| --- | --- | --- | --- | --- |
-| [ktjs-iconify-types](ktjs-iconify-types/README.md) | `@iconify/types` | 2.0.0 | 2.0.0-kt.1 | Types only, no runtime code |
-| [ktjs-iconify-utils](ktjs-iconify-utils/README.md) | `@iconify/utils` | 3.1.7 | 3.1.7-kt.1 | Browser and Node.js |
-| [ktjs-iconify-tools](ktjs-iconify-tools/README.md) | `@iconify/tools` | 5.0.14 | 5.0.14-kt.1 | Node.js only |
-| [ktjs-iconify-icon](ktjs-iconify-icon/README.md) | `iconify-icon` | 3.0.4 | 3.0.4-kt.2 | Browser, Web Component |
+| Module | npm package | Upstream version | Wrapper version | Maven Central | Runtime |
+| --- | --- | --- | --- | --- | --- |
+| [ktjs-iconify-types](ktjs-iconify-types/README.md) | `@iconify/types` | 2.0.0 | 2.0.0-kt.2 | [![Maven Central](https://img.shields.io/maven-central/v/io.github.shijianjs/ktjs-iconify-types?label=Maven%20Central&logo=apachemaven&logoColor=white)](https://central.sonatype.com/artifact/io.github.shijianjs/ktjs-iconify-types) | Types only, no runtime code |
+| [ktjs-iconify-utils](ktjs-iconify-utils/README.md) | `@iconify/utils` | 3.1.7 | 3.1.7-kt.2 | [![Maven Central](https://img.shields.io/maven-central/v/io.github.shijianjs/ktjs-iconify-utils?label=Maven%20Central&logo=apachemaven&logoColor=white)](https://central.sonatype.com/artifact/io.github.shijianjs/ktjs-iconify-utils) | Browser and Node.js |
+| [ktjs-iconify-tools](ktjs-iconify-tools/README.md) | `@iconify/tools` | 5.0.14 | 5.0.14-kt.2 | [![Maven Central](https://img.shields.io/maven-central/v/io.github.shijianjs/ktjs-iconify-tools?label=Maven%20Central&logo=apachemaven&logoColor=white)](https://central.sonatype.com/artifact/io.github.shijianjs/ktjs-iconify-tools) | Node.js only |
+| [ktjs-iconify-icon](ktjs-iconify-icon/README.md) | `iconify-icon` | 3.0.4 | 3.0.4-kt.2 | [![Maven Central](https://img.shields.io/maven-central/v/io.github.shijianjs/ktjs-iconify-icon?label=Maven%20Central&logo=apachemaven&logoColor=white)](https://central.sonatype.com/artifact/io.github.shijianjs/ktjs-iconify-icon) | Browser, Web Component |
 
 `ktjs-iconify-utils` depends on `ktjs-iconify-types`, and `ktjs-iconify-tools` depends on
 `ktjs-iconify-utils`; the dependencies are exposed with `api`, so a single dependency brings the
@@ -30,9 +30,10 @@ module's base version and `npm(...)` dependency:
 
 - Only `-kt.N` versions are published; a version without the suffix never exists.
 - Upstream upgrade: change the version in `package.json`; the base version follows automatically
-  and the revision resets to `kt.1`, even when the wrapper code itself did not change.
+  while the revision stays, even when the wrapper code itself did not change.
 - Wrapper-only fix: the revision increments (`kt.2`, `kt.3`, ...) while the base version stays.
-- The revision is the only part declared in each module's `build.gradle.kts`.
+- The revision is one project-wide counter declared once in the root `build.gradle.kts`; it only
+  ever increases and never resets to `kt.1`.
 
 ## Requirements
 
@@ -79,8 +80,8 @@ version with the one you need (`{upstream version}-kt.{revision}`):
 
 ```kotlin
 dependencies {
-    implementation("io.github.shijianjs:ktjs-iconify-utils:3.1.7-kt.1")
-    implementation("io.github.shijianjs:ktjs-iconify-tools:5.0.14-kt.1")
+    implementation("io.github.shijianjs:ktjs-iconify-utils:3.1.7-kt.2")
+    implementation("io.github.shijianjs:ktjs-iconify-tools:5.0.14-kt.2")
     implementation("io.github.shijianjs:ktjs-iconify-icon:3.0.4-kt.2")
 }
 ```
