@@ -5,6 +5,8 @@ Component.
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
+[API reference](https://shijianjs.github.io/ktjs-iconify/api/ktjs-iconify-icon/)
+
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.shijianjs/ktjs-iconify-icon?label=Maven%20Central&logo=apachemaven&logoColor=white)](https://central.sonatype.com/artifact/io.github.shijianjs/ktjs-iconify-icon)
 
 **Wrapper version:** `3.0.4-kt.2`, tracking upstream `iconify-icon` 3.0.4. See the

@@ -41,6 +41,10 @@ jobs:
       - name: Build and test
         run: ./gradlew build --stacktrace
 
+      # Validates the demo bundle and the Dokka reference that the Pages workflow deploys.
+      - name: Assemble Pages site
+        run: ./gradlew pagesSite
+
       - name: Upload refreshed npm lock file
         if: github.actor == 'dependabot[bot]'
         uses: actions/upload-artifact@v7

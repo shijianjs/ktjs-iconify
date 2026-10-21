@@ -26,6 +26,7 @@ gh repo clone <owner>/<repo> S:/workspace/github/<owner>/<repo>
 - `ktjs-iconify-utils`：`@iconify/utils`，浏览器可用，测试跑 Chromium。
 - `ktjs-iconify-tools`：`@iconify/tools`，仅 Node.js；ESM-only 的导入方式见 [ktjs-iconify-tools/AGENTS.md](ktjs-iconify-tools/AGENTS.md)。
 - `ktjs-iconify-icon`：`iconify-icon` Web Component。
+- `demo`：GitHub Pages 演示站点，不属于发布模块，组装方式见「演示页面与 GitHub Pages」。
 
 ## 浏览器 DOM 类型体系
 
@@ -212,6 +213,23 @@ klibs.io 没有需要提交的元数据文件，它从 Maven Central 和 GitHub 
 完成后仍未被发现，可以在
 [klibs-io-issue-management](https://github.com/JetBrains/klibs-io-issue-management/issues/new?template=index_request.yml)
 提交 index request。
+
+## 演示页面与 GitHub Pages
+
+- `demo` 模块是演示站点，只消费公共 API，不发布、也不进入 Dokka。根 `build.gradle.kts` 的发布与
+  Dokka 配置都按 `ktjs-iconify-` 前缀过滤子模块，新增非发布模块时沿用该约定。
+- `./gradlew pagesSite` 把 `demo/build/dist/js/productionExecutable` 与 `build/dokka/html`
+  组装到 `build/pages`：演示页在根目录，API 文档在 `api/`。演示页内部链接使用相对路径，因此
+  `/api/` 在本地和 Pages 上都可用。
+- Dokka 2.2.0 同时应用到根项目和四个 wrapper 子模块；聚合入口是根项目的
+  `dependencies { dokka(project(...)) }`，任务为 `dokkaGeneratePublicationHtml`（2.x 已移除旧的
+  `dokkaHtmlMultiModule`）。
+- `.github/workflows/pages.yml` 在 push 到 `master` 后构建并部署 `build/pages`。仓库
+  Settings → Pages 的 Source 必须选 **GitHub Actions**（一次性配置，工作流不会自动改）。
+- 站点地址为 `https://shijianjs.github.io/ktjs-iconify/`，API 文档在 `/api/`；README、模块
+  README 和演示页导航都链接到这两个地址，改仓库名时要一起更新。
+- 本地预览：执行 `./gradlew pagesSite` 后给 `build/pages` 起任意静态服务器。直接开
+  `file://` 会因相对路径与 CORS 导致图标和文档跳转异常。
 
 ## 文档约定
 

@@ -5,6 +5,8 @@ wrapper。
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
+[API 文档](https://shijianjs.github.io/ktjs-iconify/api/ktjs-iconify-icon/)
+
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.shijianjs/ktjs-iconify-icon?label=Maven%20Central&logo=apachemaven&logoColor=white)](https://central.sonatype.com/artifact/io.github.shijianjs/ktjs-iconify-icon)
 
 **Wrapper 版本：** `3.0.4-kt.2`，对应上游 `iconify-icon` 3.0.4。规则见

@@ -8,6 +8,23 @@ plugins {
     kotlin("multiplatform") version "2.4.21" apply false
     id("com.vanniktech.maven.publish") version "0.37.0" apply false
     id("dev.detekt") version "2.0.0-alpha.6" apply false
+    id("org.jetbrains.dokka") version "2.2.0"
+}
+
+// Dokka aggregates the four wrapper modules into one API reference. The demo module is not a
+// published API surface, so it is not included.
+dependencies {
+    dokka(project(":ktjs-iconify-types"))
+    dokka(project(":ktjs-iconify-utils"))
+    dokka(project(":ktjs-iconify-tools"))
+    dokka(project(":ktjs-iconify-icon"))
+}
+
+dokka {
+    dokkaPublications.html {
+        moduleName.set("ktjs-iconify")
+        outputDirectory.set(layout.buildDirectory.dir("dokka/html"))
+    }
 }
 
 // GitHub-backed namespace; verified once in the Central Portal. All modules share it.
@@ -46,6 +63,11 @@ subprojects {
         // The plain detekt task is wired into check; point it at the multiplatform source tree.
         source.setFrom(files("src"))
     }
+
+    // Only the wrapper modules are published and documented; `demo` is the GitHub Pages site.
+    if (name.startsWith("ktjs-iconify-")) {
+        apply(plugin = "org.jetbrains.dokka")
+    }
 }
 
 // Publishing is configured once for every module so that coordinates, POM metadata, signing and
@@ -55,6 +77,8 @@ subprojects {
 // GitHub repository) and requires the kotlin-tooling-metadata.json produced by the Kotlin
 // Multiplatform plugin. Keep both intact when changing this block.
 subprojects {
+    if (!name.startsWith("ktjs-iconify-")) return@subprojects
+
     val module = this
 
     group = publishedGroup
@@ -96,5 +120,15 @@ subprojects {
                 developerConnection.set("scm:git:ssh://git@github.com/shijianjs/ktjs-iconify.git")
             }
         }
+    }
+}
+
+// Assembles the GitHub Pages site: the demo at the root and the API reference under /api/.
+tasks.register<Sync>("pagesSite") {
+    dependsOn(":demo:jsBrowserDistribution", "dokkaGeneratePublicationHtml")
+    into(layout.buildDirectory.dir("pages"))
+    from(project(":demo").layout.buildDirectory.dir("dist/js/productionExecutable"))
+    from(layout.buildDirectory.dir("dokka/html")) {
+        into("api")
     }
 }

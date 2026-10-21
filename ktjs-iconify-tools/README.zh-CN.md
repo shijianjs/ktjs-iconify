@@ -4,6 +4,8 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
+[API 文档](https://shijianjs.github.io/ktjs-iconify/api/ktjs-iconify-tools/)
+
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.shijianjs/ktjs-iconify-tools?label=Maven%20Central&logo=apachemaven&logoColor=white)](https://central.sonatype.com/artifact/io.github.shijianjs/ktjs-iconify-tools)
 
 **Wrapper 版本：** `5.0.14-kt.2`，对应上游 `@iconify/tools` 5.0.14。规则见

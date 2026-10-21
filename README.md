@@ -4,6 +4,9 @@ Kotlin/JS wrappers for the [Iconify](https://iconify.design/) ecosystem.
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
+**[Live demo](https://shijianjs.github.io/ktjs-iconify/)** ·
+**[API reference](https://shijianjs.github.io/ktjs-iconify/api/)**
+
 The repository follows the multi-module layout of JetBrains
 [kotlin-wrappers](https://github.com/JetBrains/kotlin-wrappers): each npm package gets its own
 `ktjs-*` Gradle module, and shared declarations live in a single module instead of being
@@ -52,6 +55,12 @@ module's base version and `npm(...)` dependency:
 ./gradlew :ktjs-iconify-utils:jsBrowserTest
 ./gradlew :ktjs-iconify-tools:jsNodeTest
 ./gradlew :ktjs-iconify-icon:jsBrowserTest
+```
+
+The GitHub Pages site (demo at the root, Dokka output under `/api/`) is assembled by:
+
+```bash
+./gradlew pagesSite
 ```
 
 After adding or upgrading an npm dependency in a module, refresh the shared lock file:

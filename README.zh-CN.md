@@ -4,6 +4,9 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
+**[在线演示](https://shijianjs.github.io/ktjs-iconify/)** ·
+**[API 文档](https://shijianjs.github.io/ktjs-iconify/api/)**
+
 仓库仿照 JetBrains [kotlin-wrappers](https://github.com/JetBrains/kotlin-wrappers) 的多模块布局：
 每个 npm 包对应一个 `ktjs-*` Gradle 子模块，共享声明只保留一份。
 
@@ -45,6 +48,12 @@
 ./gradlew :ktjs-iconify-utils:jsBrowserTest
 ./gradlew :ktjs-iconify-tools:jsNodeTest
 ./gradlew :ktjs-iconify-icon:jsBrowserTest
+```
+
+GitHub Pages 站点（根目录为演示页，`/api/` 为 Dokka 文档）由以下任务组装：
+
+```bash
+./gradlew pagesSite
 ```
 
 在模块中新增或升级 npm 依赖后，需要刷新共享锁文件：

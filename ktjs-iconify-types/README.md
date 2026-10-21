@@ -5,6 +5,8 @@ Kotlin/JS type declarations for [`@iconify/types`](https://www.npmjs.com/package
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
+[API reference](https://shijianjs.github.io/ktjs-iconify/api/ktjs-iconify-types/)
+
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.shijianjs/ktjs-iconify-types?label=Maven%20Central&logo=apachemaven&logoColor=white)](https://central.sonatype.com/artifact/io.github.shijianjs/ktjs-iconify-types)
 
 **Wrapper version:** `2.0.0-kt.2`, tracking upstream `@iconify/types` 2.0.0. See the
