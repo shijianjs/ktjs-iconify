@@ -42,6 +42,98 @@ gh repo clone <owner>/<repo> S:/workspace/github/<owner>/<repo>
 
 Detekt 版本固定为 `2.0.0-alpha.6`：1.23.8 在 JDK 25 下直接失败，而 2.0 alpha 明确支持 Kotlin 2.4 / Gradle 9 / JDK 25。升级时注意 2.0 的插件 ID 是 `dev.detekt`，规则配置项也已改名（如 `imports` → `forbiddenImports`）。
 
+## UI 编程约定
+
+以下为维护者的通用 UI 编码偏好（源自 duckfn-docs-kit 的约定，只保留与具体项目无关的部分）。新增任何 UI 代码（本仓库的 Web Component 包装、演示页，以及由本仓库派生的 wrapper 项目）都按此执行；与具体模块绑定的细节不写在这里。
+
+### 保留模式：对原生 DOM 做面向对象封装
+
+不要引入 React / Vue / Lit 的「状态 → render → 重建 DOM」模型。组件应表现为持有内部 DOM 对象的普通类，按以下优先级裁决（上面的赢）：
+
+1. 保留 DOM 节点：节点长期存在，不随状态重建。
+2. 类/对象字段持有 DOM 引用。
+3. 直接修改 DOM：property / attribute / text / class / 事件监听。
+4. 只做局部更新。
+5. 必要时才替换局部集合。
+6. 禁止整组件 re-render。
+7. 禁止用响应式 state 驱动 render。
+8. 禁止引入 Lit / React / Vue 等 UI runtime 或其设计模式。
+
+### 禁止拼 HTML 字符串
+
+不许 `innerHTML = "..."`、`insertAdjacentHTML`，也不许任何「模板字符串生成标记再塞进 DOM」的写法。节点用 `document.createElement`（Kotlin/JS 中优先用 kotlin-browser 的类型化 API）逐个构造并组装。
+
+### DOM 用对象操作，字段持有引用
+
+需要反复访问的节点一律存成字段，直接对字段调方法；不要用 `querySelector` 当组件内部的状态管理方式。`querySelector` 只允许用于「从外部挂载点找目标」这类不属于组件自身结构的场景。
+
+### 更新局部、直接、明确，不设通用刷新机制
+
+状态变化只改相关的那几个节点，用命名的领域 setter 表达（如 `setResult` / `setLoading`），而不是把整个 UI 当成 data 的函数重算。用标准 DOM API 直说：`textContent`、`setAttribute` / `removeAttribute`、`classList.add/remove/toggle`、`hidden`、`disabled`、`value`、`href` / `src` 赋值等。
+
+禁止实现 `render()` / `rebuild()` / `rerender()` 这类通用刷新入口；禁止因为一个字段变化就重建整个子树；禁止用「替换子树」模拟响应式更新：
+
+```ts
+set data(value) { this.#data = value; this.render(); }        // 禁止
+update(data) { this.replaceChildren(); this.render(data); }   // 禁止
+```
+
+### `replaceChildren()` 分级使用
+
+它本身不是禁品，禁的是把它当整组件的通用 render 机制：
+
+- 允许：确实需要整体更新的局部集合（一次性静态组装、整批新条目、固定的「图标 + 文本」组合）。
+- 禁止：清空组件自己的根子树再重建。
+
+变长列表能增量就增量：按数据长度增删条目、复用已有条目对象，只有条目语义整体失效时才整批替换。
+
+### 内容入口：命名的领域 setter
+
+组件不接受整份 data blob，也不提供通用 `render` / `apply` / `update` 入口。每个组件暴露一组领域 setter，一个方法只碰它负责的那部分节点：
+
+- setter 只做 mutation；变长集合按新长度增删条目、复用已有对象。
+- setter 只写自己持有的节点，因此在元素尚未连接、甚至尚未插入文档时调用也安全。
+- 不做 attribute reflection：不把 setter 的值镜像回 attribute。
+- 新增字段就加对应 setter，不要回头引入 `setData()` / `update()`。
+
+**例外（attribute 种子）**：由构建期插件生成、没有挂载点可调 setter 的元素，可在 `connectedCallback()` 里从 attribute 读一次作初始种子；这与「读取用于初始化」不冲突，仍属保留模式。手写挂载的元素仍走 setter。
+
+### 生命周期：构造时建树
+
+- 静态结构优先在 `constructor()` 中创建并组装完毕，`connectedCallback()` 只做必要的一次性初始化，不要把 `connectedCallback() → rebuild() → build()` 当标准生命周期。
+- Custom Elements 规范限制：构造函数里不得给 `this` 加属性或子节点（`this.append(...)`、`this.setAttribute(...)` 都不行）；`attachShadow()` 合法，所以结构挂进 shadow root，light DOM 保持为空。
+- 监听器按归属决定挂在哪：挂在自有节点上的写在构造函数里，无需清理；挂在 `document` / `window` / `matchMedia` 等外部对象上的，必须在 `disconnectedCallback()` 里移除，注册用幂等标志（元素移动或框架重挂载会再次触发 `connectedCallback()`）。
+
+### 组件用 class，但不建通用组件基类
+
+一个组件一个类，自带字段、构造时组装、自己的 setter；不做 `create()` / `apply()` 之类的模板方法抽象，那会把状态驱动刷新重新引进来。非元素的小部件（折叠控件、卡片等）同样是 class；函数式导出只留给真正的纯工具。
+
+### 图标一律用官方 `<iconify-icon>`
+
+- 不要自己封装 SVG（不手写路径、不拼 `data:image/svg+xml`、不做 CSS mask 助手）。
+- 数据契约里图标就是 Iconify 名字字符串（如 `lucide:arrow-right`）。
+- 尺寸/颜色用 CSS 作用在 `iconify-icon` 元素上，字形自带 `currentColor`。
+- 尺寸只认 `font-size`：组件内部是 `<svg width="1em" height="1em">`，给宿主设 `width` / `height` 只会撑大空盒子。
+
+### 默认 Shadow DOM
+
+- 组件默认渲染进 `shadow root`（`mode: 'open'`），样式通过 `adoptedStyleSheets` 或 shadow 内样式注入，避免与宿主页面互相污染。
+- 主题靠 CSS 自定义属性继承穿过 shadow 边界；这些变量必须声明在文档的 `:root` / `[data-theme]` 上。组件内部不要写 `[data-theme]` 选择器，也不要依赖宿主 class。
+- 只有继承属性穿得过边界：`box-sizing` 不是继承属性，shadow 内必须在自己的作用域重新声明 `box-sizing` 重置，不要依赖宿主的 `* { box-sizing: border-box }`。
+- 万不得已才退回 light DOM（仅当必须直接复用宿主的 CSS 规则时），类名加项目前缀，新增例外要在评审里说明依赖了宿主的哪条规则。混合形态（部分 shadow、部分 light）要划清边界并记录原因。
+
+### 无 document 环境安全
+
+- 可能被 Node（SSR、`jsNodeTest`）加载的模块，类字段初始化器不要碰 `document` / `window` / `customElements`；这些入口要么带守卫，要么由调用方在浏览器环境触达。
+- `CSSStyleSheet` 等浏览器对象必须惰性创建（在构造函数里），不要在模块级初始化。
+- 浏览器专用的重依赖用动态 `import()` 按需加载，业务纯数据模块不要反向依赖重依赖。
+
+### React 19 自定义元素
+
+- 对象 prop 不会在 SSR/hydration 阶段设到自定义元素上，挂载用 callback ref 显式喂内容。
+- `mount*()` 助手必须是纯 setter 调用（幂等）：StrictMode 双调用、元素移动后重挂载会重复喂同样的数据，重复执行必须无副作用。
+- 预渲染 HTML 里自定义元素是空壳是已知取舍；light DOM 恒为空可以顺带消除 hydration mismatch。若控制台出现 hydration 报错指向自定义元素，说明有代码把节点挂回了 light DOM，修原因而不是用 `suppressHydrationWarning` 掩盖。
+
 ## 版本约定
 
 每个子模块独立版本，格式为 `{上游 npm 版本}-kt.{修订号}`。上游 npm 版本只在根目录 `package.json` 的 `dependencies` 中声明，根 `build.gradle.kts` 解析后放入 `extra["npmVersions"]`，各子模块读取它来声明 `npm(...)` 并推导版本基础部分。
