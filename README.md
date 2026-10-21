@@ -57,11 +57,20 @@ module's base version and `npm(...)` dependency:
 ./gradlew :ktjs-iconify-icon:jsBrowserTest
 ```
 
+The demo is bundled and served by Vite (`dev.opensavvy.vite.kotlin`):
+
+```bash
+# Development server with live reload at http://localhost:5173/
+./gradlew :demo:viteRun
+```
+
 The GitHub Pages site (demo at the root, Dokka output under `/api/`) is assembled by:
 
 ```bash
 ./gradlew pagesSite
 ```
+
+`pagesSite` consumes the Vite production bundle from `demo/build/vite/js/dist`.
 
 After adding or upgrading an npm dependency in a module, refresh the shared lock file:
 
@@ -71,8 +80,9 @@ After adding or upgrading an npm dependency in a module, refresh the shared lock
 
 ## Design notes
 
-- Kotlin 2.4.21, Kotlin/JS IR, CommonJS output (`JsModuleKind.MODULE_COMMONJS`). CommonJS is
-  required for npm `@JsModule` imports in the Node test harness.
+- Kotlin 2.4.21, Kotlin/JS IR. The published wrapper modules emit CommonJS
+  (`JsModuleKind.MODULE_COMMONJS`), which the Node test harness requires. The `demo` module is the
+  exception: it uses `useEsModules()` so Vite can serve it as native ES modules in development.
 - Browser-facing public API uses the JetBrains `kotlin-browser` type system: DOM elements are
   `web.html.*` and the document is `web.dom.document`. Do not expose `org.w3c.dom.*` or
   `kotlinx.browser.*` from public declarations, or the wrappers stop composing with

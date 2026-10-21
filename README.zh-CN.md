@@ -50,11 +50,20 @@
 ./gradlew :ktjs-iconify-icon:jsBrowserTest
 ```
 
+演示页由 Vite（`dev.opensavvy.vite.kotlin`）打包并提供开发服务器：
+
+```bash
+# 开发服务器，支持热更新，地址 http://localhost:5173/
+./gradlew :demo:viteRun
+```
+
 GitHub Pages 站点（根目录为演示页，`/api/` 为 Dokka 文档）由以下任务组装：
 
 ```bash
 ./gradlew pagesSite
 ```
+
+`pagesSite` 读取 Vite 的生产产物 `demo/build/vite/js/dist`。
 
 在模块中新增或升级 npm 依赖后，需要刷新共享锁文件：
 
@@ -64,8 +73,9 @@ GitHub Pages 站点（根目录为演示页，`/api/` 为 Dokka 文档）由以�
 
 ## 设计说明
 
-- Kotlin 2.4.21，Kotlin/JS IR，输出 CommonJS（`JsModuleKind.MODULE_COMMONJS`）。Node 测试
-  直接 `require` 编译产物，npm 的 `@JsModule` 导入依赖 CommonJS。
+- Kotlin 2.4.21，Kotlin/JS IR。发布用的 wrapper 模块输出 CommonJS
+  （`JsModuleKind.MODULE_COMMONJS`），因为 Node 测试直接 `require` 编译产物。`demo` 模块是例外：
+  它启用 `useEsModules()`，让 Vite 在开发时按原生 ES module 提供页面。
 - 面向前端的公开 API 统一使用 JetBrains `kotlin-browser` 的类型体系：DOM 元素为
   `web.html.*`，全局 document 为 `web.dom.document`。不要在公开声明中暴露
   `org.w3c.dom.*` 或 `kotlinx.browser.*`，否则无法与 kotlin-browser 项目组合使用。

@@ -218,8 +218,21 @@ klibs.io 没有需要提交的元数据文件，它从 Maven Central 和 GitHub 
 
 - `demo` 模块是演示站点，只消费公共 API，不发布、也不进入 Dokka。根 `build.gradle.kts` 的发布与
   Dokka 配置都按 `ktjs-iconify-` 前缀过滤子模块，新增非发布模块时沿用该约定。
-- `./gradlew pagesSite` 把 `demo/build/dist/js/productionExecutable` 与 `build/dokka/html`
-  组装到 `build/pages`：演示页在根目录，API 文档在 `api/`。演示页内部链接使用相对路径，因此
+- 演示页由 `dev.opensavvy.vite.kotlin`（0.9.2）打包和提供开发服务器，不再走 KGP 的 webpack：
+  `./gradlew :demo:viteRun` 启动 `http://localhost:5173/`，`./gradlew :demo:viteBuild` 产出
+  `demo/build/vite/js/dist`。入口文件名由根项目名和模块名拼成（`ktjs-iconify-demo.mjs`），
+  `index.html` 必须用 `type="module"` 引用；给模块改名前要同步改 `index.html`。
+- demo 的 JS target 启用 `useEsModules()`，wrapper 模块保持 CommonJS：前者只影响 demo 的
+  可执行文件图，Node 测试与 `jsBrowserTest` 继续依赖 webpack + CommonJS。根脚本里的
+  `webpack` override 仍为 wrapper 测试保留。
+- 因为 demo 以 ESM 方式编译整张依赖图，wrapper 里的 `@JsModule` 声明必须对 CommonJS 和 ESM
+  两种模块类型都成立。Kotlin 在 ESM 下把顶层 `external val`（带 `@JsName`）编译成 default
+  import，而 `iconify-icon` 这类包只有命名导出，会报 `does not provide an export named
+  'default'`；这类值要写成 external module object + 属性访问（见
+  `ktjs-iconify-icon/src/jsMain/kotlin/iconify/IconifyModule.kt`），ESM 生成 `import * as`，
+  CommonJS 生成 `require(...).Name`。
+- `./gradlew pagesSite` 把 `demo/build/vite/js/dist` 与 `build/dokka/html` 组装到
+  `build/pages`：演示页在根目录，API 文档在 `api/`。演示页内部链接使用相对路径，因此
   `/api/` 在本地和 Pages 上都可用。
 - Dokka 2.2.0 同时应用到根项目和四个 wrapper 子模块；聚合入口是根项目的
   `dependencies { dokka(project(...)) }`，任务为 `dokkaGeneratePublicationHtml`（2.x 已移除旧的

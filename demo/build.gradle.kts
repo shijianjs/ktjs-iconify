@@ -1,16 +1,15 @@
-import org.jetbrains.kotlin.gradle.dsl.JsModuleKind
-
 plugins {
     kotlin("multiplatform")
+    id("dev.opensavvy.vite.kotlin")
 }
 
 kotlin {
     js {
-        compilerOptions {
-            moduleKind.set(JsModuleKind.MODULE_COMMONJS)
-        }
+        // Vite serves native ES modules in development; the wrapper modules stay CommonJS because
+        // their Node tests require it, so this setting only affects the demo executable.
+        useEsModules()
 
-        // The demo is a standalone page, so the JS target needs an executable webpack bundle.
+        // The demo is a standalone page, so the JS target needs an executable bundle.
         binaries.executable()
         browser()
     }
