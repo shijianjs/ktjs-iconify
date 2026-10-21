@@ -1,4 +1,5 @@
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
+import dev.detekt.gradle.extensions.DetektExtension
 import groovy.json.JsonSlurper
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.targets.js.npm.NpmExtension
@@ -6,6 +7,7 @@ import org.jetbrains.kotlin.gradle.targets.js.npm.NpmExtension
 plugins {
     kotlin("multiplatform") version "2.4.21" apply false
     id("com.vanniktech.maven.publish") version "0.37.0" apply false
+    id("dev.detekt") version "2.0.0-alpha.6" apply false
 }
 
 // GitHub-backed namespace; verified once in the Central Portal. All modules share it.
@@ -25,6 +27,19 @@ extra["npmVersions"] = npmVersions
 // a second copy for source-map-loader's peer dependency.
 plugins.withType<NodeJsRootPlugin> {
     extensions.getByType(NpmExtension::class.java).override("webpack", "5.108.1")
+}
+
+// The public API must use kotlin-browser's web.* types. Kotlin/JS's own org.w3c.dom.* and
+// kotlinx.browser.* compile and run against the same objects, but the compiler treats them as
+// unrelated types, which breaks callers that use kotlin-browser. detekt.yml forbids the imports.
+subprojects {
+    apply(plugin = "dev.detekt")
+
+    extensions.configure<DetektExtension> {
+        config.setFrom(rootProject.files("detekt.yml"))
+        // The plain detekt task is wired into check; point it at the multiplatform source tree.
+        source.setFrom(files("src"))
+    }
 }
 
 // Publishing is configured once for every module so that coordinates, POM metadata, signing and

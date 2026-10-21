@@ -70,7 +70,8 @@ for cases where the component must be loaded before creating elements another wa
 
 The public API uses the `kotlin-browser` type system: the element extends `web.html.HTMLElement`,
 and helpers use `web.dom.document`. Do not mix in `org.w3c.dom.*` or `kotlinx.browser.*`; callers
-using those declarations need an `unsafeCast` at the boundary.
+using those declarations need an `unsafeCast` at the boundary. The build fails on
+`org.w3c.dom` or `kotlinx.browser` imports via Detekt's `ForbiddenImport` rule.
 
 The tag name is available as the typed `IconifyIconTagName.iconifyIcon` constant, ready for
 `createElement`:

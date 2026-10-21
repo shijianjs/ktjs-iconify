@@ -70,7 +70,8 @@ addIcon("test:home", data)
 
 公开 API 使用 `kotlin-browser` 类型体系：元素继承 `web.html.HTMLElement`，辅助函数使用
 `web.dom.document`。不要混入 `org.w3c.dom.*` 或 `kotlinx.browser.*`；使用这些声明的调用方需要
-在边界处做 `unsafeCast`。
+在边界处做 `unsafeCast`。构建时 Detekt 的 `ForbiddenImport` 规则会拦截 `org.w3c.dom` 或
+`kotlinx.browser` 的 import。
 
 标签名通过 `IconifyIconTagName.iconifyIcon` 提供类型化常量，可直接传给 `createElement`：
 

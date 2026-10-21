@@ -36,6 +36,10 @@ gh repo clone <owner>/<repo> S:/workspace/github/<owner>/<repo>
 
 两套类型在运行时指向同一个对象，但编译器不视为同一类型；wrapper 的公开 API 一旦用 `org.w3c.dom.*`，kotlin-browser 项目就无法直接使用。
 
+`build` / `check` 会执行 Detekt 的 `ForbiddenImport` 规则：根脚本为所有子模块应用 `dev.detekt` 并分析 `src`，根目录 `detekt.yml` 禁止 `org.w3c.dom.*` 与 `kotlinx.browser.*`。新增模块无需单独配置。该规则只拦截 import，代码里直接写全限定名（如 `kotlinx.browser.window`）不会被发现。
+
+Detekt 版本固定为 `2.0.0-alpha.6`：1.23.8 在 JDK 25 下直接失败，而 2.0 alpha 明确支持 Kotlin 2.4 / Gradle 9 / JDK 25。升级时注意 2.0 的插件 ID 是 `dev.detekt`，规则配置项也已改名（如 `imports` → `forbiddenImports`）。
+
 ## 版本约定
 
 每个子模块独立版本，格式为 `{上游 npm 版本}-kt.{修订号}`。上游 npm 版本只在根目录 `package.json` 的 `dependencies` 中声明，根 `build.gradle.kts` 解析后放入 `extra["npmVersions"]`，各子模块读取它来声明 `npm(...)` 并推导版本基础部分：
