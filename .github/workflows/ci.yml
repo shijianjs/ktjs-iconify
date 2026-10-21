@@ -45,6 +45,9 @@ jobs:
       - name: Assemble Pages site
         run: ./gradlew pagesSite
 
+      - name: Test the demo page
+        run: ./gradlew :demo:e2eTest
+
       - name: Upload refreshed npm lock file
         if: github.actor == 'dependabot[bot]'
         uses: actions/upload-artifact@v7

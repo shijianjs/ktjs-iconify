@@ -44,6 +44,7 @@ module's base version and `npm(...)` dependency:
 - Node.js is downloaded automatically by the Kotlin Gradle plugin. npm is used because Yarn is
   disabled in `gradle.properties`.
 - Chromium is downloaded by Playwright the first time browser tests run.
+- The demo's end-to-end test is a standalone Node script, so `node` must also be on `PATH`.
 
 ## Build and test
 
@@ -55,13 +56,9 @@ module's base version and `npm(...)` dependency:
 ./gradlew :ktjs-iconify-utils:jsBrowserTest
 ./gradlew :ktjs-iconify-tools:jsNodeTest
 ./gradlew :ktjs-iconify-icon:jsBrowserTest
-```
 
-The demo is bundled and served by Vite (`dev.opensavvy.vite.kotlin`):
-
-```bash
-# Development server with live reload at http://localhost:5173/
-./gradlew :demo:viteRun
+# End-to-end checks for the bundled demo page (Playwright, needs node on PATH)
+./gradlew :demo:e2eTest
 ```
 
 The GitHub Pages site (demo at the root, Dokka output under `/api/`) is assembled by:
@@ -69,8 +66,6 @@ The GitHub Pages site (demo at the root, Dokka output under `/api/`) is assemble
 ```bash
 ./gradlew pagesSite
 ```
-
-`pagesSite` consumes the Vite production bundle from `demo/build/vite/js/dist`.
 
 After adding or upgrading an npm dependency in a module, refresh the shared lock file:
 
@@ -80,9 +75,8 @@ After adding or upgrading an npm dependency in a module, refresh the shared lock
 
 ## Design notes
 
-- Kotlin 2.4.21, Kotlin/JS IR. The published wrapper modules emit CommonJS
-  (`JsModuleKind.MODULE_COMMONJS`), which the Node test harness requires. The `demo` module is the
-  exception: it uses `useEsModules()` so Vite can serve it as native ES modules in development.
+- Kotlin 2.4.21, Kotlin/JS IR, CommonJS output (`JsModuleKind.MODULE_COMMONJS`). CommonJS is
+  required for npm `@JsModule` imports in the Node test harness.
 - Browser-facing public API uses the JetBrains `kotlin-browser` type system: DOM elements are
   `web.html.*` and the document is `web.dom.document`. Do not expose `org.w3c.dom.*` or
   `kotlinx.browser.*` from public declarations, or the wrappers stop composing with

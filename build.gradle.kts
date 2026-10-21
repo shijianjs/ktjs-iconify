@@ -6,7 +6,6 @@ import org.jetbrains.kotlin.gradle.targets.js.npm.NpmExtension
 
 plugins {
     kotlin("multiplatform") version "2.4.21" apply false
-    id("dev.opensavvy.vite.kotlin") version "0.9.2" apply false
     id("com.vanniktech.maven.publish") version "0.37.0" apply false
     id("dev.detekt") version "2.0.0-alpha.6" apply false
     id("org.jetbrains.dokka") version "2.2.0"
@@ -125,11 +124,10 @@ subprojects {
 }
 
 // Assembles the GitHub Pages site: the demo at the root and the API reference under /api/.
-// The demo is bundled by Vite (dev.opensavvy.vite.kotlin), which writes to build/vite/js/dist.
 tasks.register<Sync>("pagesSite") {
-    dependsOn(":demo:viteBuild", "dokkaGeneratePublicationHtml")
+    dependsOn(":demo:jsBrowserDistribution", "dokkaGeneratePublicationHtml")
     into(layout.buildDirectory.dir("pages"))
-    from(project(":demo").layout.buildDirectory.dir("vite/js/dist"))
+    from(project(":demo").layout.buildDirectory.dir("dist/js/productionExecutable"))
     from(layout.buildDirectory.dir("dokka/html")) {
         into("api")
     }
