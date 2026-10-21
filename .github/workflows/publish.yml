@@ -81,22 +81,22 @@ jobs:
               echo ":$module:publishToMavenCentral" >> pending.txt
             fi
           done < versions.txt
-          {
-            echo "tasks<<EOF"
-            cat pending.txt
-            echo "EOF"
-          } >> "$GITHUB_OUTPUT"
+          # One space-separated line: Gradle needs every task in a single invocation, and a
+          # multi-line output would be splat into the shell as separate commands.
+          tasks="$(tr '\n' ' ' < pending.txt | sed 's/[[:space:]]*$//')"
+          echo "tasks=$tasks" >> "$GITHUB_OUTPUT"
 
       # Central Portal user token, not the account password. The GPG key is passed in memory;
       # the key id is optional and embedded in the key itself.
       - name: Publish pending modules
         if: steps.pending.outputs.tasks != ''
         env:
+          PENDING_TASKS: ${{ steps.pending.outputs.tasks }}
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
           ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.MAVEN_CENTRAL_SIGNING_KEY }}
           ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.MAVEN_CENTRAL_SIGNING_KEY_PASSWORD }}
-        run: ./gradlew ${{ steps.pending.outputs.tasks }} --stacktrace
+        run: ./gradlew $PENDING_TASKS --stacktrace
 
       - name: Create or refresh the GitHub release
         env:
