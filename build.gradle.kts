@@ -123,6 +123,19 @@ subprojects {
     }
 }
 
+// Prints "<module>=<version>" for every publishable module. The release workflow uses the output
+// to skip versions already on Maven Central and to build the GitHub release notes, so version
+// derivation stays in the module scripts rather than being duplicated in shell.
+tasks.register("printPublishedVersions") {
+    val publishedModules = subprojects.filter { it.name.startsWith("ktjs-iconify-") }
+    doLast {
+        publishedModules
+            .associate { it.name to it.version.toString() }
+            .toSortedMap()
+            .forEach { (name, version) -> println("$name=$version") }
+    }
+}
+
 // Assembles the GitHub Pages site: the demo at the root and the API reference under /api/.
 tasks.register<Sync>("pagesSite") {
     dependsOn(":demo:jsBrowserDistribution", "dokkaGeneratePublicationHtml")

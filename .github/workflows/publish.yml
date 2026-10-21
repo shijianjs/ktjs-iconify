@@ -1,26 +1,29 @@
 name: Publish to Maven Central
 
+# A release is one tag push. The tag only marks the moment; the versions come from
+# package.json and wrapperRevision, so a tag must never be read as an artifact version.
 on:
+  push:
+    tags:
+      - "release-*"
   workflow_dispatch:
     inputs:
-      module:
-        description: Module to publish
+      tag:
+        description: Existing release-* tag to publish and release
         required: true
-        default: all
-        type: choice
-        options:
-          - all
-          - ktjs-iconify-types
-          - ktjs-iconify-utils
-          - ktjs-iconify-tools
-          - ktjs-iconify-icon
+        type: string
 
 concurrency:
   group: publish
   cancel-in-progress: false
 
 permissions:
-  contents: read
+  # Creating or refreshing the GitHub release.
+  contents: write
+
+env:
+  GROUP: io.github.shijianjs
+  GROUP_PATH: io/github/shijianjs
 
 jobs:
   publish:
@@ -29,6 +32,26 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v7
+        with:
+          # Full history for the previous-tag comparison in the release notes.
+          fetch-depth: 0
+          ref: ${{ github.event_name == 'push' && github.ref || inputs.tag }}
+
+      - name: Resolve release tag
+        id: release
+        run: |
+          tag="${{ github.event_name == 'push' && github.ref_name || inputs.tag }}"
+          if [[ "$tag" != release-* ]]; then
+            echo "::error::Release tags must start with 'release-', got '$tag'."
+            exit 1
+          fi
+          # CI only runs on master, so tagging anything else would publish untested code.
+          git fetch --no-tags origin "+refs/heads/master:refs/remotes/origin/master"
+          if ! git merge-base --is-ancestor "$tag^{commit}" refs/remotes/origin/master; then
+            echo "::error::Tag $tag is not on master. Tag a commit that CI has already validated."
+            exit 1
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
       - name: Set up JDK
         uses: actions/setup-java@v6
@@ -39,17 +62,61 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v6
 
+      # Versions differ per module, and a Dependabot bump only moves one of them, so the
+      # workflow cannot assume a single version or publish every module.
+      - name: Read module versions
+        run: ./gradlew -q --console=plain printPublishedVersions | tee versions.txt
+
+      # Maven Central never allows a version to be overwritten. Checking the published POM
+      # keeps re-runs (and releases that only changed one module) idempotent.
+      - name: Find versions still missing from Maven Central
+        id: pending
+        run: |
+          : > pending.txt
+          while IFS='=' read -r module version; do
+            url="https://repo1.maven.org/maven2/$GROUP_PATH/$module/$version/$module-$version.pom"
+            if curl -fsI --retry 3 --retry-delay 2 "$url" > /dev/null; then
+              echo "$module $version is already on Maven Central, skipping."
+            else
+              echo ":$module:publishToMavenCentral" >> pending.txt
+            fi
+          done < versions.txt
+          {
+            echo "tasks<<EOF"
+            cat pending.txt
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
       # Central Portal user token, not the account password. The GPG key is passed in memory;
       # the key id is optional and embedded in the key itself.
-      - name: Publish and release
+      - name: Publish pending modules
+        if: steps.pending.outputs.tasks != ''
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
           ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.MAVEN_CENTRAL_SIGNING_KEY }}
           ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.MAVEN_CENTRAL_SIGNING_KEY_PASSWORD }}
+        run: ./gradlew ${{ steps.pending.outputs.tasks }} --stacktrace
+
+      - name: Create or refresh the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          if [ "${{ inputs.module }}" = "all" ]; then
-            ./gradlew publishToMavenCentral --stacktrace
+          tag="${{ steps.release.outputs.tag }}"
+          {
+            echo "Artifacts on Maven Central for this release:"
+            echo
+            while IFS='=' read -r module version; do
+              echo "- [\`$module\` $version](https://central.sonatype.com/artifact/$GROUP/$module/$version)"
+            done < versions.txt
+            prev="$(git describe --tags --abbrev=0 --match 'release-*' "$tag^" 2>/dev/null || true)"
+            if [ -n "$prev" ]; then
+              echo
+              echo "**Full Changelog**: https://github.com/${{ github.repository }}/compare/$prev...$tag"
+            fi
+          } > release-notes.md
+          if gh release view "$tag" > /dev/null 2>&1; then
+            gh release edit "$tag" --notes-file release-notes.md
           else
-            ./gradlew ":${{ inputs.module }}:publishToMavenCentral" --stacktrace
+            gh release create "$tag" --title "$tag" --notes-file release-notes.md --verify-tag
           fi

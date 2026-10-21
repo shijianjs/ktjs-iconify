@@ -186,11 +186,21 @@ group 必须单独设置，根项目的 `group` 不会自动继承。
    `MAVEN_CENTRAL_SIGNING_KEY`（`gpg --export-secret-keys --armor <key id>` 的完整输出）、
    `MAVEN_CENTRAL_SIGNING_KEY_PASSWORD`（密钥没有密码时留空）。
 
-发布时手动运行 **Publish to Maven Central** workflow（`.github/workflows/publish.yml`），可以选
-单个模块或 `all`。DSL 里用的是 `publishToMavenCentral(automaticRelease = true)`，上传后会等待
-Central 校验并自动发布。Maven Central 的版本不可覆盖，发布前务必确认版本号没有被用过；同一
-版本重复发布会失败。选 `all` 只有在四个模块的当前版本都从未发布过时才安全；日常发布应只选
-版本有变化的模块。
+发布由推送 `release-N` tag 触发（如 `git tag release-3 && git push origin release-3`）。
+`.github/workflows/publish.yml` 先校验 tag 位于 `master` 上，再用根项目的
+`printPublishedVersions` 任务读出各模块版本，跳过 Maven Central 上已存在的版本，只对缺失的
+模块执行 `publishToMavenCentral`，最后创建（或刷新）同名 GitHub Release：正文列出各模块版本
+与 Central 链接，并附上一个 `release-*` tag 以来的提交对比链接，不附任何构件。
+
+- tag 只是发版开关，不是 artifact 版本：各模块版本仍由 `package.json` 与 `wrapperRevision`
+  推导，四个模块的版本可以各不相同。
+- Maven Central 的版本不可覆盖；探测已发布 POM 的跳过逻辑让重复运行幂等。发布失败时用
+  workflow_dispatch 指定同一个 tag 重试即可。
+- tag 必须打在 CI 验证过的 `master` 提交上（CI 不监听 tag），工作流会拒绝不在 `master` 上的
+  tag；不要在推 tag 前遗漏 `wrapperRevision` 的递增。
+- DSL 里用的是 `publishToMavenCentral(automaticRelease = true)`，上传后会等待 Central 校验并
+  自动发布，所以 Release 正文只链接 `https://central.sonatype.com/artifact/io.github.shijianjs/<module>/<version>`；
+  repo1 有 CDN 延迟，不要拿它当正文链接。
 
 本地检查发布内容时，`publishToMavenLocal` 对非 `-SNAPSHOT` 版本也强制签名，需要提供
 `signingInMemoryKey` 等属性。只想看 POM 和构件清单时，可以临时把模块版本改成 `-SNAPSHOT`，
