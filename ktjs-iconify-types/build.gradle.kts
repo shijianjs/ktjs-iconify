@@ -8,7 +8,7 @@ plugins {
 @Suppress("UNCHECKED_CAST")
 val npmVersions = rootProject.extra["npmVersions"] as Map<String, String>
 val upstreamVersion = npmVersions.getValue("@iconify/types")
-version = "$upstreamVersion-kt.1"
+version = "$upstreamVersion-kt.2"
 description = "Kotlin/JS type declarations for the @iconify/types package."
 
 kotlin {

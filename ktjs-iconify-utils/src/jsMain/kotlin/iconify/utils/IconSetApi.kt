@@ -8,12 +8,21 @@ import iconify.IconifyJSON
 import kotlin.js.Promise
 
 /**
- * Get icon data from an icon set, resolving aliases.
+ * Get icon data from an icon set, resolving aliases and filling in defaults.
+ *
+ * @return the resolved icon, or `null` if the icon does not exist or its alias chain is broken.
  */
 external fun getIconData(data: IconifyJSON, name: String): ExtendedIconifyIcon?
 
 /**
  * Extract a subset of icons from an icon set.
+ *
+ * Aliases are copied as aliases, but only when their parent icon is also included, so the result is
+ * self-contained.
+ *
+ * @param notFound list missing names in `not_found` and return a result even when no icon was
+ * found.
+ * @return the subset, or `null` if no icon was found and [notFound] is not `true`.
  */
 external fun getIcons(
     data: IconifyJSON,
@@ -22,20 +31,35 @@ external fun getIcons(
 ): IconifyJSON?
 
 /**
- * Callback invoked for each icon. `data` is `null` if the icon is missing.
+ * Invoke [callback] for each icon in the icon set.
+ *
+ * Alias chains are resolved before the callback is invoked. `data` is `null` if the icon is
+ * missing.
+ *
+ * @return names of the icons found in the icon set.
  */
 external fun parseIconSet(
     data: IconifyJSON,
     callback: (name: String, data: ExtendedIconifyIcon?) -> Any?,
 ): Array<String>
 
+/**
+ * Asynchronous version of [parseIconSet]: awaits each callback before processing the next icon.
+ *
+ * @return names of the icons found in the icon set.
+ */
 external fun parseIconSetAsync(
     data: IconifyJSON,
     callback: (name: String, data: ExtendedIconifyIcon?) -> dynamic,
 ): Promise<Array<String>>
 
 /**
- * Validate an icon set. Returns the icon set on success, throws on failure.
+ * Validate an icon set, optionally fixing it.
+ *
+ * Checks metadata, icon data, aliases and parent references.
+ *
+ * @return the icon set on success.
+ * @throws if the icon set is invalid and [IconSetValidationOptions.fix] is not `true`.
  */
 external fun validateIconSet(
     obj: dynamic,
@@ -43,22 +67,51 @@ external fun validateIconSet(
 ): IconifyJSON
 
 /**
- * Quick validation. Returns `null` on failure.
+ * Quick validation of an icon set.
+ *
+ * Unlike [validateIconSet], this does not check metadata, does not throw and does not fix
+ * anything. It only checks that the object has an `icons` object.
+ *
+ * @return the icon set on success, `null` on failure.
  */
 external fun quicklyValidateIconSet(obj: dynamic): IconifyJSON?
 
-/** Expand a minified icon set in place. */
+/**
+ * Expand a minified icon set in place.
+ *
+ * Copies root defaults into each icon and alias, the opposite of [minifyIconSet].
+ */
 external fun expandIconSet(data: IconifyJSON)
 
-/** Minify an icon set in place by moving repeated values to the root. */
+/**
+ * Minify an icon set in place.
+ *
+ * Moves values repeated by all icons to the root, and removes default values.
+ */
 external fun minifyIconSet(data: IconifyJSON)
 
+/**
+ * Convert icon set information from the legacy format used by the Iconify API and
+ * `collections.json` to [IconifyInfo].
+ *
+ * @param expectedPrefix when set, reject data whose `prefix` does not match.
+ * @return the converted information, or `null` if [data] is invalid.
+ */
 external fun convertIconSetInfo(data: dynamic, expectedPrefix: String = definedExternally): IconifyInfo?
 
 /**
- * Parent icon list for each icon, `null` if the alias tree cannot be resolved.
+ * Parent icons for each icon.
+ *
+ * The result is keyed by icon name; each value lists the direct parent first, followed by its
+ * parents. Icons without a parent map to an empty list. Missing icons and aliases with a broken
+ * parent chain map to `null`.
+ *
+ * @param names only resolve these icons; defaults to all icons and aliases.
  */
 external fun getIconsTree(data: IconifyJSON, names: Array<String>? = definedExternally): dynamic
 
-/** Optional properties copied when extracting icons. */
+/**
+ * Optional properties copied when extracting icons: `left`, `top`, `width`, `height` and
+ * `provider`.
+ */
 external val propsToCopy: Array<String>

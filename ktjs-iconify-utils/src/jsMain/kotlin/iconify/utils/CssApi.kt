@@ -7,6 +7,8 @@ import iconify.IconifyJSON
 
 /**
  * Generate CSS for one icon, rendered as background or mask.
+ *
+ * The mode is taken from [IconCSSIconOptions.mode], or detected from the icon content.
  */
 external fun getIconCSS(
     icon: IconifyIcon,
@@ -23,6 +25,9 @@ external fun getIconContentCSS(
 
 /**
  * Generate CSS for icons from an icon set, rendered as background or mask.
+ *
+ * Icons missing from [iconSet] are skipped. The mode is taken from
+ * [IconCSSIconSetOptions.mode], or detected from the first available icon.
  */
 external fun getIconsCSS(
     iconSet: IconifyJSON,

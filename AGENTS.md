@@ -7,6 +7,8 @@
 - `S:\workspace\github\JetBrains\kotlin-toolchain`
 - `S:\workspace\github\JetBrains\kotlin-wrappers`
 - `S:\workspace\github\JetBrains\kotlin-web-site`
+- `S:\workspace\github\iconify\iconify`（`iconify-icon` Web Component 源码在 `iconify-icon/icon`）
+- `S:\workspace\github\iconify\tools`（`@iconify/tools` 源码在 `@iconify/tools/src`）
 
 ## 拉取 GitHub 仓库
 
@@ -121,3 +123,4 @@ klibs.io 没有需要提交的元数据文件，它从 Maven Central 和 GitHub 
 - 需要跨会话、跨上下文感知的信息（环境约定、构建方式、模块结构、容易踩的坑）记录在本文件。
 - 只与某个目录强相关、篇幅较长的说明，放在该目录下的 `AGENTS.md`（如 `ktjs-iconify-tools/AGENTS.md`），根文件只保留指向它的简短索引。
 - 跨项目需要感知的信息也记录在本文件：本仓库会作为模板创建更多 wrapper 项目，约定应写成不依赖具体模块名的通用规则，而不是只活在当前模块或当前对话里。
+- 公开声明都要有 KDoc：上游源码或 README 有说明的，翻译并改写过来；没有的按实际行为补充。描述以源码为准，不要照搬过时或错误的理解。

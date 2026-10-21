@@ -4,21 +4,34 @@ package iconify
  * Links to the provider's website.
  */
 external interface APIProviderRawDataLinks {
-    /** Collections list. */
+    /**
+     * Link to the collections list.
+     */
     var home: String?
 
-    /** Collection page. Supports `{prefix}`. */
+    /**
+     * Link to a collection page. Supports `{prefix}`.
+     */
     var collection: String?
 
-    /** Icon page. Supports `{prefix}` and `{name}`. */
+    /**
+     * Link to an icon page. Supports `{prefix}` and `{name}`.
+     */
     var icon: String?
 }
 
+/**
+ * NPM packages for the provider's icons, used in code samples.
+ */
 external interface APIProviderRawDataNPM {
-    /** Package name for installation. Supports `{prefix}`. */
+    /**
+     * Package name for installation. Supports `{prefix}`.
+     */
     var `package`: String?
 
-    /** Icon import source. Supports `{prefix}` and `{name}`. */
+    /**
+     * Icon import source. Supports `{prefix}` and `{name}`.
+     */
     var icon: String?
 }
 
@@ -26,18 +39,37 @@ external interface APIProviderRawDataNPM {
  * Raw API provider data, as provided by an Iconify API.
  */
 external interface APIProviderRawData {
-    /** Provider name as used in icon names. */
+    /**
+     * Provider name as used in icon names.
+     */
     var provider: String
 
-    /** Human readable provider name. */
+    /**
+     * Human readable provider name.
+     */
     var title: String?
 
-    /** API endpoint or endpoints. */
+    /**
+     * API endpoint or endpoints.
+     *
+     * Usually redundant, because the endpoint that returned the data is already known.
+     */
     var api: dynamic
 
+    /**
+     * Links to the provider's website.
+     */
     var links: APIProviderRawDataLinks?
+
+    /**
+     * NPM packages for the provider's icons.
+     */
     var npm: APIProviderRawDataNPM?
 
-    /** SVG generator URL, supports `{prefix}` and `{name}`. */
+    /**
+     * SVG URL template, including the full host name and the `{prefix}` and `{name}` variables.
+     *
+     * For example, `https://api.iconify.design/{prefix}/{name}.svg`.
+     */
     var svg: String?
 }

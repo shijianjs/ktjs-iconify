@@ -6,9 +6,10 @@ import iconify.IconifyJSON
 import kotlin.js.Promise
 
 /**
- * Load an icon from the Iconify API or a locally installed `@iconify-json` package.
+ * Load an icon from a custom collection registered in [IconifyLoaderOptions.customCollections].
  *
- * Browser builds can only use custom collections.
+ * The loader does not fetch anything: it only uses inline collections and custom loader functions.
+ * Returns `undefined` when the collection is not registered or the icon is missing.
  */
 external fun loadIcon(
     collection: String,
@@ -17,7 +18,11 @@ external fun loadIcon(
 ): Promise<String?>
 
 /**
- * Get an icon from an inline collection or a custom loader.
+ * Get an icon from an inline collection or a custom loader function.
+ *
+ * The result is an SVG string with customisations and extra properties applied.
+ *
+ * Returns `undefined` when the icon is missing.
  */
 external fun getCustomIcon(
     custom: dynamic,
@@ -27,7 +32,11 @@ external fun getCustomIcon(
 ): Promise<String?>
 
 /**
- * Search for an icon in an icon set, trying alternative names.
+ * Search for an icon in an icon set, trying names from [ids] in order.
+ *
+ * The first matching name is rendered as an SVG string with customisations applied.
+ *
+ * Returns `undefined` when none of the names exist.
  */
 external fun searchForIcon(
     iconSet: IconifyJSON,
@@ -38,6 +47,9 @@ external fun searchForIcon(
 
 /**
  * Apply customisations and extra properties to an SVG string.
+ *
+ * Applies the transformations configured in [IconifyLoaderOptions.customizations], then adds
+ * namespaces, default style and class, scale and [IconifyLoaderOptions.usedProps].
  */
 external fun mergeIconProps(
     svg: String,
@@ -49,6 +61,9 @@ external fun mergeIconProps(
 ): Promise<String>
 
 /**
- * Get possible icon names, from the most specific to the most generic.
+ * Possible icon names for a name that may use a different naming convention, from the most specific
+ * to the most generic.
+ *
+ * For example, `fooBar` also produces `foo-bar`, and `foo2` also produces `foo-2`.
  */
 external fun getPossibleIconNames(icon: String): Array<String>

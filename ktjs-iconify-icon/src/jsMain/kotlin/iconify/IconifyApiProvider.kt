@@ -4,8 +4,13 @@ package iconify
  * Icon name split into parts.
  */
 external interface IconifyIconName {
+    /** API provider name; empty for the default provider. */
     val provider: String
+
+    /** Icon set prefix, such as `mdi`. */
     val prefix: String
+
+    /** Icon name without prefix, such as `home`. */
     val name: String
 }
 
@@ -13,12 +18,12 @@ external interface IconifyIconName {
  * API provider configuration for [addAPIProvider].
  */
 external interface IconifyAPIProviderConfig {
-    /** API endpoints, tried in order. Supports `{prefix}` and `{provider}`. */
+    /** API hosts, tried in order. */
     var resources: Array<String>
 
-    /** Path to the icons endpoint. Defaults to the Iconify API path. */
+    /** Root path after the domain and before the icon prefix. Defaults to `/`. */
     var path: String?
 
-    /** Maximum number of icons per API request. */
+    /** Maximum URL length; longer icon lists are split across requests. Defaults to `500`. */
     var maxURL: Int?
 }
