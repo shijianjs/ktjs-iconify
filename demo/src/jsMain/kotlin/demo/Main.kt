@@ -16,6 +16,7 @@ import iconify.utils.stringToColor
 import iconify.utils.stringToIcon
 import kotlin.js.js
 import kotlin.js.unsafeCast
+import web.cssom.ClassName
 import web.dom.TagName
 import web.dom.Text
 import web.dom.document
@@ -35,6 +36,8 @@ import web.navigator.navigator
 import web.pointer.CLICK
 import web.pointer.PointerEvent
 import web.storage.localStorage
+import web.window.WindowTarget
+import web.window._blank
 
 private const val GITHUB_URL = "https://github.com/shijianjs/ktjs-iconify"
 private const val LANGUAGE_STORAGE_KEY = "ktjs-iconify-demo-language"
@@ -98,7 +101,7 @@ private class LoaderPanel(initialName: String) {
         type = ButtonType.button
     }
     private val status: HTMLElement = element(HtmlTagName.p, "loader-status muted").apply {
-        setAttribute("aria-live", "polite")
+        ariaLive = "polite"
     }
     private val output: HTMLElement = element(HtmlTagName.div, "loader-output")
 
@@ -117,7 +120,7 @@ private class LoaderPanel(initialName: String) {
     fun setCopy(strings: Strings) {
         this.strings = strings
         button.textContent = strings.loaderButton
-        input.setAttribute("aria-label", strings.loaderInputLabel)
+        input.ariaLabel = strings.loaderInputLabel
         showState()
     }
 
@@ -223,7 +226,7 @@ private class DemoPage {
         val inner = element(HtmlTagName.div, "topbar-inner")
         val brand = element(HtmlTagName.a, "brand").apply {
             textContent = "ktjs-iconify"
-            setAttribute("href", "./")
+            href = "./"
         }
         navDemo = navLink("", "./")
         navApi = navLink("", "api/")
@@ -407,10 +410,10 @@ private class DemoPage {
         this.language = language
         val strings = stringsFor(language)
 
-        document.documentElement.setAttribute("lang", language.code)
+        document.documentElement.lang = language.code
         document.title = strings.documentTitle
         languageButton.textContent = language.switchLabel
-        languageButton.setAttribute("aria-label", strings.switchLanguageAria)
+        languageButton.ariaLabel = strings.switchLanguageAria
 
         navDemo.textContent = strings.navDemo
         navApi.textContent = strings.navApi
@@ -473,20 +476,20 @@ private class DemoPage {
     private fun navLink(label: String, href: String, external: Boolean = false): HTMLAnchorElement =
         element(HtmlTagName.a, "nav-link").apply {
             textContent = label
-            setAttribute("href", href)
+            this.href = href
             if (external) {
-                setAttribute("target", "_blank")
-                setAttribute("rel", "noreferrer")
+                target = WindowTarget._blank
+                rel = "noreferrer"
             }
         }
 
     private fun actionLink(label: String, href: String, primary: Boolean = false, external: Boolean = false): HTMLAnchorElement =
         element(HtmlTagName.a, if (primary) "button primary" else "button").apply {
             textContent = label
-            setAttribute("href", href)
+            this.href = href
             if (external) {
-                setAttribute("target", "_blank")
-                setAttribute("rel", "noreferrer")
+                target = WindowTarget._blank
+                rel = "noreferrer"
             }
         }
 }
@@ -497,7 +500,7 @@ private fun initialLanguage(): Language =
 
 private fun <T : HTMLElement> element(tag: TagName<T>, classNames: String = ""): T =
     document.createElement(tag).apply {
-        if (classNames.isNotEmpty()) setAttribute("class", classNames)
+        if (classNames.isNotEmpty()) className = ClassName(classNames)
     }
 
 private fun <T : HTMLElement> textElement(tag: TagName<T>, value: String, className: String = ""): T =
