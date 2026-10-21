@@ -9,7 +9,7 @@ plugins {
 @Suppress("UNCHECKED_CAST")
 val npmVersions = rootProject.extra["npmVersions"] as Map<String, String>
 val upstreamVersion = npmVersions.getValue("iconify-icon")
-version = "$upstreamVersion-kt.3"
+version = "$upstreamVersion-kt.2"
 description = "Kotlin/JS wrapper for the iconify-icon web component."
 
 kotlin {
