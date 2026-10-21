@@ -4,12 +4,11 @@
 
 ## ESM-only 包，必须走 `lib/index.js` 子路径
 
-`@iconify/tools` 是纯 ESM 包，其 `package.json` 的 `exports["."]` 只声明了 `types` 和 `import` 条件，没有 `require`/`default`。本项目 JS 目标输出 CommonJS，Mocha 直接 `require` 编译产物，因此：
+`@iconify/tools` 是纯 ESM 包，其 `package.json` 的 `exports["."]` 只声明了 `types` 和 `import` 条件，没有 `require`/`default`。wrapper 发布的是 klib，消费方可能按 CommonJS 或 ESM 链接，因此：
 
-- 所有 `@file:JsModule` 必须写成 `@file:JsModule("@iconify/tools/lib/index.js")`，不能写包名。
-- 该包另有 `"./*": "./*"` 导出，所以上面的子路径是公开可用的；Node 20.19+ / 22.12+ / 24 原生支持 `require(ESM)`，无需 `--experimental-require-module`。
-
-不要为了这个问题把整个模块切成 ES module，浏览器测试（utils/icon）依赖 CommonJS 的 webpack 测试流程。
+- 所有 `@file:JsModule` 必须写成 `@file:JsModule("@iconify/tools/lib/index.js")`，不能写包名；子路径对两种模块格式都可用。
+- 该包另有 `"./*": "./*"` 导出，所以上面的子路径是公开可用的。
+- 本模块自身输出 ESM（根约定 `useEsModules()`）；CommonJS 消费者依赖 Node 20.19+ / 22.12+ / 24 的 `require(ESM)`，无需 `--experimental-require-module`。
 
 ## 与上游语义不一致的地方
 

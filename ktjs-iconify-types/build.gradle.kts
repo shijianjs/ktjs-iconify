@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.dsl.JsModuleKind
-
 plugins {
     kotlin("multiplatform")
 }
@@ -14,9 +12,7 @@ description = "Kotlin/JS type declarations for the @iconify/types package."
 
 kotlin {
     js {
-        compilerOptions {
-            moduleKind.set(JsModuleKind.MODULE_COMMONJS)
-        }
+        useEsModules()
 
         nodejs()
     }

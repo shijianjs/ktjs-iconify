@@ -16,9 +16,10 @@
 
 ## 环境要求
 
-`@iconify/tools` 是纯 ESM 包，而本项目输出 CommonJS。wrapper 通过该包公开的
-`@iconify/tools/lib/index.js` 子路径导入，因此使用方需要支持 `require(ESM)` 的 Node.js 版本：
-20.19+、22.12+ 或 24。完整说明见 [AGENTS.md](AGENTS.md)。
+`@iconify/tools` 是纯 ESM 包，根导出没有 `require` 条件。wrapper 通过该包公开的
+`@iconify/tools/lib/index.js` 子路径导入，ESM 与 CommonJS 使用方都可解析；CommonJS 使用方
+额外需要支持 `require(ESM)` 的 Node.js 版本：20.19+、22.12+ 或 24。完整说明见
+[AGENTS.md](AGENTS.md)。
 
 ## API
 

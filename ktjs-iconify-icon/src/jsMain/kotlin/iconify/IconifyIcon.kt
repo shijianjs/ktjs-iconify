@@ -6,7 +6,7 @@ import web.dom.document
  * Imports `iconify-icon`, which registers the `<iconify-icon>` custom element, and returns the
  * component.
  */
-fun registerIconifyIcon(): dynamic = iconifyIconComponent
+fun registerIconifyIcon(): dynamic = IconifyModule.IconifyIconComponent
 
 /**
  * Creates an `<iconify-icon>` element displaying [icon].

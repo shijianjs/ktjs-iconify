@@ -43,6 +43,18 @@ gh repo clone <owner>/<repo> S:/workspace/github/<owner>/<repo>
 
 Detekt 版本固定为 `2.0.0-alpha.6`：1.23.8 在 JDK 25 下直接失败，而 2.0 alpha 明确支持 Kotlin 2.4 / Gradle 9 / JDK 25。升级时注意 2.0 的插件 ID 是 `dev.detekt`，规则配置项也已改名（如 `imports` → `forbiddenImports`）。
 
+## Kotlin/JS 模块格式与测试运行时
+
+- 所有 `js` 目标统一 `useEsModules()`，新增模块沿用，不要退回 CommonJS/UMD。klib 不携带
+  moduleKind，消费方在链接时自行选择格式；这里的选择只影响本仓库的测试产物与 demo bundle。
+- `@JsModule` 声明必须按 ESM 语义书写：`@file:JsModule` 的顶层函数/类会生成具名导入，安全；
+  但顶层 `external val` 配 `@JsName` 会生成 default import，对只有具名导出的包
+  （如 `iconify-icon`）必须写成 `@JsModule` + `external object` + 具名属性，见
+  `ktjs-iconify-icon/src/jsMain/kotlin/iconify/IconifyModule.kt`。
+- 浏览器测试使用新版测试 DSL：`@OptIn(ExperimentalJsTestDsl::class) browser { test { chromium() } }`，
+  由 Playwright 驱动并按需安装浏览器。Karma 已废弃，不要再新增 `testTask { useKarma { ... } }`。
+- Node 侧的 `jsNodeTest` 同样按 ESM 产物运行。
+
 ## UI 编程约定
 
 以下为维护者的通用 UI 编码偏好（源自 duckfn-docs-kit 的约定，只保留与具体项目无关的部分）。新增任何 UI 代码（本仓库的 Web Component 包装、演示页，以及由本仓库派生的 wrapper 项目）都按此执行；与具体模块绑定的细节不写在这里。

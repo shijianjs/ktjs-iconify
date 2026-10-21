@@ -1,14 +1,10 @@
-import org.jetbrains.kotlin.gradle.dsl.JsModuleKind
-
 plugins {
     kotlin("multiplatform")
 }
 
 kotlin {
     js {
-        compilerOptions {
-            moduleKind.set(JsModuleKind.MODULE_COMMONJS)
-        }
+        useEsModules()
 
         // The demo is a standalone page, so the JS target needs an executable webpack bundle.
         binaries.executable()

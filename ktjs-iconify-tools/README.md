@@ -16,10 +16,10 @@ Node.js only. For browser-side icon parsing and SVG/CSS generation use
 
 ## Requirements
 
-`@iconify/tools` is ESM-only, while this project emits CommonJS. The wrapper imports the package
-through its public `@iconify/tools/lib/index.js` subpath, which means consumers need a Node.js
-version with `require(ESM)` support: 20.19+, 22.12+ or 24. See
-[AGENTS.md](AGENTS.md) for the full explanation.
+`@iconify/tools` is ESM-only and its root export has no `require` condition. The wrapper imports
+the package through its public `@iconify/tools/lib/index.js` subpath, which works for both ES
+module and CommonJS consumers; CommonJS consumers additionally need `require(ESM)` support
+(Node.js 20.19+, 22.12+ or 24). See [AGENTS.md](AGENTS.md) for the full explanation.
 
 ## API
 

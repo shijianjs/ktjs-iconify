@@ -1,5 +1,4 @@
 import org.jetbrains.kotlin.gradle.ExperimentalJsTestDsl
-import org.jetbrains.kotlin.gradle.dsl.JsModuleKind
 
 plugins {
     kotlin("multiplatform")
@@ -15,9 +14,7 @@ description = "Kotlin/JS wrapper for the @iconify/utils package."
 
 kotlin {
     js {
-        compilerOptions {
-            moduleKind.set(JsModuleKind.MODULE_COMMONJS)
-        }
+        useEsModules()
 
         browser {
             @OptIn(ExperimentalJsTestDsl::class)

@@ -75,8 +75,11 @@ After adding or upgrading an npm dependency in a module, refresh the shared lock
 
 ## Design notes
 
-- Kotlin 2.4.21, Kotlin/JS IR, CommonJS output (`JsModuleKind.MODULE_COMMONJS`). CommonJS is
-  required for npm `@JsModule` imports in the Node test harness.
+- Kotlin 2.4.21, Kotlin/JS IR, ES module output (`useEsModules()`). Browser tests run through
+  the Playwright-based test DSL (`browser { test { chromium() } }`), not Karma.
+- `@JsModule` declarations must stay ESM-safe: a top-level `external val` with `@JsName` becomes
+  a default import, so modules with named exports only (such as `iconify-icon`) are declared as
+  an `external object` with a named property.
 - Browser-facing public API uses the JetBrains `kotlin-browser` type system: DOM elements are
   `web.html.*` and the document is `web.dom.document`. Do not expose `org.w3c.dom.*` or
   `kotlinx.browser.*` from public declarations, or the wrappers stop composing with
