@@ -8,7 +8,7 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.shijianjs/ktjs-iconify-tools?label=Maven%20Central&logo=apachemaven&logoColor=white)](https://central.sonatype.com/artifact/io.github.shijianjs/ktjs-iconify-tools)
 
-**Wrapper 版本：** `5.0.14-kt.2`，对应上游 `@iconify/tools` 5.0.14。规则见
+**Wrapper 版本：** `5.0.14-kt.3`，对应上游 `@iconify/tools` 5.0.14。规则见
 [版本约定](../README.zh-CN.md#版本约定)。
 
 仅面向 Node.js。浏览器侧的图标解析与 SVG/CSS 生成请使用

@@ -9,7 +9,7 @@ Works in browsers and Node.js.
 
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.shijianjs/ktjs-iconify-utils?label=Maven%20Central&logo=apachemaven&logoColor=white)](https://central.sonatype.com/artifact/io.github.shijianjs/ktjs-iconify-utils)
 
-**Wrapper version:** `3.1.7-kt.2`, tracking upstream `@iconify/utils` 3.1.7. See the
+**Wrapper version:** `3.1.7-kt.3`, tracking upstream `@iconify/utils` 3.1.7. See the
 [versioning rule](../README.md#versioning).
 
 Depends on [`ktjs-iconify-types`](../ktjs-iconify-types/README.md) and re-exports its types with

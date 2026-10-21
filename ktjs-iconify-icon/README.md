@@ -9,7 +9,7 @@ Component.
 
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.shijianjs/ktjs-iconify-icon?label=Maven%20Central&logo=apachemaven&logoColor=white)](https://central.sonatype.com/artifact/io.github.shijianjs/ktjs-iconify-icon)
 
-**Wrapper version:** `3.0.4-kt.2`, tracking upstream `iconify-icon` 3.0.4. See the
+**Wrapper version:** `3.0.4-kt.3`, tracking upstream `iconify-icon` 3.0.4. See the
 [versioning rule](../README.md#versioning).
 
 Browser only. Importing the module loads `iconify-icon`, which registers the `<iconify-icon>`

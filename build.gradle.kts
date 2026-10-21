@@ -43,7 +43,7 @@ extra["npmVersions"] = npmVersions
 // Wrapper revision shared by every module. It identifies the project-wide wrapper release,
 // is independent of upstream npm versions and only ever increases. Keeping it here rather
 // than in each module prevents the four modules from drifting apart. See AGENTS.md.
-val wrapperRevision = 2
+val wrapperRevision = 3
 extra["wrapperRevision"] = wrapperRevision
 
 // Keep a single webpack instance across the npm workspace; npm otherwise installs

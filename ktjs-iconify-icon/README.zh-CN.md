@@ -9,7 +9,7 @@ wrapper。
 
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.shijianjs/ktjs-iconify-icon?label=Maven%20Central&logo=apachemaven&logoColor=white)](https://central.sonatype.com/artifact/io.github.shijianjs/ktjs-iconify-icon)
 
-**Wrapper 版本：** `3.0.4-kt.2`，对应上游 `iconify-icon` 3.0.4。规则见
+**Wrapper 版本：** `3.0.4-kt.3`，对应上游 `iconify-icon` 3.0.4。规则见
 [版本约定](../README.zh-CN.md#版本约定)。
 
 仅面向浏览器。导入模块即加载 `iconify-icon` 并注册 `<iconify-icon>` 自定义元素；图标既可来自

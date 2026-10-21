@@ -8,7 +8,7 @@ Kotlin/JS wrapper for [`@iconify/tools`](https://www.npmjs.com/package/@iconify/
 
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.shijianjs/ktjs-iconify-tools?label=Maven%20Central&logo=apachemaven&logoColor=white)](https://central.sonatype.com/artifact/io.github.shijianjs/ktjs-iconify-tools)
 
-**Wrapper version:** `5.0.14-kt.2`, tracking upstream `@iconify/tools` 5.0.14. See the
+**Wrapper version:** `5.0.14-kt.3`, tracking upstream `@iconify/tools` 5.0.14. See the
 [versioning rule](../README.md#versioning).
 
 Node.js only. For browser-side icon parsing and SVG/CSS generation use
