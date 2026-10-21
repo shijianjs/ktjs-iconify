@@ -14,7 +14,7 @@
 | [ktjs-iconify-types](ktjs-iconify-types/README.zh-CN.md) | `@iconify/types` | 2.0.0 | 2.0.0-kt.1 | 纯类型，无运行时代码 |
 | [ktjs-iconify-utils](ktjs-iconify-utils/README.zh-CN.md) | `@iconify/utils` | 3.1.7 | 3.1.7-kt.1 | 浏览器与 Node.js |
 | [ktjs-iconify-tools](ktjs-iconify-tools/README.zh-CN.md) | `@iconify/tools` | 5.0.14 | 5.0.14-kt.1 | 仅 Node.js |
-| [ktjs-iconify-icon](ktjs-iconify-icon/README.zh-CN.md) | `iconify-icon` | 3.0.4 | 3.0.4-kt.1 | 浏览器，Web Component |
+| [ktjs-iconify-icon](ktjs-iconify-icon/README.zh-CN.md) | `iconify-icon` | 3.0.4 | 3.0.4-kt.2 | 浏览器，Web Component |
 
 `ktjs-iconify-utils` 依赖 `ktjs-iconify-types`，`ktjs-iconify-tools` 依赖 `ktjs-iconify-utils`；
 依赖均以 `api` 暴露，引入一个模块即可同时获得共享的图标类型。
@@ -73,7 +73,7 @@
 dependencies {
     implementation("io.github.shijianjs:ktjs-iconify-utils:3.1.7-kt.1")
     implementation("io.github.shijianjs:ktjs-iconify-tools:5.0.14-kt.1")
-    implementation("io.github.shijianjs:ktjs-iconify-icon:3.0.4-kt.1")
+    implementation("io.github.shijianjs:ktjs-iconify-icon:3.0.4-kt.2")
 }
 ```
 
