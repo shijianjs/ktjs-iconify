@@ -63,13 +63,6 @@ external fun <T : IconifyTransformations> mergeIconTransformations(
 external fun makeIconSquare(icon: FullIconifyIcon): FullIconifyIcon
 
 /**
- * Center a viewBox in a square one, keeping the original size.
- *
- * Returns [viewBox] unchanged if it is already square.
- */
-external fun makeViewBoxSquare(viewBox: SVGViewBox): SVGViewBox
-
-/**
  * Convert a string such as `mdi:home`, `@provider:mdi:home` or `mdi-home` to an icon name object.
  *
  * @param validate return `null` when the result is not a valid icon name.

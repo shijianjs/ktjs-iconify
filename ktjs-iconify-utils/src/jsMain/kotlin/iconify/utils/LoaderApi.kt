@@ -59,11 +59,3 @@ external fun mergeIconProps(
     propsProvider: (() -> dynamic)? = definedExternally,
     afterCustomizations: ((dynamic) -> Unit)? = definedExternally,
 ): Promise<String>
-
-/**
- * Possible icon names for a name that may use a different naming convention, from the most specific
- * to the most generic.
- *
- * For example, `fooBar` also produces `foo-bar`, and `foo2` also produces `foo-2`.
- */
-external fun getPossibleIconNames(icon: String): Array<String>

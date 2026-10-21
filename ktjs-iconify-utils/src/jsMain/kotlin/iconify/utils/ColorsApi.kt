@@ -22,20 +22,6 @@ external fun stringToColor(value: String): Color?
 external fun compareColors(color1: Color, color2: Color): Boolean
 
 /**
- * Convert an RGB color to a hex string.
- *
- * @param canCompact shorten six digit colors to three digits, and eight digit colors to four, when
- * possible.
- * @param canRound round non-integer channel values; when `false`, such colors return `null`.
- * @return the hex string, or `null` if the color cannot be represented without rounding.
- */
-external fun colorToHexString(
-    color: RGBColor,
-    canCompact: Boolean = definedExternally,
-    canRound: Boolean = definedExternally,
-): String?
-
-/**
  * Convert a parsed color back to a CSS string.
  *
  * RGB colors are written as hex when possible, otherwise as `rgb()` or `rgba()`.

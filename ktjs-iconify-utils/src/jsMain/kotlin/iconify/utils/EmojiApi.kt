@@ -13,36 +13,6 @@ import iconify.IconifyJSON
 external fun getEmojiSequenceFromString(value: String): Array<Int>
 
 /**
- * Convert an emoji sequence or keyword to code points.
- *
- * Values made only of hex digits, dashes and whitespace are parsed as a sequence; anything else,
- * such as a keyword, is converted character by character.
- */
-external fun getSequenceFromEmojiStringOrKeyword(value: String): Array<Int>
-
-/**
- * Split an emoji sequence by the joiner into smaller sequences.
- *
- * Each part represents one component of a combined emoji.
- *
- * @param separator code point to split on; defaults to the zero width joiner, U+200D.
- */
-external fun splitEmojiSequences(
-    sequence: Array<Int>,
-    separator: Int = definedExternally,
-): Array<Array<Int>>
-
-/**
- * Join emoji sequences, inserting the separator between them.
- *
- * @param separator code point to insert; defaults to the zero width joiner, U+200D.
- */
-external fun joinEmojiSequences(
-    sequences: Array<Array<Int>>,
-    separator: Int = definedExternally,
-): Array<Int>
-
-/**
  * Remove emoji variation selectors, U+FE0F, from a sequence.
  */
 external fun getUnqualifiedEmojiSequence(sequence: Array<Int>): Array<Int>
@@ -178,11 +148,6 @@ external fun findAndReplaceEmojisInText(
  * sequence.
  */
 external fun parseEmojiTestFile(data: String): dynamic
-
-/**
- * Convert an emoji sequence to its qualified form, adding variation selectors where required.
- */
-external fun <T : EmojiSequenceItem> getQualifiedEmojiVariation(item: T): T
 
 /**
  * Convert emoji sequences to their qualified forms, removing duplicates.

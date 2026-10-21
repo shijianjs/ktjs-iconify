@@ -109,9 +109,3 @@ external fun convertIconSetInfo(data: dynamic, expectedPrefix: String = definedE
  * @param names only resolve these icons; defaults to all icons and aliases.
  */
 external fun getIconsTree(data: IconifyJSON, names: Array<String>? = definedExternally): dynamic
-
-/**
- * Optional properties copied when extracting icons: `left`, `top`, `width`, `height` and
- * `provider`.
- */
-external val propsToCopy: Array<String>
