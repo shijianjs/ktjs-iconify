@@ -44,12 +44,15 @@ Detekt 版本固定为 `2.0.0-alpha.6`：1.23.8 在 JDK 25 下直接失败，而
 
 ## 版本约定
 
-每个子模块独立版本，格式为 `{上游 npm 版本}-kt.{修订号}`。上游 npm 版本只在根目录 `package.json` 的 `dependencies` 中声明，根 `build.gradle.kts` 解析后放入 `extra["npmVersions"]`，各子模块读取它来声明 `npm(...)` 并推导版本基础部分：
+每个子模块独立版本，格式为 `{上游 npm 版本}-kt.{修订号}`。上游 npm 版本只在根目录 `package.json` 的 `dependencies` 中声明，根 `build.gradle.kts` 解析后放入 `extra["npmVersions"]`，各子模块读取它来声明 `npm(...)` 并推导版本基础部分。
+
+`kt.{修订号}` 是整个项目共享的全局发布序号，只在根 `build.gradle.kts` 的 `wrapperRevision` 中维护，各子模块统一读取，禁止在模块脚本里单独硬编码：
 
 - 只发布带 `-kt.N` 后缀的版本，不存在不带后缀的版本。
-- 上游升级：只改 `package.json`，基础版本自动跟随，修订号重置为 `kt.1`；即使 wrapper 代码没变，也要按新上游版本发布。
-- 上游不变、只修订 wrapper：递增 `build.gradle.kts` 里的修订号（`kt.2`、`kt.3`…）。
-- 不要再把 npm 版本硬编码回 `build.gradle.kts`。
+- 修订号持续递增，永不重置为 `kt.1`。它表示项目的第 N 次 wrapper 发布，与上游 npm 版本各自独立演进，不要按上游版本重新计数。
+- wrapper 代码有变化时，把根脚本的 `wrapperRevision` 加一；四个模块的版本号同步变化，发布时保持四个模块的修订号一致。
+- 仅上游 npm 版本变化、wrapper 代码没变时，`wrapperRevision` 保持不变；Dependabot 改 `package.json` 后，受影响模块的基础版本自动跟随（如 `3.0.4-kt.2` → `3.0.5-kt.2`），只发布该模块即可。
+- 不要再把 npm 版本或 `kt.N` 硬编码回子模块的 `build.gradle.kts`。
 - `-kt.N` 在 SemVer 中是预发布标识，优先级低于同基础版本的无后缀版本；因为永不发布无后缀版本，发布序列内部不会冲突。
 
 ## 仓库与本地镜像
