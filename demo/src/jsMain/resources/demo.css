@@ -132,6 +132,9 @@ a:hover {
     font-size: clamp(2rem, 5vw, 3.25rem);
     line-height: 1.1;
     letter-spacing: -0.03em;
+    /* background-clip: text only paints inside the element's box. Glyph ascenders and descenders
+       overflow the tight line box, so pad the box until they fit. */
+    padding: 0.18em 0;
     background: linear-gradient(100deg, #ffffff 15%, #c4b5fd 55%, #67e8f9 90%);
     -webkit-background-clip: text;
     background-clip: text;
