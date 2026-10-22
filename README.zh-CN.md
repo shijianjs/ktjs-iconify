@@ -120,6 +120,19 @@ plugins.withType<NodeJsRootPlugin> {
 声明它的模块的 `package.json`，其他 Kotlin 模块仍固定 wrapper 的版本，npm 可能因此安装两份
 拷贝。更上游的版本可能改变 JS API，调用前请确认实际用法。
 
+**修改 `override` 后必须重建锁文件才会生效。** Kotlin 的 Gradle 插件使用 npm 11，`overrides`
+变化不会让已有锁失效：`npm install` 会报 `up to date` 并继续使用锁里的旧版本，新 override
+不报错但也不起作用。不要只依赖上面的刷新命令，改为重建锁：
+
+```bash
+rm kotlin-js-store/package-lock.json
+./gradlew kotlinNpmInstall
+./gradlew kotlinUpgradePackageLock
+```
+
+之后先确认实际解析到的版本（例如 `node_modules/@iconify/utils/package.json` 或
+`build/js/package-lock.json`），再认为覆盖已生效。
+
 ## 发布
 
 发布配置统一写在根目录 [`build.gradle.kts`](build.gradle.kts)。仓库不再提供自动发布工作流：

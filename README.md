@@ -131,6 +131,20 @@ the module that declares it, while other Kotlin modules still pin the wrapper's 
 can install two copies. A newer upstream release may change its JS API, so check the calls you
 use.
 
+**Changing an override only takes effect after the lock file is rebuilt.** Kotlin's Gradle plugin
+runs npm 11, which does not invalidate an existing lock when the `overrides` map changes:
+`npm install` reports `up to date` and keeps the previously locked version, so the new override
+silently does nothing. Rebuild the lock instead of relying on the add/upgrade command above:
+
+```bash
+rm kotlin-js-store/package-lock.json
+./gradlew kotlinNpmInstall
+./gradlew kotlinUpgradePackageLock
+```
+
+Then confirm the resolved version (for example in `node_modules/@iconify/utils/package.json` or
+`build/js/package-lock.json`) before you assume the override is active.
+
 ## Publishing
 
 Publishing is configured once in the root [`build.gradle.kts`](build.gradle.kts) for all modules.

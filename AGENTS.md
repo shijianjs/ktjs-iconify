@@ -160,6 +160,7 @@ update(data) { this.replaceChildren(); this.render(data); }   // 禁止
 - 模块间的 `api(project(...))` 会解析到依赖模块当前的版本。一次提交同时变更多个模块时，必须在同一条发布命令里上传所有缺失版本；不要分多次只发布其中一个，否则 POM 可能指向尚未上传的依赖版本。
 - 新增发布模块时，在 `wrapper-revisions.properties` 里从 `1` 开始加一行；缺少条目会在配置阶段直接失败。
 - 消费方不必为了上游补丁等 wrapper 发版：在根构建脚本里用 `NpmExtension.override(...)` 覆盖 klib 记录的 npm 版本即可（根 `overrides` 对 workspace 内所有包生效）。不要用第二个 `npm(...)` 声明去改版本：它只改声明它的模块的 `package.json`，其他模块仍固定 wrapper 的版本，npm 可能装出两份。
+- `override` 已在仓库内实测：把 `iconify-icon` 3.0.4 → 3.0.3、`@iconify/utils` 3.1.7 → 3.1.6 后，icon/utils 的浏览器测试与 tools 的 Node 测试全部通过，webpack 打包的也是覆盖后的版本。**改完 override 必须重建锁文件**：Gradle 用的是 npm 11，`overrides` 变化不会让旧锁失效，`npm install` 会认为 `up to date` 并继续装旧版本。可靠做法是删掉 `kotlin-js-store/package-lock.json` 后跑 `./gradlew kotlinNpmInstall`，再用 `./gradlew kotlinUpgradePackageLock` 把新锁写回。
 - `-kt.N` 在 SemVer 中是预发布标识，优先级低于同基础版本的无后缀版本；因为永不发布无后缀版本，发布序列内部不会冲突。
 
 ## 仓库与本地镜像
