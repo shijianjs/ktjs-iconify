@@ -133,13 +133,13 @@ use.
 
 ## Publishing
 
-Publishing is configured once in the root [`build.gradle.kts`](build.gradle.kts) for all modules
-and runs from the **Publish to Maven Central** GitHub Actions workflow. Only modules whose revision
-changed get a new version; the workflow skips versions already on Maven Central. Every pending
-module is published in a single Gradle invocation, which Maven Central records as one deployment and
-counts once against the monthly release limit, no matter how many modules or versions it contains.
-See the [publishing section](AGENTS.md#发布到-maven-central) for the one-time Central Portal and GPG
-setup.
+Publishing is configured once in the root [`build.gradle.kts`](build.gradle.kts) for all modules.
+There is no automated publishing workflow: releases run from a local machine, listing only the
+modules whose revision changed. Every pending module must be listed in a single Gradle invocation,
+which Maven Central records as one deployment and counts once against the monthly release limit, no
+matter how many modules or versions it contains. See the
+[publishing section](AGENTS.md#发布到-maven-central) for the one-time Central Portal and GPG setup and
+the manual publish command.
 
 ## License
 

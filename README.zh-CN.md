@@ -122,11 +122,10 @@ plugins.withType<NodeJsRootPlugin> {
 
 ## 发布
 
-发布配置统一写在根目录 [`build.gradle.kts`](build.gradle.kts)，通过 GitHub Actions 的
-**Publish to Maven Central** 工作流执行。只有修订号变化的模块才会得到新版本，工作流会跳过
-Maven Central 上已存在的版本。所有待发布模块在同一次 Gradle 调用中上传，Central 记录为一个
-deployment，无论其中包含多少模块或版本，都只占一次月度发布额度。一次性的 Central Portal 与 GPG
-配置见 [发布到 Maven Central](AGENTS.md#发布到-maven-central)。
+发布配置统一写在根目录 [`build.gradle.kts`](build.gradle.kts)。仓库不再提供自动发布工作流：
+发版在本机手动执行，命令里只列修订号变化的模块。所有待发布模块必须写在同一条 Gradle 命令中，
+Central 记录为一个 deployment，无论其中包含多少模块或版本，都只占一次月度发布额度。一次性的
+Central Portal 与 GPG 配置以及手动发布命令见 [发布到 Maven Central](AGENTS.md#发布到-maven-central)。
 
 ## 许可证
 

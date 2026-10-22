@@ -43,8 +43,8 @@ extra["npmVersions"] = npmVersions
 
 // Wrapper revisions are per module: a release only creates new versions for the modules whose
 // revision was bumped, so unchanged modules are not re-uploaded (file/size quota and version
-// noise). Release Count is per Central deployment, not per module: the publish workflow batches
-// every pending module into one Gradle invocation and the plugin uploads one deployment.
+// noise). Release Count is per Central deployment, not per module: publishing every pending
+// module in one Gradle invocation makes the plugin upload a single deployment.
 // See AGENTS.md.
 @Suppress("UNCHECKED_CAST")
 val wrapperRevisions: Map<String, Int> = run {
@@ -153,9 +153,9 @@ subprojects {
     }
 }
 
-// Prints "<module>=<version>" for every publishable module. The release workflow uses the output
-// to skip versions already on Maven Central and to build the GitHub release notes, so version
-// derivation stays in the module scripts rather than being duplicated in shell.
+// Prints "<module>=<version>" for every publishable module. Use it to see which versions a release
+// would upload before running publishToMavenCentral, so version derivation stays in the module
+// scripts rather than being duplicated in shell.
 tasks.register("printPublishedVersions") {
     val publishedModules = subprojects.filter { it.name.startsWith("ktjs-iconify-") }
     doLast {
