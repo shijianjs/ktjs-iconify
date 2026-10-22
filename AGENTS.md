@@ -172,8 +172,10 @@ update(data) { this.replaceChildren(); this.render(data); }   // 禁止
 
 ## CI 与依赖更新
 
-- `.github/workflows/ci.yml` 在 push 到 `master` 和所有 PR 上运行 `./gradlew build`（JDK 21，Ubuntu）。
-- `.github/workflows/dependabot-auto-merge.yml` 在 CI 成功后自动 squash 合并 Dependabot 的 PR。它用 `workflow_run` 而不是直接由 Dependabot PR 触发，因为后者拿到的 `GITHUB_TOKEN` 只读。
+- `.github/workflows/ci.yml` 只在**所有 PR** 和手动触发时运行 `./gradlew build`（JDK 21，Ubuntu），
+  **不再被 push 到 `master` 触发**：能进 `master` 的提交已经在 PR 上跑过同一套构建，再跑一遍只是重复
+  消耗机器。需要验证 `master` 现状时用 `gh workflow run ci.yml`。
+- `.github/workflows/dependabot-auto-merge.yml` 在 CI 成功后自动 squash 合并 Dependabot 的 PR。它用 `workflow_run` 而不是直接由 Dependabot PR 触发，因为后者拿到的 `GITHUB_TOKEN` 只读。CI 不再由 master push 触发不影响它：`workflow_run` 本来就只收到 PR 上的运行。
 - `.github/dependabot.yml` 覆盖 `gradle`、`npm`（根目录 `package.json`）和 `github-actions` 三个生态。npm 版本由 Dependabot 改 `package.json`，Gradle 自动读取，不再手工改 `npm(...)`。
 - Gradle wrapper 固定在 `9.4.1`，并在 Dependabot 里忽略 `gradle-wrapper`：IntelliJ IDEA 2026.2.3 同步 Gradle 9.8.x 项目时会报 `ExternalSystemPartialResolutionException`（消息为空，界面只显示“同步失败”），回退到 9.4.1 即恢复正常。等 IDEA 修复后再删除这条 ignore 并升级。
 - Dependabot 的 npm PR 不会带 Gradle 生成的锁文件更新，所以 CI 对 Dependabot PR 先跑 `kotlinUpgradePackageLock` 再构建，并把校验过的锁文件作为 `npm-lock` artifact 上传；自动合并 job 下载该 artifact、提交到 PR 分支，然后 squash 合并。普通 PR 仍然严格校验锁文件。
@@ -338,7 +340,9 @@ klibs.io 没有需要提交的元数据文件，它从 Maven Central 和 GitHub 
 - Dokka 2.2.0 同时应用到根项目和四个 wrapper 子模块；聚合入口是根项目的
   `dependencies { dokka(project(...)) }`，任务为 `dokkaGeneratePublicationHtml`（2.x 已移除旧的
   `dokkaHtmlMultiModule`）。
-- `.github/workflows/pages.yml` 在 push 到 `master` 后构建并部署 `build/pages`。仓库
+- `.github/workflows/pages.yml` 只有 `workflow_dispatch`：**不再由 push 到 `master` 自动部署**，
+  站点更新要在内容值得上线后手动执行 `gh workflow run pages.yml`（或 Actions 页面点 Run workflow）。
+  它会重新跑 `pagesSite` 再部署，所以线上内容始终对应触发时 `master` 的提交。仓库
   Settings → Pages 的 Source 必须选 **GitHub Actions**（一次性配置，工作流不会自动改）。
 - 站点地址为 `https://shijianjs.github.io/ktjs-iconify/`，API 文档在 `/api/`；README、模块
   README 和演示页导航都链接到这两个地址，改仓库名时要一起更新。

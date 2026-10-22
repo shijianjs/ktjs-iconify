@@ -1,8 +1,8 @@
 name: CI
 
 on:
-  push:
-    branches: [master]
+  # Pull requests only: a commit that reached master was already verified by the PR run, so a push
+  # to master would just spend the same build again. Run this manually when needed.
   pull_request:
     branches: [master]
   workflow_dispatch:
