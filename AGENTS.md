@@ -233,7 +233,9 @@ gh workflow run release.yml -f release=release-2 \
 - `verify`（默认 true）：触发 hub 的 dry run 并等待；关掉则到 Release 为止。
 
 重跑同一 `release`：已存在的 Release 用 `gh release upload --clobber` 覆盖同名归档，注册按
-sha256 覆盖旧文件。归档里的时间戳固定为 1980-01-01，相同输入得到相同 sha256。
+sha256 覆盖旧文件。归档内的时间戳固定为 1980-01-01、条目顺序固定，但 Gradle 产出的
+klib/jar/module 本身不是逐字节可复现的（ZIP 元数据会变），所以重跑会得到新的 sha256 并改写
+注册。这是预期行为，覆盖是幂等的；不要把归档 sha256 当成构建输入的指纹。
 
 版本仍完全由 `package.json` 与 `wrapper-revisions.properties` 推导，工作流不重复 `-kt.N` 规则：
 `./gradlew -q printPublishedVersions` 输出 `模块=版本`，只把 `modules` 选中的模块传给
@@ -271,6 +273,12 @@ python3 scripts/hub-release.py --project shijianjs/ktjs-iconify --release releas
 本地还可以用 hub 的脚本预检，不碰网络上传：在 `maven-central-publishing` 里执行
 `python3 scripts/collect.py --local <本仓库>/build/hub-release` 再 `python3 scripts/stage.py`
 （`stage.py` 会探测 `repo1`）。
+
+hub 的 `jreleaser.yml` 对每个 `*-js` 坐标显式设了 `jar: false`、并关掉 `verifyPom`：KMP 的 JS
+publication 是 `<packaging>klib</packaging>` + `.klib`，Central 接受，但 JReleaser 的 PomChecker
+不认这个 packaging，且它把除 pom/aar/war/zip 以外的 packaging 都当成必须有同名 `.jar`。
+`jar: false` 只能按 `groupId` + `artifactId` 精确匹配，所以**新增 KMP 模块（产生新的 `*-js`
+坐标）时，必须先在 hub 的 `artifactOverrides` 里补一条**，否则 hub 整批失败。
 
 ### hub 凭据与注册提交
 
