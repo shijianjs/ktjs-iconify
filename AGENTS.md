@@ -30,6 +30,157 @@ gh repo clone <owner>/<repo> S:/workspace/github/<owner>/<repo>
 
 新增 wrapper 项目时，按「上游发版节奏」而不是「npm 包数量」划分子模块：上游版本号相同、总是一起发版的包（例如一组 Vaadin Web Component）放在同一个 Gradle 模块里，避免每个包都产生一个 Maven 版本和一次 Central 发布。终端应用打包时本来就会摇树，模块内多出的声明不会进入最终产物。
 
+## 以本仓库为模板创建新的 wrapper 项目
+
+本节回答两件事：新项目从头到尾要做哪些事；本仓库适不适合直接点 GitHub 的 **Use this template**。
+
+### 结论：不要把本仓库直接设为 GitHub Template
+
+本仓库只有「构建配置 + 发布流水线 + 文档骨架」是通用的，其余是 Iconify 域内容：四个 `ktjs-iconify-*` 模块、
+demo 的图标加载示例、`scripts/hub-release.py` 里写死的 `io/github/shijianjs`、README 的模块表、
+`AGENTS.md` 里大量 Iconify 专属说明。直接当模板会有三个问题：
+
+- 生成的新仓库要删掉大半文件，且删漏一处（例如 POM 的 `url`、`GROUP_PATH`）不会编译失败，只会在发布时才暴露。
+- GitHub 的 template 只复制一次快照，本仓库后续修掉的坑（锁文件、发布额度、ESM 导入）不会回流到新项目。
+- 历史提交、`wrapper-revisions.properties`、hub 注册都带原有项目身份，混在新项目里容易误发。
+
+推荐方案：单独维护一个只含脚手架的模板仓库 [`shijianjs/ktjs-wrapper-template`](https://github.com/shijianjs/ktjs-wrapper-template)
+（占位符 + `scripts/init-wrapper-project.py` 负责替换并生成第一个模块），本仓库退化为「参考实现」。
+短期内只做一两个项目时，也可以直接 `git clone` 本仓库后按下一节改名，但要把改动做成一次性提交并写进新仓库的 `AGENTS.md`。
+只有在「有人愿意长期维护模板仓」时，再把模板仓打开 Settings → Template repository；不要给本仓库打开这个开关。
+
+### 1. 先划分模块
+
+- 按上游发版节奏分组：同一个 npm 版本号、总是一起发版的包放一个模块（如一组 Vaadin Web Component）。
+- 类型声明单独成一个 types 模块——它不依赖运行时，其他模块用 `api(project(...))` 暴露。
+- 只有 Node.js 可用的包和浏览器包分模块，因为测试运行时不同（`nodejs()` vs `browser { test { chromium() } }`）。
+- 模块名前缀统一（本仓库是 `ktjs-iconify-`）。这个前缀同时是发布过滤条件，见下一节。
+
+### 2. 复制什么、删什么
+
+保留并改造：
+
+- 根：`settings.gradle.kts`、`build.gradle.kts`、`gradle.properties`、`detekt.yml`、`.gitignore`、
+  `gradlew` / `gradlew.bat` / `gradle/wrapper/`、`LICENSE`、`README.md` / `README.zh-CN.md`。
+- 版本与发布：`package.json`、`wrapper-revisions.properties`、`scripts/hub-release.py`。
+- CI：`.github/workflows/ci.yml`、`pages.yml`、`release.yml`、`.github/dependabot.yml`。
+- 每个模块：`build.gradle.kts`、`README.md` / `README.zh-CN.md`、`src/jsMain`、`src/jsTest`。
+- demo：只保留页面骨架、`build.gradle.kts`、`e2e/` 的测试框架，示例内容全部重写。
+
+删除或重建：
+
+- 所有 `ktjs-iconify-*` 目录和对应 `include(...)`；不要留空模块「等以后用」。
+- `kotlin-js-store/package-lock.json`：必须删掉后由 Gradle 重新生成，否则锁的是旧依赖树。
+- `build/`、`.gradle/`、`.kotlin/`、`node_modules/` 等本地产物。
+- demo 里与旧域内容绑定的断言（本仓库 `demo/e2e/demo-page.test.mjs` 断言了英文/中文标题、图标数量和
+  `localStorage` key），改页面时必须同步改这些断言。
+- `AGENTS.md` 的 Iconify 专属章节：模块结构、演示页、发布说明里的项目身份；通用的「浏览器 DOM 类型体系」
+  「Kotlin/JS 模块格式与测试运行时」「UI 编程约定」「版本约定」「文档约定」原样保留。
+
+### 3. 改项目身份（按文件清单逐项过）
+
+| 文件 | 需要改的内容 |
+| --- | --- |
+| `settings.gradle.kts` | `rootProject.name`、`include(...)` 列表 |
+| `build.gradle.kts` | `publishedGroup`；Dokka 的 `dependencies { dokka(project(...)) }` 与 `moduleName`；三处 `name.startsWith("ktjs-iconify-")`（Dokka、发布、`printPublishedVersions`）；POM 的 `description` / `url` / `inceptionYear` / `licenses` / `developers` / `scm`；`pagesSite` 的来源模块；不需要的 `NpmExtension.override(...)` |
+| `package.json` | `name` 改成 `<prefix>-npm-versions`；`dependencies` 换成新上游包 |
+| `wrapper-revisions.properties` | 每个发布模块一行，首次写 `1`；删掉所有旧模块 |
+| `scripts/hub-release.py` | `GROUP_PATH` 常量与 `Coordinate.coordinate` 里的 `io.github.<owner>` |
+| `.github/workflows/release.yml` | `HUB_REPOSITORY`（跨项目汇总仓）、release 输入示例、签名 secret 名保持不变即可 |
+| `.github/dependabot.yml` | npm 的 `groups.patterns`（旧的 `iconify` 组换成新上游包前缀） |
+| `demo/src/jsMain/kotlin/demo/Main.kt` | `GITHUB_URL`、`LANGUAGE_STORAGE_KEY`、示例数据 |
+| `demo/src/jsMain/kotlin/demo/Strings.kt` | 中英文文案 |
+| `demo/src/jsMain/resources/index.html` | `<title>`、`description` |
+| `demo/e2e/demo-page.test.mjs` | 标题文案断言、`localStorage` key、页面结构断言 |
+| `README.md` / `README.zh-CN.md`、各模块 README | 标题、模块表、Maven 坐标、徽章、站点链接 |
+| `LICENSE` | 版权人 |
+| `AGENTS.md` | 本地仓库路径、模块结构、发布/演示页章节里的项目名与地址 |
+
+改完先自查残留：`rg -i "iconify|shijianjs|ktjs" --glob '!kotlin-js-store/**'`。POM 的 `url` 与 `scm.url`
+必须是新仓库地址，klibs.io 靠它关联源码。
+
+### 4. 新增一个模块
+
+模块脚本从本仓库的 `ktjs-iconify-utils/build.gradle.kts` 复制，只改 `npmVersions.getValue(...)`、`description`、
+测试目标与依赖。固定结构：
+
+```kotlin
+version = "$upstreamVersion-kt.$wrapperRevision"   // 从根项目 extra 读取，禁止硬编码
+kotlin {
+    js {
+        useEsModules()
+        browser { @OptIn(ExperimentalJsTestDsl::class) test { chromium() } }  // 或 nodejs()
+    }
+    sourceSets {
+        jsMain.dependencies { implementation(npm("<pkg>", upstreamVersion)) }
+        jsTest.dependencies { implementation(kotlin("test")) }
+    }
+}
+```
+
+- 源码放 `src/jsMain/kotlin/<package>/`，测试放 `src/jsTest/kotlin/<package>/`，包名不要沿用 `iconify`。
+- 浏览器 API 一律用 `kotlin-browser` 的 `web.*` 类型；DOM 模块加 `api("org.jetbrains.kotlin-wrappers:kotlin-browser:<version>")`。
+  公开 API 禁止出现 `org.w3c.dom.*` / `kotlinx.browser.*`（Detekt 会拦 import）。
+- Web Component 的标签名按 `web.html.HtmlTagName` 风格集中到一个 `object XxxTagName { inline val xxx: TagName<XxxElement> }`。
+- `@JsModule` 按 ESM 语义写：只有具名导出的包用 `external object` + 具名属性；ESM-only 的 Node 包写子路径
+  （如 `@iconify/tools/lib/index.js`）。理由见「Kotlin/JS 模块格式与测试运行时」。
+- 在 `wrapper-revisions.properties` 加一行（模块名与 `wrapper-revisions.properties` 的 key、`package.json`
+  的依赖名三者必须对得上），并在 `settings.gradle.kts` 中 `include`。
+- 每个对外声明都要有 KDoc，内容以上游源码/README 为准；同时补模块的中英文 README。
+
+### 5. npm 与锁文件
+
+`package.json` 是 npm 版本的唯一来源，模块里的 `npm(...)` 由它推导。第一次构建和任何依赖变化后：
+
+```bash
+./gradlew kotlinNpmInstall
+./gradlew kotlinUpgradePackageLock
+```
+
+提交 `kotlin-js-store/package-lock.json`。不要手改锁文件，也不要在 `kotlin-js-store` 下放 `package.json`。
+`gradle.properties` 里 `kotlin.js.yarn=false` 表示统一用 npm（Node 由插件下载）。
+
+### 6. 首次构建与本地验收
+
+按顺序跑，全部通过再推：
+
+```bash
+./gradlew build
+./gradlew printPublishedVersions        # 确认每个模块的 {上游版本}-kt.1
+./gradlew pagesSite
+./gradlew :demo:e2eTest                 # 需要 PATH 上有 node
+```
+
+发布链路在本地不碰网络预演一遍（签名密钥按「发布到 Maven Central」一节准备）：
+
+```bash
+ORG_GRADLE_PROJECT_signingInMemoryKey=... \
+ORG_GRADLE_PROJECT_signingInMemoryKeyPassword=... \
+./gradlew :<module>:publishAllPublicationsToHubStagingRepository
+python3 scripts/hub-release.py --project <owner>/<repo> --release release-1 \
+  --module <module>=<version> --repository . \
+  --archives build/hub-release/archives --registrations build/hub-release
+```
+
+检查 `build/hub-release/archives/*.tar.xz`：每个归档只含一个 Maven 坐标、含 `.asc`、不含 `.md5` / `.sha1`。
+还可以用 hub 的 `collect.py --local` + `stage.py` 做离线预检。
+
+### 7. 仓库一次性设置
+
+- Central Portal：验证 `io.github.<owner>` namespace（GitHub 方式，用户名对得上）。
+- Secrets：`MAVEN_CENTRAL_SIGNING_KEY`、`MAVEN_CENTRAL_SIGNING_KEY_PASSWORD`、`HUB_RELEASE_TOKEN`
+  （fine-grained PAT：hub 的 Contents + Actions 读写）。hub 侧配置 Central User Token 与 `maven-central` environment。
+- Settings → Pages：Source 选 **GitHub Actions**；站点地址同步到两个 README 与 demo 导航。
+- 若沿用 hub：**新增 KMP 模块产生新的 `*-js` 坐标时，先在 hub 的 `artifactOverrides` 补 `jar: false` 并关闭
+  `verifyPom`**，否则 hub 整批失败。
+- 第一次发布用 `release-1` 并把所有模块列进 `modules`；之后只列修订号变化的模块。
+
+### 8. 模板改进怎么回流
+
+模板仓库只放通用脚手架和通用规则；领域知识（本仓库的 Iconify 用法、Vaadin 的组件约定）写在各自仓库的
+`AGENTS.md`，不要回灌模板。升级项目时从模板仓 `git diff` 取变更，人工 cherry-pick；不要反向把项目仓当模板源，
+否则通用配置会被某个项目的特例污染。
+
 ## 浏览器 DOM 类型体系
 
 统一使用 JetBrains `kotlin-browser`（`org.jetbrains.kotlin-wrappers:kotlin-browser`）的 `web.*` 类型，不要在公开 API 中混用 `org.w3c.dom.*`（Kotlin/JS 自带）或 `kotlinx.browser.*`：
