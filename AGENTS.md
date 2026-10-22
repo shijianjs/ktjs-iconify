@@ -205,36 +205,98 @@ group 必须单独设置，根项目的 `group` 不会自动继承。
    （历史配置在 GitHub 仓库 Secrets：`MAVEN_CENTRAL_USERNAME`、`MAVEN_CENTRAL_PASSWORD`、
    `MAVEN_CENTRAL_SIGNING_KEY`、`MAVEN_CENTRAL_SIGNING_KEY_PASSWORD`，删除工作流后不再被读取。）
 
-发布**没有自动化入口**：`.github/workflows/publish.yml` 已删除，推送 `release-*` tag 或手动
-触发工作流都不会发布任何东西（CI 不监听 tag）。发版在本机执行，凭据通过 Gradle 属性传入
-（vanniktech 读 `mavenCentralUsername`、`mavenCentralPassword`；签名读
-`signingInMemoryKey`、`signingInMemoryKeyId`、`signingInMemoryKeyPassword`）：
+### 发布流程
+
+发布是两段式，Central 只在第二段被触及：
+
+1. 本仓库 `.github/workflows/release.yml`，只有 `workflow_dispatch`：
+   解析版本 → 用仓库里的签名密钥签名 → 发布到模块内的 `build/hub-staging` 文件仓库 →
+   `scripts/hub-release.py` 为**每个 Maven 坐标**打一个 `.tar.xz` 并生成注册 → 创建/更新
+   GitHub Release 并上传归档 → 把注册推到 hub → 触发 hub 的 `upload=false` dry run 并等待它结束。
+2. hub `shijianjs/maven-central-publishing` 手动 dispatch 且勾选 `upload=true`，才真正上传
+   Central，并在成功后删除已满足的注册。
+
+不在本仓库直接 `publishToMavenCentral` 的原因：一次 release 的多个模块要合并进 hub 的同一次
+deployment，Release Count 才只算一次；归档也可以跨项目攒批。本仓库只负责产出签名好的构件、
+归档和注册。
 
 ```bash
-./gradlew -q printPublishedVersions   # 先确认各模块版本
-ORG_GRADLE_PROJECT_mavenCentralUsername=... \
-ORG_GRADLE_PROJECT_mavenCentralPassword=... \
-ORG_GRADLE_PROJECT_signingInMemoryKey="$(< ~/central-signing-key.txt)" \
-ORG_GRADLE_PROJECT_signingInMemoryKeyPassword=... \
-./gradlew :ktjs-iconify-utils:publishToMavenCentral
+gh workflow run release.yml -f release=release-2 \
+  -f modules=ktjs-iconify-icon,ktjs-iconify-utils
 ```
 
-- 命令里只列本次修订号变化的模块。所有待发布模块写在**同一条** Gradle 调用里：vanniktech 的
-  共享构建服务把它们合并成一次上传、一个 deployment；拆成多次调用就变成多个 deployment，各占
-  一次 Release Count。
-- 不要在根目录直接跑 `./gradlew publishToMavenCentral`：它会对四个模块全部提交，已发布版本会让
-  整批因版本重复而失败。插件不会跳过已存在的版本。
-- 失败重试时同样只列尚未发布的模块，并等 `repo1` 上能看到已上传的版本再跑。构件已上传但还没
-  同步到 `repo1` 时，重跑会把该模块再次提交，Central 以版本重复拒绝，整批一起失败。
-- 各模块版本仍由 `package.json` 与 `wrapper-revisions.properties` 推导，四个模块可以各不相同。
-- DSL 里用的是 `publishToMavenCentral(automaticRelease = true)`，上传后会等待 Central 校验并
-  自动发布。Central 页面链接是
-  `https://central.sonatype.com/artifact/io.github.shijianjs/<module>/<version>`；repo1 有 CDN
-  延迟，不要拿它当版本存在的即时证据。
-- tag 不再触发发布。若想标记发版，可以照旧打 `release-N` 并手动创建 GitHub Release；它只是
-  标记，与构件版本无关（CI 不监听 tag，仍应打在验证过的 `master` 上）。
-- GitHub Secrets 里的 Central 凭据与签名密钥目前没有消费者，保留备用；恢复自动发布或接入
-  汇总仓库时直接复用。
+- `release`：`release-<数字>`，本次为 `release-2`。tag 由工作流创建（指向触发时的提交），
+  工作流不会移动已有 tag。
+- `modules`：逗号分隔；留空表示四个模块全发。按上游发版节奏，只列本次修订号变化的模块。
+- `register`（默认 true）：把注册推到 hub；关掉则只做构建和 GitHub Release。
+- `verify`（默认 true）：触发 hub 的 dry run 并等待；关掉则到 Release 为止。
+
+重跑同一 `release`：已存在的 Release 用 `gh release upload --clobber` 覆盖同名归档，注册按
+sha256 覆盖旧文件。归档里的时间戳固定为 1980-01-01，相同输入得到相同 sha256。
+
+版本仍完全由 `package.json` 与 `wrapper-revisions.properties` 推导，工作流不重复 `-kt.N` 规则：
+`./gradlew -q printPublishedVersions` 输出 `模块=版本`，只把 `modules` 选中的模块传给
+`hub-release.py`。未提升修订号的模块保持已发布版本，不要把它们列进来。
+
+### 文件仓库与打包
+
+`subprojects` 里给每个模块注册了名为 `hubStaging` 的 file repository
+（`<module>/build/hub-staging`），任务名 `publishAllPublicationsToHubStagingRepository`。它与
+`publishToMavenCentral` 共用同一套 vanniktech 配置：同样的 POM、空 javadoc、排除签名校验和、
+同样的签名，只是不发网络请求。
+
+`scripts/hub-release.py`：
+
+- 一个 KMP 模块有两个 publication，因此两个坐标：`<module>` 和 `<module>-js`；
+- 只保留 Central 需要的文件（pom、构件、sources、javadoc、`.module`、
+  `kotlin-tooling-metadata.json` 及各自的 `.asc`），丢弃 `.md5` / `.sha1` 等校验和；
+- 归档内是 Maven 仓库布局，且只含一个坐标；
+- 注册写到 `build/hub-release/registry/shijianjs/ktjs-iconify/<artifact>.json`；
+- 同时写 `hub-manifest.json`，供 release notes 与排查使用。
+
+本地复现（签名密钥处理见上一节）：
+
+```bash
+./gradlew -q printPublishedVersions
+ORG_GRADLE_PROJECT_signingInMemoryKey="$(< ~/central-signing-key.txt)" \
+ORG_GRADLE_PROJECT_signingInMemoryKeyPassword=... \
+./gradlew :ktjs-iconify-icon:publishAllPublicationsToHubStagingRepository \
+          :ktjs-iconify-utils:publishAllPublicationsToHubStagingRepository
+python3 scripts/hub-release.py --project shijianjs/ktjs-iconify --release release-2 \
+  --module ktjs-iconify-icon=3.0.4-kt.4 --module ktjs-iconify-utils=3.1.7-kt.4 \
+  --archives build/hub-release/archives --registrations build/hub-release
+```
+
+本地还可以用 hub 的脚本预检，不碰网络上传：在 `maven-central-publishing` 里执行
+`python3 scripts/collect.py --local <本仓库>/build/hub-release` 再 `python3 scripts/stage.py`
+（`stage.py` 会探测 `repo1`）。
+
+### hub 凭据与注册提交
+
+`GITHUB_TOKEN` 只对**本仓库**有效，写不了 hub。跨仓库动作使用本仓库 Secret
+`HUB_RELEASE_TOKEN`：
+
+- fine-grained PAT，只授权 `shijianjs/maven-central-publishing`；
+- 权限：Contents **Read and write**（推注册）、Actions **Read and write**（dispatch 并读取 hub
+  运行）；Metadata 只读由 GitHub 自动附带。
+
+工作流直接 push 到 hub 的 `main`，不经过 PR：
+
+- hub 的 `main` 没有分支保护，注册是「一个项目 + 模块一个文件、新版本覆盖旧文件」的小改动；
+- hub 没有 PR CI 可以给 auto-merge 当门禁；为它再加「注册校验 + 自动合并」只会多一个工作流，
+  而且创建 PR 仍然需要同一个 PAT；
+- 注册内容先由 `hub-release.py` 按 hub 的规则校验（POM 存在、每个文件有非空 `.asc`、单个坐标），
+  hub 侧 `collect.py` / `stage.py` 又完整重验一遍，推错了会被 hub 的运行挡住。
+
+push 带 rebase 重试：hub 的 upload job 成功后也会推同一分支删除注册，两者可能撞车。`verify`
+步骤 dispatch `hub.yml`（`upload=false`）并等它结束：这一步跑 hub 的 collect → stage →
+`jreleaser deploy --dry-run`，会下载归档、校验 sha256、检查签名、探测 `repo1` 剪枝并产出
+bundle，但不访问 Central。
+
+hub 侧真正上传前还需要在 hub 仓库配置 `MAVEN_CENTRAL_USERNAME` / `MAVEN_CENTRAL_PASSWORD`
+（Central User Token 的两半）以及 `maven-central` environment；本仓库不再保存 Central 凭据。
+签名密钥 `MAVEN_CENTRAL_SIGNING_KEY` / `MAVEN_CENTRAL_SIGNING_KEY_PASSWORD` 仍在本仓库，供
+`release.yml` 签名使用。
 
 ### 发布额度与产物瘦身
 
@@ -286,7 +348,7 @@ Release Count 的真正杠杆是「把一次上传攒大」：额度紧张时把
   构件、sources、javadoc 和每个文件的 `.asc`。推荐 `.tar.xz`（solid 压缩对重复内容更友好），
   也接受 `.zip` / `.tar.gz`。
 
-产出归档而不上传的方式：
+产出归档而不上传的方式（本仓库已由 `release.yml` + `hub-release.py` 实现）：
 
 - Gradle 项目：`maven-publish` 往 `build/staging-repo` 这类 file repository 发布，再
   `tar -C build/staging-repo -cJf <module>-<version>.tar.xz .`。vanniktech 没有「只打包不上传」
@@ -299,9 +361,8 @@ Release Count 的真正杠杆是「把一次上传攒大」：额度紧张时把
 构件已由项目侧签名，hub 保持 `sign: false`。上传失败时不要 drop（保留给 Sonatype Support），
 让 job 失败、注册保持不动即可；hub 已有 `concurrency`，不会并行上传。
 
-每个组织每月只消耗「发版次数」个 Release Count，与项目数、模块数无关。本仓库原有的自动发布
-流水线已撤掉；在项目侧自动化产出归档与注册之前，仍只能在本机手动发布，或手工准备注册后在 hub
-手动触发上传。
+每个组织每月只消耗「发版次数」个 Release Count，与项目数、模块数无关。项目侧已经自动化到
+「触发 `release.yml` 即可产出归档和注册」；真正上传仍是 hub 的一次手动 dispatch。
 
 本地检查发布内容时，`publishToMavenLocal` 对非 `-SNAPSHOT` 版本也强制签名，需要提供
 `signingInMemoryKey` 等属性。只想看 POM 和构件清单时，可以临时把模块版本改成 `-SNAPSHOT`，

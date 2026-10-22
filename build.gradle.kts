@@ -2,6 +2,7 @@ import com.vanniktech.maven.publish.JavadocJar
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import dev.detekt.gradle.extensions.DetektExtension
 import groovy.json.JsonSlurper
+import org.gradle.api.publish.PublishingExtension
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.targets.js.npm.NpmExtension
 
@@ -148,6 +149,19 @@ subprojects {
                 url.set("https://github.com/shijianjs/ktjs-iconify")
                 connection.set("scm:git:git://github.com/shijianjs/ktjs-iconify.git")
                 developerConnection.set("scm:git:ssh://git@github.com/shijianjs/ktjs-iconify.git")
+            }
+        }
+    }
+
+    // A plain file repository produces the Maven repository layout — POMs, artifacts, sources,
+    // javadoc and the `.asc` signatures — without contacting Central. The release workflow packages
+    // one archive per coordinate from it and registers them with the hub.
+    // Task name: publishAllPublicationsToHubStagingRepository
+    extensions.configure<PublishingExtension> {
+        repositories {
+            maven {
+                name = "hubStaging"
+                url = module.layout.buildDirectory.dir("hub-staging").get().asFile.toURI()
             }
         }
     }
