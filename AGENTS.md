@@ -181,6 +181,7 @@ update(data) { this.replaceChildren(); this.render(data); }   // 禁止
 - Dependabot 的 npm PR 不会带 Gradle 生成的锁文件更新，所以 CI 对 Dependabot PR 先跑 `kotlinUpgradePackageLock` 再构建，并把校验过的锁文件作为 `npm-lock` artifact 上传；自动合并 job 下载该 artifact、提交到 PR 分支，然后 squash 合并。普通 PR 仍然严格校验锁文件。
 - `kotlin-js-store` 里只有 Gradle 生成的锁文件，没有也不应该有 `package.json`；根目录的 `package.json` 才是版本清单，不要给 `kotlin-js-store` 配置 npm 生态的 Dependabot。
 - 本地增量构建后，`jsPackageJson` / `rootPackageJson` 可能残留旧输出（模块版本变成 `0.0.0-unspecified`、漏掉 `packages_imported/*`），此时 CI 会报 `Lock file was changed`。执行 `./gradlew kotlinUpgradePackageLock --rerun-tasks` 重新生成锁文件并提交。
+- 提升 `wrapper-revisions.properties` 的修订号也会改生成的 workspace 包版本，必须同时跑 `./gradlew kotlinUpgradePackageLock` 并提交 `kotlin-js-store/package-lock.json`，否则 CI 在 `:kotlinStorePackageLock` 报 `Lock file was changed`。
 
 ## 发布到 Maven Central
 
