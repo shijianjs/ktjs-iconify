@@ -1,7 +1,7 @@
 name: Publish to Maven Central
 
 # A release is one tag push. The tag only marks the moment; the versions come from
-# package.json and wrapperRevision, so a tag must never be read as an artifact version.
+# package.json and wrapper-revisions.properties, so a tag must never be read as an artifact version.
 on:
   push:
     tags:
@@ -62,8 +62,8 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v6
 
-      # Versions differ per module, and a Dependabot bump only moves one of them, so the
-      # workflow cannot assume a single version or publish every module.
+      # Versions differ per module, and each module owns its own revision, so the workflow
+      # cannot assume a single version or publish every module.
       - name: Read module versions
         run: ./gradlew -q --console=plain printPublishedVersions | tee versions.txt
 
@@ -73,12 +73,14 @@ jobs:
         id: pending
         run: |
           : > pending.txt
+          : > pending-versions.txt
           while IFS='=' read -r module version; do
             url="https://repo1.maven.org/maven2/$GROUP_PATH/$module/$version/$module-$version.pom"
             if curl -fsI --retry 3 --retry-delay 2 "$url" > /dev/null; then
               echo "$module $version is already on Maven Central, skipping."
             else
               echo ":$module:publishToMavenCentral" >> pending.txt
+              echo "$module $version" >> pending-versions.txt
             fi
           done < versions.txt
           # One space-separated line: Gradle needs every task in a single invocation, and a
@@ -88,6 +90,11 @@ jobs:
 
       # Central Portal user token, not the account password. The GPG key is passed in memory;
       # the key id is optional and embedded in the key itself.
+      #
+      # Keep every pending module in this single Gradle invocation. The plugin's shared build
+      # service bundles all publications in the build into one deployment, and Central counts
+      # deployments (not modules) against the monthly release limit. Splitting this into
+      # per-module runs would multiply the Release Count.
       - name: Publish pending modules
         if: steps.pending.outputs.tasks != ''
         env:
@@ -104,11 +111,15 @@ jobs:
         run: |
           tag="${{ steps.release.outputs.tag }}"
           {
-            echo "Artifacts on Maven Central for this release:"
-            echo
-            while IFS='=' read -r module version; do
-              echo "- [\`$module\` $version](https://central.sonatype.com/artifact/$GROUP/$module/$version)"
-            done < versions.txt
+            if [ -s pending-versions.txt ]; then
+              echo "Published to Maven Central in this release:"
+              echo
+              while read -r module version; do
+                echo "- [\`$module\` $version](https://central.sonatype.com/artifact/$GROUP/$module/$version)"
+              done < pending-versions.txt
+            else
+              echo "No new module versions: everything for this release was already on Maven Central."
+            fi
             prev="$(git describe --tags --abbrev=0 --match 'release-*' "$tag^" 2>/dev/null || true)"
             if [ -n "$prev" ]; then
               echo

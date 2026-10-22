@@ -1,3 +1,4 @@
+import com.vanniktech.maven.publish.JavadocJar
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import dev.detekt.gradle.extensions.DetektExtension
 import groovy.json.JsonSlurper
@@ -40,11 +41,20 @@ val npmVersions: Map<String, String> = run {
 }
 extra["npmVersions"] = npmVersions
 
-// Wrapper revision shared by every module. It identifies the project-wide wrapper release,
-// is independent of upstream npm versions and only ever increases. Keeping it here rather
-// than in each module prevents the four modules from drifting apart. See AGENTS.md.
-val wrapperRevision = 3
-extra["wrapperRevision"] = wrapperRevision
+// Wrapper revisions are per module: a release only creates new versions for the modules whose
+// revision was bumped, so unchanged modules are not re-uploaded (file/size quota and version
+// noise). Release Count is per Central deployment, not per module: the publish workflow batches
+// every pending module into one Gradle invocation and the plugin uploads one deployment.
+// See AGENTS.md.
+@Suppress("UNCHECKED_CAST")
+val wrapperRevisions: Map<String, Int> = run {
+    val properties = java.util.Properties()
+    file("wrapper-revisions.properties").inputStream().use { properties.load(it) }
+    properties.stringPropertyNames().associate { name ->
+        name to properties.getProperty(name).trim().toInt()
+    }
+}
+extra["wrapperRevisions"] = wrapperRevisions
 
 // Keep a single webpack instance across the npm workspace; npm otherwise installs
 // a second copy for source-map-loader's peer dependency.
@@ -79,15 +89,35 @@ subprojects {
 subprojects {
     if (!name.startsWith("ktjs-iconify-")) return@subprojects
 
+    check(wrapperRevisions.containsKey(name)) {
+        "Missing '$name' in wrapper-revisions.properties"
+    }
+
     val module = this
 
     group = publishedGroup
 
     apply(plugin = "com.vanniktech.maven.publish")
 
+    // The subproject's Kotlin Multiplatform plugin is applied after this root script runs.
+    // Choosing the javadoc jar earlier would hit the "no compatible plugin" branch and the
+    // plugin's afterEvaluate default (Dokka HTML) would win.
+    plugins.withId("org.jetbrains.kotlin.multiplatform") {
+        extensions.configure<MavenPublishBaseExtension> {
+            // Maven Central requires a javadoc jar, but Dokka's HTML output duplicates its static
+            // assets into every module's jar (~1.1 MB each). The API reference is deployed to the
+            // Pages site, so publish the required empty jar instead of the HTML copy.
+            configureBasedOnAppliedPlugins(javadocJar = JavadocJar.Empty())
+        }
+    }
+
     extensions.configure<MavenPublishBaseExtension> {
         publishToMavenCentral(automaticRelease = true)
         signAllPublications()
+
+        // Gradle writes .md5/.sha1 next to every .asc signature. Maven Central does not need
+        // them and they count toward the monthly file quota (KTC-5453, gradle/gradle#20232).
+        excludeSignatureChecksums()
 
         pom {
             name.set(module.name)

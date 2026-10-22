@@ -7,8 +7,9 @@
 **[在线演示](https://shijianjs.github.io/ktjs-iconify/)** ·
 **[API 文档](https://shijianjs.github.io/ktjs-iconify/api/)**
 
-仓库仿照 JetBrains [kotlin-wrappers](https://github.com/JetBrains/kotlin-wrappers) 的多模块布局：
-每个 npm 包对应一个 `ktjs-*` Gradle 子模块，共享声明只保留一份。
+本仓库为每个 npm 包保留一个 `ktjs-*` Gradle 子模块，因为这四个上游包的版本相互独立。
+新建 wrapper 项目时，按上游版本与发版节奏划分：总是一起发版的包放在同一个模块里；终端应用
+打包时本来就会摇树，模块内多出的声明不会进入最终产物。
 
 ## 模块
 
@@ -25,12 +26,15 @@
 ## 版本约定
 
 每个模块独立版本，格式为 `{上游 npm 版本}-kt.{修订号}`。上游 npm 版本统一声明在根目录
-[`package.json`](package.json) 中，Gradle 读取后自动推导各模块的基础版本与 `npm(...)` 依赖：
+[`package.json`](package.json) 中，修订号按模块记录在
+[`wrapper-revisions.properties`](wrapper-revisions.properties) 中；Gradle 读取这两份文件后
+自动推导各模块的基础版本与 `npm(...)` 依赖：
 
 - 只发布带 `-kt.N` 后缀的版本，不存在不带后缀的版本。
 - 上游升级：只改 `package.json`，基础版本自动跟随，修订号保持不变；即使 wrapper 代码没变，也按新上游版本发布。
 - 上游不变、只修订 wrapper：修订号递增（`kt.2`、`kt.3`…），基础版本保持不变。
-- 修订号是整个项目共享的计数器，只在根 `build.gradle.kts` 声明一次，持续递增，永不重置为 `kt.1`。
+- 修订号按模块记录在根目录 `wrapper-revisions.properties`，各自持续递增，永不重置为 `kt.1`。
+  发布时只递增并发布有变更的模块，未变更模块保持已经发布过的版本。
 
 ## 环境要求
 
@@ -96,11 +100,33 @@ dependencies {
 项目发布了 `kotlin-tooling-metadata.json`。这是 [klibs.io](https://klibs.io/) 自动发现库的
 条件；版本进入 Google 的 Maven Central 镜像后会被自动收录。
 
+### 覆盖上游 npm 版本
+
+klib 会记录构建时使用的上游 npm 精确版本，Kotlin/JS 会把它带进你生成的 `package.json`。
+如果不想等 wrapper 发版就想用更新的上游版本，可以在根构建脚本（拥有 Kotlin/JS npm
+workspace 的那个项目）里覆盖：
+
+```kotlin
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
+import org.jetbrains.kotlin.gradle.targets.js.npm.NpmExtension
+
+plugins.withType<NodeJsRootPlugin> {
+    extensions.getByType<NpmExtension>().override("@iconify/utils", "3.2.0")
+}
+```
+
+生成的根 `package.json` 会增加 npm `overrides` 条目，对 workspace 里的所有包生效，优先级
+高于 klib 里记录的精确依赖。再加一个 `npm("@iconify/utils", ...")` 依赖不能替代它：那只改
+声明它的模块的 `package.json`，其他 Kotlin 模块仍固定 wrapper 的版本，npm 可能因此安装两份
+拷贝。更上游的版本可能改变 JS API，调用前请确认实际用法。
+
 ## 发布
 
 发布配置统一写在根目录 [`build.gradle.kts`](build.gradle.kts)，通过 GitHub Actions 的
-**Publish to Maven Central** 工作流执行。一次性的 Central Portal 与 GPG 配置见
-[发布到 Maven Central](AGENTS.md#发布到-maven-central)。
+**Publish to Maven Central** 工作流执行。只有修订号变化的模块才会得到新版本，工作流会跳过
+Maven Central 上已存在的版本。所有待发布模块在同一次 Gradle 调用中上传，Central 记录为一个
+deployment，无论其中包含多少模块或版本，都只占一次月度发布额度。一次性的 Central Portal 与 GPG
+配置见 [发布到 Maven Central](AGENTS.md#发布到-maven-central)。
 
 ## 许可证
 

@@ -28,6 +28,8 @@ gh repo clone <owner>/<repo> S:/workspace/github/<owner>/<repo>
 - `ktjs-iconify-icon`：`iconify-icon` Web Component。
 - `demo`：GitHub Pages 演示站点，不属于发布模块，组装方式见「演示页面与 GitHub Pages」。
 
+新增 wrapper 项目时，按「上游发版节奏」而不是「npm 包数量」划分子模块：上游版本号相同、总是一起发版的包（例如一组 Vaadin Web Component）放在同一个 Gradle 模块里，避免每个包都产生一个 Maven 版本和一次 Central 发布。终端应用打包时本来就会摇树，模块内多出的声明不会进入最终产物。
+
 ## 浏览器 DOM 类型体系
 
 统一使用 JetBrains `kotlin-browser`（`org.jetbrains.kotlin-wrappers:kotlin-browser`）的 `web.*` 类型，不要在公开 API 中混用 `org.w3c.dom.*`（Kotlin/JS 自带）或 `kotlinx.browser.*`：
@@ -149,15 +151,15 @@ update(data) { this.replaceChildren(); this.render(data); }   // 禁止
 
 ## 版本约定
 
-每个子模块独立版本，格式为 `{上游 npm 版本}-kt.{修订号}`。上游 npm 版本只在根目录 `package.json` 的 `dependencies` 中声明，根 `build.gradle.kts` 解析后放入 `extra["npmVersions"]`，各子模块读取它来声明 `npm(...)` 并推导版本基础部分。
-
-`kt.{修订号}` 是整个项目共享的全局发布序号，只在根 `build.gradle.kts` 的 `wrapperRevision` 中维护，各子模块统一读取，禁止在模块脚本里单独硬编码：
+每个子模块独立版本，格式为 `{上游 npm 版本}-kt.{修订号}`。上游 npm 版本只在根目录 `package.json` 的 `dependencies` 中声明；每个模块的修订号在根目录 `wrapper-revisions.properties` 中维护。根 `build.gradle.kts` 解析这两份数据，分别放入 `extra["npmVersions"]` 与 `extra["wrapperRevisions"]`，各子模块读取后声明 `npm(...)` 并推导版本。禁止在模块脚本里硬编码 npm 版本或 `kt.N`。
 
 - 只发布带 `-kt.N` 后缀的版本，不存在不带后缀的版本。
-- 修订号持续递增，永不重置为 `kt.1`。它表示项目的第 N 次 wrapper 发布，与上游 npm 版本各自独立演进，不要按上游版本重新计数。
-- wrapper 代码有变化时，把根脚本的 `wrapperRevision` 加一；四个模块的版本号同步变化，发布时保持四个模块的修订号一致。
-- 仅上游 npm 版本变化、wrapper 代码没变时，`wrapperRevision` 保持不变；Dependabot 改 `package.json` 后，受影响模块的基础版本自动跟随（如 `3.0.4-kt.2` → `3.0.5-kt.2`），只发布该模块即可。
-- 不要再把 npm 版本或 `kt.N` 硬编码回子模块的 `build.gradle.kts`。
+- 每个模块的修订号独立递增，永不重置为 `kt.1`。它表示该模块的第 N 次 wrapper 发布，与上游 npm 版本各自独立演进。
+- wrapper 代码或该模块的已发布元数据变化时，只把 `wrapper-revisions.properties` 中对应模块的修订号加一；其他模块保持原版本，发布工作流会跳过 Central 上已存在的版本，因此不会为它们产生新版本、新文件。Release Count 按 deployment 计，不受模块数影响，见「发布额度与产物瘦身」。
+- 仅上游 npm 版本变化、wrapper 代码没变时，修订号保持不变；Dependabot 改 `package.json` 后，受影响模块的基础版本自动跟随（如 `3.0.4-kt.3` → `3.0.5-kt.3`），该模块作为新版本发布。
+- 模块间的 `api(project(...))` 会解析到依赖模块当前的版本。一次提交同时变更多个模块时，必须通过发布工作流一次性上传所有缺失版本；不要手工只发布其中一个，否则 POM 可能指向尚未上传的依赖版本。
+- 新增发布模块时，在 `wrapper-revisions.properties` 里从 `1` 开始加一行；缺少条目会在配置阶段直接失败。
+- 消费方不必为了上游补丁等 wrapper 发版：在根构建脚本里用 `NpmExtension.override(...)` 覆盖 klib 记录的 npm 版本即可（根 `overrides` 对 workspace 内所有包生效）。不要用第二个 `npm(...)` 声明去改版本：它只改声明它的模块的 `package.json`，其他模块仍固定 wrapper 的版本，npm 可能装出两份。
 - `-kt.N` 在 SemVer 中是预发布标识，优先级低于同基础版本的无后缀版本；因为永不发布无后缀版本，发布序列内部不会冲突。
 
 ## 仓库与本地镜像
@@ -201,20 +203,120 @@ group 必须单独设置，根项目的 `group` 不会自动继承。
 发布由推送 `release-N` tag 触发（如 `git tag release-3 && git push origin release-3`）。
 `.github/workflows/publish.yml` 先校验 tag 位于 `master` 上，再用根项目的
 `printPublishedVersions` 任务读出各模块版本，跳过 Maven Central 上已存在的版本，只对缺失的
-模块执行 `publishToMavenCentral`，最后创建（或刷新）同名 GitHub Release：正文列出各模块版本
-与 Central 链接，并附上一个 `release-*` tag 以来的提交对比链接，不附任何构件。
+模块执行 `publishToMavenCentral`，最后创建（或刷新）同名 GitHub Release：正文列出本次实际
+发布的模块与 Central 链接，并附上一个 `release-*` tag 以来的提交对比链接，不附任何构件。
 
-- tag 只是发版开关，不是 artifact 版本：各模块版本仍由 `package.json` 与 `wrapperRevision`
-  推导，四个模块的版本可以各不相同。
+- tag 只是发版开关，不是 artifact 版本：各模块版本仍由 `package.json` 与
+  `wrapper-revisions.properties` 推导，四个模块的版本可以各不相同。
 - Maven Central 的版本不可覆盖；探测已发布 POM 的跳过逻辑让重复运行幂等。发布失败时用
   workflow_dispatch 指定同一个 tag 重试即可。
 - 重试要等 `repo1` 上能看到已上传的版本再跑。工作流只认 `repo1` 的 POM，构件已经上传但还没
   同步到 `repo1` 时，重试会把该模块再次提交，Central 会以版本重复为由拒绝，整批任务一起失败。
 - tag 必须打在 CI 验证过的 `master` 提交上（CI 不监听 tag），工作流会拒绝不在 `master` 上的
-  tag；不要在推 tag 前遗漏 `wrapperRevision` 的递增。
+  tag；不要在推 tag 前遗漏需要发布模块的修订号递增。
 - DSL 里用的是 `publishToMavenCentral(automaticRelease = true)`，上传后会等待 Central 校验并
   自动发布，所以 Release 正文只链接 `https://central.sonatype.com/artifact/io.github.shijianjs/<module>/<version>`；
   repo1 有 CDN 延迟，不要拿它当正文链接。
+
+### 发布额度与产物瘦身
+
+Central 社区版按组织限制每月的 Release Count、File Count 与 Release Size。三者的计量口径不同：
+
+- **Release Count 按 deployment 计**，不按模块或坐标计。vanniktech 的 `MavenCentralBuildService`
+  是 Gradle 共享服务（`maxParallelUsages = 1`），在构建结束时把本次构建里注册的所有 publication
+  压成一个 zip、上传为一个 deployment。一次 Gradle 调用里放多少模块、多少版本都只算一次。
+  Central 上的部署名可以印证：单坐标是 `group-artifact-version`，同 group+version 的多坐标是
+  `group-version`，版本不一致时是 `group-<timestamp>`（如
+  `io.github.shijianjs-1792580173977`，一次含 types/tools/utils）。
+- **File Count 与 Release Size 按实际上传的构件累计**，所以只发变更模块、精简每个构件才有意义。
+
+由此得到的硬规则：
+
+- **所有待发布构件必须进入同一次上传**。当前 `publish.yml` 把缺失版本逐个探测后写进 `tasks`
+  变量，一次 Gradle 调用完成；不要改成按模块循环调用，那会把 1 次 deployment 拆成 N 次 Release
+  Count。跨项目汇总发布同理：多个项目的构件要先合并成一个 bundle，再上传一次。
+- **只发变更模块**：修订号按模块维护，未变更模块的版本已经在 Central 上，工作流会跳过。这减少的是
+  File Count、Release Size 和无意义的版本号，不是 Release Count；不要为了省额度把四个模块一起加一。
+- **javadoc 空包**：`configureBasedOnAppliedPlugins(javadocJar = JavadocJar.Empty())`。Central
+  要求 javadoc 文件存在，但 Dokka HTML 的静态资源会在每个模块里重复约 1.1 MB；API 文档由
+  `pagesSite` 统一部署到 GitHub Pages，不在构件里重复。
+- **不传签名校验文件**：显式调用 `excludeSignatureChecksums()`，保证不会为 `.asc` 上传
+  `.md5` / `.sha1`。Central 不校验这些文件，它们只占 File Count；vanniktech 0.37 的默认值
+  已经是排除，显式声明用于防止默认值变化（KTC-5453、gradle/gradle#20232）。
+
+Release Count 的真正杠杆是「把一次上传攒大」：额度紧张时把多个模块的变更集中到一个固定发版时间，
+用同一个 `release-N` tag 一次发布。
+
+### 跨项目汇总发布（设想）
+
+汇总仓库只做「收集 → 校验 → 合并 → 上传」，不编译任何项目。上传用
+[JReleaser](https://jreleaser.org/) 的 `deploy.maven.mavenCentral`，不要手写 Publisher API：
+官方文档明确说该 API 面向「实现发布客户端」的工具作者，自己发布应用现成客户端。JReleaser 内部
+是一套独立的 Publisher API SDK（`jreleaser-mavencentral-java-sdk`），负责打包、上传、状态轮询、
+错误解析和重复坐标检查。
+
+项目侧交付物是 GitHub Release 上的两个附件：
+
+- 一个 Maven 仓库布局的 zip：`group/artifact/version/` 下放 pom、构件、sources、javadoc、
+  `.asc` 与 `.md5` / `.sha1`。这与 Portal bundle 的格式完全相同，一个 zip 可以包含多个组件。
+- 一个 manifest：坐标列表、zip 的 sha256、release tag。
+
+产出 bundle 而不上传的方式：
+
+- Gradle 项目：`maven-publish` 往 `build/staging-repo` 这类 file repository 发布后打 zip。
+  vanniktech 没有「只打包不上传」的开关。
+- Maven 项目：`central-publishing-maven-plugin` 的 `skipUpload=true` 会生成
+  `central-bundle.zip` 而不上传，是官方支持的产出方式。
+
+汇总仓库的定时工作流（例如每周五 cron，`ubuntu-latest`，需要 JDK，不需要 Gradle）：
+
+1. `gh release download` 拉取各项目待发布的 zip 与 manifest，按 manifest 校验 sha256。
+2. 对每个坐标探测 `repo1` 上的 POM，已发布的坐标把对应 `group/artifact/version/` 目录从合并区
+   剔除。JReleaser 上传前也会对每个 POM 调 `isPublished`，发现已存在会直接失败；它是最后一道
+   防线，不会替你跳过。
+3. 把剩余 zip 解压进同一个 staging 目录（同一路径出现不同内容要直接失败）。JReleaser 会把
+   `stagingRepositories` 里的所有目录合并成一个 bundle，并自动忽略隐藏文件和
+   `maven-metadata.xml`。
+4. 运行 `jreleaser deploy`，配置指向合并后的目录：
+
+   ```yaml
+   project:
+     name: ktjs-release-hub
+     version: "2026.10.23"   # 只用于 bundle 文件名
+     java:
+       groupId: io.github.shijianjs
+   deploy:
+     maven:
+       mavenCentral:
+         hub:
+           active: ALWAYS
+           url: https://central.sonatype.com/api/v1/publisher
+           authorization: BASIC        # 编码成 Bearer base64(user:password)
+           username: __USE_ENVIRONMENT_VARIABLE__
+           password: __USE_ENVIRONMENT_VARIABLE__
+           stagingRepositories:
+             - staging
+   ```
+
+   Central 的 user token 用 `authorization: BASIC` 加 token 的两部分；`BEARER` 表示 password
+   里直接放已经编码好的 token，容易配错。所有 staging 目录里的构件只产生一次上传、一个
+   deployment。默认是完整流程：上传、等待 `VALIDATED`、调用发布接口（之后 Central 异步完成
+   发布）。想留人工复核窗口就用 `stage: UPLOAD`，复核后带上同一个 `deploymentId` 再跑
+   `stage: PUBLISH`；deploymentId 会写进 `out/jreleaser/output.properties`，这一步不会新建
+   deployment。构件已由项目侧签名，保持 `sign: false`（默认），不要重复签名。
+5. 失败时不要 drop（保留给 Sonatype Support 排查），让 job 失败；成功则记录已发布坐标，下一次
+   跳过。给工作流加 `concurrency`，避免两次定时任务并行上传；本次没有待发布坐标时直接结束，
+   不创建空 deployment。
+
+工具选择：
+
+- **官方 Maven 插件**：`PublishMojo` 从当前 Maven reactor 的 artifact 收集构件，没有「上传一个
+  已有 bundle 目录」的入口；`skipUpload` 面向项目侧产出 bundle。汇总仓库要用它，得先造一个
+  Maven reactor 把外部构件 `deploy-file` 进去，绕远路。
+- **手写 curl**：等于把 JReleaser 已经实现好的 SDK 行为重写一遍，没有收益。
+
+每个组织每月只消耗「发版次数」个 Release Count，与项目数、模块数无关。该发布仓库尚未建立，
+当前仍由本仓库的 `publish.yml` 直接发布。
 
 本地检查发布内容时，`publishToMavenLocal` 对非 `-SNAPSHOT` 版本也强制签名，需要提供
 `signingInMemoryKey` 等属性。只想看 POM 和构件清单时，可以临时把模块版本改成 `-SNAPSHOT`，

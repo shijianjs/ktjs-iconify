@@ -7,10 +7,10 @@ Kotlin/JS wrappers for the [Iconify](https://iconify.design/) ecosystem.
 **[Live demo](https://shijianjs.github.io/ktjs-iconify/)** ·
 **[API reference](https://shijianjs.github.io/ktjs-iconify/api/)**
 
-The repository follows the multi-module layout of JetBrains
-[kotlin-wrappers](https://github.com/JetBrains/kotlin-wrappers): each npm package gets its own
-`ktjs-*` Gradle module, and shared declarations live in a single module instead of being
-duplicated.
+The repository keeps one `ktjs-*` Gradle module per npm package because the four upstream packages
+version independently. For new wrapper projects, group npm packages that share an upstream version
+and release cadence into one module; tree shaking removes unused declarations from the final
+application bundle anyway.
 
 ## Modules
 
@@ -28,15 +28,17 @@ shared icon types along.
 ## Versioning
 
 Each module is versioned as `{upstream npm version}-kt.{revision}`. The upstream npm versions are
-declared once in the root [`package.json`](package.json); Gradle reads them and derives each
-module's base version and `npm(...)` dependency:
+declared once in the root [`package.json`](package.json); the revision is read per module from
+[`wrapper-revisions.properties`](wrapper-revisions.properties). Gradle derives the base version and
+the `npm(...)` dependency from these two files:
 
 - Only `-kt.N` versions are published; a version without the suffix never exists.
 - Upstream upgrade: change the version in `package.json`; the base version follows automatically
   while the revision stays, even when the wrapper code itself did not change.
 - Wrapper-only fix: the revision increments (`kt.2`, `kt.3`, ...) while the base version stays.
-- The revision is one project-wide counter declared once in the root `build.gradle.kts`; it only
-  ever increases and never resets to `kt.1`.
+- Revisions are tracked per module in the root `wrapper-revisions.properties` and only ever
+  increase; they never reset to `kt.1`. A release bumps and publishes only the modules that
+  changed, so unchanged modules stay at their already-published version.
 
 ## Requirements
 
@@ -107,11 +109,37 @@ Multiplatform project publishing `kotlin-tooling-metadata.json`. Those are the r
 [klibs.io](https://klibs.io/) to discover the libraries automatically; indexing starts once the
 exact version reaches the Google Maven Central mirror.
 
+### Overriding the upstream npm version
+
+The klib records the exact npm version it was built against, and Kotlin/JS propagates that version
+to your generated `package.json`. To use a newer upstream release without waiting for a wrapper
+release, override it in the root build script (the project that owns the Kotlin/JS npm workspace):
+
+```kotlin
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
+import org.jetbrains.kotlin.gradle.targets.js.npm.NpmExtension
+
+plugins.withType<NodeJsRootPlugin> {
+    extensions.getByType<NpmExtension>().override("@iconify/utils", "3.2.0")
+}
+```
+
+The generated root `package.json` gets an npm `overrides` entry, which wins over the exact
+dependency recorded in the klib for every workspace package. Declaring a second
+`npm("@iconify/utils", ...)` dependency is not a substitute: it only changes the `package.json` of
+the module that declares it, while other Kotlin modules still pin the wrapper's version, so npm
+can install two copies. A newer upstream release may change its JS API, so check the calls you
+use.
+
 ## Publishing
 
 Publishing is configured once in the root [`build.gradle.kts`](build.gradle.kts) for all modules
-and runs from the **Publish to Maven Central** GitHub Actions workflow. See the
-[publishing section](AGENTS.md#发布到-maven-central) for the one-time Central Portal and GPG setup.
+and runs from the **Publish to Maven Central** GitHub Actions workflow. Only modules whose revision
+changed get a new version; the workflow skips versions already on Maven Central. Every pending
+module is published in a single Gradle invocation, which Maven Central records as one deployment and
+counts once against the monthly release limit, no matter how many modules or versions it contains.
+See the [publishing section](AGENTS.md#发布到-maven-central) for the one-time Central Portal and GPG
+setup.
 
 ## License
 
