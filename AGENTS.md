@@ -65,15 +65,15 @@ demo 的图标加载示例、`scripts/hub-release.py` 里写死的 `io/github/sh
 - 版本与发布：`package.json`、`wrapper-revisions.properties`、`scripts/hub-release.py`。
 - CI：`.github/workflows/ci.yml`、`pages.yml`、`release.yml`、`.github/dependabot.yml`。
 - 每个模块：`build.gradle.kts`、`README.md` / `README.zh-CN.md`、`src/jsMain`、`src/jsTest`。
-- demo：只保留页面骨架、`build.gradle.kts`、`e2e/` 的测试框架，示例内容全部重写。
+- demo：只保留页面骨架、`build.gradle.kts`、`src/jvmTest/` 的端到端测试框架，示例内容全部重写。
 
 删除或重建：
 
 - 所有 `ktjs-iconify-*` 目录和对应 `include(...)`；不要留空模块「等以后用」。
 - `kotlin-js-store/package-lock.json`：必须删掉后由 Gradle 重新生成，否则锁的是旧依赖树。
 - `build/`、`.gradle/`、`.kotlin/`、`node_modules/` 等本地产物。
-- demo 里与旧域内容绑定的断言（本仓库 `demo/e2e/demo-page.test.mjs` 断言了英文/中文标题、图标数量和
-  `localStorage` key），改页面时必须同步改这些断言。
+- demo 里与旧域内容绑定的断言（本仓库 `demo/src/jvmTest/kotlin/demo/e2e/DemoPageTest.kt` 断言了英文/中文
+  标题、图标数量和 `localStorage` key），改页面时必须同步改这些断言。
 - `AGENTS.md` 的 Iconify 专属章节：模块结构、演示页、发布说明里的项目身份；通用的「浏览器 DOM 类型体系」
   「Kotlin/JS 模块格式与测试运行时」「UI 编程约定」「版本约定」「文档约定」原样保留。
 
@@ -91,7 +91,7 @@ demo 的图标加载示例、`scripts/hub-release.py` 里写死的 `io/github/sh
 | `demo/src/jsMain/kotlin/demo/Main.kt` | `GITHUB_URL`、`LANGUAGE_STORAGE_KEY`、示例数据 |
 | `demo/src/jsMain/kotlin/demo/Strings.kt` | 中英文文案 |
 | `demo/src/jsMain/resources/index.html` | `<title>`、`description` |
-| `demo/e2e/demo-page.test.mjs` | 标题文案断言、`localStorage` key、页面结构断言 |
+| `demo/src/jvmTest/kotlin/demo/e2e/DemoPageTest.kt` | 标题文案断言、`localStorage` key、页面结构断言 |
 | `README.md` / `README.zh-CN.md`、各模块 README | 标题、模块表、Maven 坐标、徽章、站点链接 |
 | `LICENSE` | 版权人 |
 | `AGENTS.md` | 本地仓库路径、模块结构、发布/演示页章节里的项目名与地址 |
@@ -148,7 +148,7 @@ kotlin {
 ./gradlew build
 ./gradlew printPublishedVersions        # 确认每个模块的 {上游版本}-kt.1
 ./gradlew pagesSite
-./gradlew :demo:e2eTest                 # 需要 PATH 上有 node
+./gradlew :demo:e2eTest                 # Playwright 浏览器由 kotlinInstallPlaywrightBrowsers 安装
 ```
 
 发布链路在本地不碰网络预演一遍（签名密钥按「发布到 Maven Central」一节准备）：
@@ -551,11 +551,14 @@ klibs.io 没有需要提交的元数据文件，它从 Maven Central 和 GitHub 
 
 - `demo` 模块是演示站点，只消费公共 API，不发布、也不进入 Dokka。根 `build.gradle.kts` 的发布与
   Dokka 配置都按 `ktjs-iconify-` 前缀过滤子模块，新增非发布模块时沿用该约定。
-- demo 的端到端测试是 `demo/e2e/demo-page.test.mjs`：Playwright 驱动打包后的
-  `demo/build/dist/js/productionExecutable`，脚本自带静态服务器，不涉及 `build/pages` 与 API
-  文档。运行 `./gradlew :demo:e2eTest`；它不在 `check` 里，CI 在 `pagesSite` 之后单独执行。
-  Playwright 与 Chromium 复用 Kotlin/JS npm workspace（`build/js`）和
-  `:ktjs-iconify-icon:kotlinInstallPlaywrightBrowsers`，脚本本身用 PATH 上的 `node` 启动。
+- demo 的端到端测试是 `demo` 的 JVM 目标里的 Playwright JUnit 5 套件
+  （`demo/src/jvmTest/kotlin/demo/e2e`）：Playwright 驱动打包后的
+  `demo/build/dist/js/productionExecutable`，`DemoServer` 用 Hutool 的 `SimpleServer` 在测试 JVM 内
+  提供静态文件，不涉及 `build/pages` 与 API 文档。运行 `./gradlew :demo:e2eTest`；它不在 `check` 里，
+  CI 在 `pagesSite` 之后单独执行。`jvmTest` 本身被禁用，避免 `build` / `check` 依赖浏览器。Playwright
+  与 Chromium 复用 `:ktjs-iconify-icon:kotlinInstallPlaywrightBrowsers`，因此
+  `com.microsoft.playwright:playwright` 的版本必须与 KGP 安装的 npm `playwright` 一致（当前都是
+  1.61.0），升级 KGP 后若浏览器版本不匹配，重新跑安装任务。
 - `./gradlew pagesSite` 把 `demo/build/dist/js/productionExecutable` 与 `build/dokka/html`
   组装到 `build/pages`：演示页在根目录，API 文档在 `api/`。演示页内部链接使用相对路径，因此
   `/api/` 在本地和 Pages 上都可用。

@@ -40,8 +40,8 @@
 
 - JDK 17 及以上（构建使用 Gradle 9.4.1）。
 - Node.js 由 Kotlin Gradle 插件自动下载。`gradle.properties` 中禁用了 Yarn，因此使用 npm。
-- 首次运行浏览器测试时，Playwright 会下载 Chromium。
-- 演示页的端到端测试是独立的 Node 脚本，因此还要求 `PATH` 上有 `node`。
+- 首次运行浏览器测试时，Playwright 会下载 Chromium。演示页的端到端测试是 Kotlin/JVM 的
+  JUnit 5 用例，复用同一份浏览器。
 
 ## 构建与测试
 
@@ -54,7 +54,7 @@
 ./gradlew :ktjs-iconify-tools:jsNodeTest
 ./gradlew :ktjs-iconify-icon:jsBrowserTest
 
-# 演示页的端到端检查（Playwright，需要 PATH 上有 node）
+# 演示页的端到端检查（Playwright，通过 JUnit 5 运行）
 ./gradlew :demo:e2eTest
 ```
 

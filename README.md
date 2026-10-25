@@ -45,8 +45,8 @@ the `npm(...)` dependency from these two files:
 - JDK 17 or newer (the build uses Gradle 9.4.1).
 - Node.js is downloaded automatically by the Kotlin Gradle plugin. npm is used because Yarn is
   disabled in `gradle.properties`.
-- Chromium is downloaded by Playwright the first time browser tests run.
-- The demo's end-to-end test is a standalone Node script, so `node` must also be on `PATH`.
+- Chromium is downloaded by Playwright the first time browser tests run. The demo's end-to-end
+  suite is a Kotlin/JVM JUnit 5 test that reuses the same browser.
 
 ## Build and test
 
@@ -59,7 +59,7 @@ the `npm(...)` dependency from these two files:
 ./gradlew :ktjs-iconify-tools:jsNodeTest
 ./gradlew :ktjs-iconify-icon:jsBrowserTest
 
-# End-to-end checks for the bundled demo page (Playwright, needs node on PATH)
+# End-to-end checks for the bundled demo page (Playwright through JUnit 5)
 ./gradlew :demo:e2eTest
 ```
 
