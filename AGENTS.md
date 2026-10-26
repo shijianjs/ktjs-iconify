@@ -2,6 +2,11 @@
 
 ## 本地代码仓库
 
+- 仓库按 `S:\workspace\github\<owner>\<repo>` 存放；目录约定、自有项目清单与可参考的第三方克隆见上级
+  `S:\workspace\github\shijianjs\AGENTS.md`（本仓库的 `../AGENTS.md`），查资料前先读它。
+- 上游资料一律读本地克隆，**不要访问 `raw.githubusercontent.com`，也不要用网页抓取 GitHub**：本机所在的
+  国内网络访问这些域名经常超时。
+
 以下 GitHub 仓库已克隆到本地，需要查阅源码时直接读本地目录，不要重新克隆：
 
 - `S:\workspace\github\JetBrains\kotlin-toolchain`
