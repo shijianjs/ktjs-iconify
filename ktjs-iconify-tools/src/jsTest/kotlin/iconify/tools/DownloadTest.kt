@@ -213,15 +213,22 @@ class DownloadTest {
 
             downloadGitRepo(gitDownloadOptions(remote, target, ifModifiedSince = true))
         }.then { download ->
-            assertEquals("git", download.downloadType as String)
-            assertEquals(normalizePath(target), download.contentsDir as String)
-            assertEquals(remoteHash, download.hash as String)
+            val result = download.unsafeCast<DownloadGitRepoResult>()
+            assertEquals(DownloadSourceTypes.git, result.downloadType)
+            assertEquals(normalizePath(target), result.contentsDir)
+            assertEquals(remoteHash, result.hash)
             assertTrue(fileExists("$target/package.json"))
 
             // Checking the previous result reports no changes
-            downloadGitRepo(gitDownloadOptions(remote, target, ifModifiedSince = download))
+            downloadGitRepo(
+                gitDownloadOptions(
+                    remote,
+                    target,
+                    ifModifiedSince = DownloadGitRepoIfModifiedSince(result),
+                )
+            )
         }.then { result ->
-            assertEquals("not_modified", result as String)
+            assertEquals("not_modified", result.unsafeCast<String>())
             getGitRepoHash(exportTarget(target))
         }.then { hash ->
             assertEquals(remoteHash, hash)

@@ -1,6 +1,17 @@
 package iconify
 
+import js.reflect.unsafeCast
 import web.html.HTMLElement
+
+/**
+ * Upstream `string | IconifyIcon`: an icon name such as `mdi:home`, serialised icon data, or icon
+ * data itself.
+ */
+external interface StringOrIconifyIcon
+
+fun StringOrIconifyIcon(value: String): StringOrIconifyIcon = unsafeCast(value)
+
+fun StringOrIconifyIcon(value: IconifyIcon): StringOrIconifyIcon = unsafeCast(value)
 
 /**
  * The `<iconify-icon>` custom element.
@@ -16,7 +27,7 @@ abstract external class IconifyIconElement : HTMLElement {
      *
      * Changing the value loads the icon if needed and re-renders the element.
      */
-    var icon: dynamic
+    var icon: StringOrIconifyIcon
 
     /**
      * Rendering mode: `style`, `bg`, `mask` or `svg`.

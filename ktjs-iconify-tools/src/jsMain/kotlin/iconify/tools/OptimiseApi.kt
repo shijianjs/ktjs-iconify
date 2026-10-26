@@ -5,11 +5,10 @@ package iconify.tools
 /**
  * Optimise an SVG with SVGO.
  *
- * Without [SVGOptions.plugins], uses the Iconify plugin set and detects animations and
- * filters to avoid plugins that would break them. `multipass` defaults to `true`.
- * IDs are rewritten with the `svgID` prefix by default; set `cleanupIDs` to a custom
- * prefix or `false` to disable it. [SVGOptions.keepShapes] keeps plugins that modify
- * shapes disabled.
+ * Without plugins, uses the Iconify plugin set and detects animations and filters to
+ * avoid plugins that would break them. `multipass` defaults to `true`. IDs are rewritten
+ * with the `svgID` prefix by default; set `cleanupIDs` to a custom prefix or `false` to
+ * disable it. `keepShapes` keeps plugins that modify shapes disabled.
  */
 external fun runSVGO(svg: SVG, options: SVGOptions? = definedExternally)
 
@@ -48,7 +47,7 @@ external fun resetSVGOrigin(svg: SVG)
  * Returns `true` when the SVG was converted; otherwise restores the original and returns
  * `false`.
  */
-external fun convertSVGToMask(svg: SVG, options: dynamic = definedExternally): Boolean
+external fun convertSVGToMask(svg: SVG, options: SVGToMaskOptions? = definedExternally): Boolean
 
 /**
  * Scale an SVG by [scale], resetting the origin first and optimising the result.

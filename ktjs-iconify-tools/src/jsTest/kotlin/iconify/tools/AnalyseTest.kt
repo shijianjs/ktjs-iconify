@@ -36,14 +36,17 @@ private fun stringOrNull(value: dynamic): String? = if (value == null) null else
 
 private fun booleanOrNull(value: dynamic): Boolean? = if (value == null) null else value as Boolean
 
+private fun ElementsMap.elementAt(index: Double): ExtendedTagElement =
+    get(index) ?: error("Missing element at index $index")
+
 private fun mapIds(result: AnalyseSVGStructureResult): Map<String, MappedId> {
     val mapped = linkedMapOf<String, MappedId>()
     for (id in jsKeys(result.ids)) {
-        val element = result.elements.get(result.ids[id] as Int)
+        val element = result.elements.elementAt(result.ids[id]!!)
         mapped[id] = MappedId(
-            tag = element.tag as String,
-            usedAsMask = element._usedAsMask as Boolean,
-            usedAsPaint = element._usedAsPaint as Boolean,
+            tag = element.tag,
+            usedAsMask = element._usedAsMask,
+            usedAsPaint = element._usedAsPaint,
         )
     }
     return mapped
@@ -51,11 +54,11 @@ private fun mapIds(result: AnalyseSVGStructureResult): Map<String, MappedId> {
 
 private fun mapLinks(result: AnalyseSVGStructureResult): List<MappedLink> {
     val elements = result.elements
-    return jsArray(result.links).map { item ->
+    return result.links.map { item ->
         MappedLink(
-            id = item.id as String,
-            usedByTag = elements.get(item.usedByIndex as Int).tag as String,
-            usedAsMask = item.usedAsMask as Boolean,
+            id = item.id,
+            usedByTag = elements.elementAt(item.usedByIndex).tag,
+            usedAsMask = item.usedAsMask,
         )
     }
 }
@@ -69,13 +72,13 @@ private fun mapElements(result: AnalyseSVGStructureResult): List<MappedElement> 
             parentTag = if (element._parentElement == null) {
                 null
             } else {
-                elements.get(element._parentElement as Int).tag as String
+                elements.elementAt(element._parentElement!!).tag
             },
             childTags = if (element._childElements == null) {
                 null
             } else {
                 jsArray(element._childElements).map { index ->
-                    elements.get(index as Int).tag as String
+                    elements.elementAt(index as Double).tag
                 }
             },
             id = stringOrNull(element._id),
@@ -98,17 +101,17 @@ private fun mapElements(result: AnalyseSVGStructureResult): List<MappedElement> 
 private fun mapTree(result: AnalyseSVGStructureResult): MappedTree {
     val elements = result.elements
 
-    fun map(item: dynamic): MappedTree {
-        val element = elements.get(item.index as Int)
+    fun map(item: ElementsTreeItem): MappedTree {
+        val element = elements.elementAt(item.index)
         return MappedTree(
-            tag = element.tag as String,
-            usedAsMask = item.usedAsMask as Boolean,
+            tag = element.tag,
+            usedAsMask = item.usedAsMask,
             parentTag = if (item.parent == null) {
                 null
             } else {
-                elements.get(item.parent.index as Int).tag as String
+                elements.elementAt(item.parent!!.index).tag
             },
-            children = jsArray(item.children).map { map(it) },
+            children = item.children.map { map(it) },
         )
     }
 

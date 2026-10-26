@@ -15,7 +15,7 @@ class ColorsTest {
     private val emptyPath =
         """<path d="M3 0v1h4v5h-4v1h5v-7h-5zm1 2v1h-4v1h4v1l2-1.5-2-1.5z"/>"""
 
-    private fun assertColors(expected: Array<String>, actual: Array<dynamic>) {
+    private fun assertColors(expected: Array<String>, actual: Array<ColorOrString>) {
         assertEquals(expected.size, actual.size)
         expected.forEachIndexed { index, value ->
             assertEquals(jsStringify(stringToColor(value)), jsStringify(actual[index]))
@@ -61,12 +61,12 @@ class ColorsTest {
         assertEquals(svgCode, svg.toSvgString())
 
         val options = parseOptions("{}")
-        options.callback = { attr: dynamic, colorStr: dynamic, color: dynamic, tag: dynamic, item: dynamic ->
+        options.callback = { _, _, color, _, _ ->
             assertEquals(
                 """{"type":"rgb","r":0,"g":0,"b":0,"alpha":1}""",
                 jsStringify(color),
             )
-            "white"
+            ColorOrString("white")
         }
         val replaceResult = parseColors(svg, options)
         assertEquals("""[{"type":"rgb","r":255,"g":255,"b":255,"alpha":1}]""", jsStringify(replaceResult.colors))
@@ -139,11 +139,11 @@ class ColorsTest {
         val svg = SVG(svgCode)
 
         val options = parseOptions("{}")
-        options.callback = { attr: dynamic, colorStr: dynamic, color: dynamic, tag: dynamic, item: dynamic ->
-            assertEquals("fill", attr)
+        options.callback = { attr, colorStr, color, _, _ ->
+            assertEquals(ColorAttributes.fill, attr)
             assertEquals("var(--foo)", colorStr)
             assertEquals("""{"type":"function","func":"var","value":"--foo"}""", jsStringify(color))
-            "var(--bar)"
+            ColorOrString("var(--bar)")
         }
 
         val searchResult = parseColors(svg, options)
@@ -162,7 +162,7 @@ class ColorsTest {
         val svg = SVG(svgCode)
 
         val options = parseOptions("{}")
-        options.callback = { attr: dynamic, colorStr: dynamic, color: dynamic, tag: dynamic, item: dynamic ->
+        options.callback = { attr, _, _, _, _ ->
             error("Unexpected callback call for \"$attr\"")
         }
 
@@ -235,8 +235,8 @@ class ColorsTest {
         )
 
         val options = parseOptions("{}")
-        options.callback = { attr: dynamic, colorStr: dynamic, color: dynamic, tag: dynamic, item: dynamic ->
-            js("Promise.resolve('remove')")
+        options.callback = { _, _, _, _, _ ->
+            js("Promise.resolve('remove')") as ColorOrString
         }
 
         assertFails { parseColors(svg, options) }

@@ -13,7 +13,7 @@ import web.dom.document
 import web.html.HTMLUnknownElement
 
 class IconifyIconTest {
-    private val homeIcon = js(
+    private val homeIcon: IconifyIcon = js(
         """{ body: '<path d="M0 0h24v24H0z" fill="currentColor"/>', width: 24, height: 24 }"""
     )
 
@@ -76,7 +76,7 @@ class IconifyIconTest {
         }
 
         assertEquals("iconify-icon", element.tagName.lowercase())
-        assertEquals("mdi:home", element.icon)
+        assertEquals("mdi:home", element.icon.unsafeCast<String>())
         assertEquals("1em", element.width)
         assertEquals("2em", element.height)
         assertEquals("mask", element.mode)
@@ -244,12 +244,12 @@ class IconifyIconTest {
         // Object assigned directly to the property
         val element = document.createElement(IconifyIconTagName.iconifyIcon)
         registerIconifyIcon()
-        element.icon = homeIcon
+        element.icon = StringOrIconifyIcon(homeIcon)
         element.noobserver = true
         attach(element)
 
         return awaitStatus(element, "rendered").then {
-            assertEquals("""<path d="M0 0h24v24H0z" fill="currentColor"/>""", element.icon.body as String)
+            assertEquals("""<path d="M0 0h24v24H0z" fill="currentColor"/>""", element.icon.unsafeCast<IconifyIcon>().body)
             assertTrue(shadowHtml(element).contains("<svg"))
             detach(element)
         }
@@ -266,7 +266,7 @@ class IconifyIconTest {
 
         return awaitStatus(element, "rendered").then {
             // Getter parses serialised data
-            assertEquals("""<path d="M0 0h24v24H0z"/>""", element.icon.body as String)
+            assertEquals("""<path d="M0 0h24v24H0z"/>""", element.icon.unsafeCast<IconifyIcon>().body)
             assertTrue(shadowHtml(element).contains("<svg"))
             detach(element)
         }

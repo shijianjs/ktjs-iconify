@@ -1,6 +1,9 @@
 package iconify.tools
 
 import iconify.IconifyIcon
+import js.objects.Record
+import js.reflect.unsafeCast
+import kotlin.js.JsAny
 
 /**
  * Icon category.
@@ -20,18 +23,28 @@ external interface IconCategory {
 }
 
 /**
- * SVG viewBox: `left`, `top`, `width` and `height`.
+ * SVG viewBox: `left`, `top`, `width` and `height`, plus the optional horizontal center
+ * `cx`.
  */
 external interface IconViewBox {
     /**
      * Left position of the viewBox.
+     *
+     * Omitted when the viewBox starts at `0`.
      */
-    var left: Double
+    var left: Double?
 
     /**
      * Top position of the viewBox.
+     *
+     * Omitted when the viewBox starts at `0`.
      */
-    var top: Double
+    var top: Double?
+
+    /**
+     * Horizontal center, used for icons that are horizontally symmetric.
+     */
+    var cx: Double?
 
     /**
      * Width of the viewBox.
@@ -100,24 +113,6 @@ external interface ResolvedIconifyIcon : IconifyIcon {
 }
 
 /**
- * Result of checking which icons belong to each theme.
- */
-external interface CheckThemeResult {
-    /**
-     * Theme name to matching icon names.
-     *
-     * Keys are sorted longest first. An empty key matches all icons that do not belong to another
-     * theme.
-     */
-    var valid: dynamic
-
-    /**
-     * Icons that do not match any theme.
-     */
-    var invalid: Array<String>
-}
-
-/**
  * Options for SVG cleanup.
  */
 external interface CleanupSVGOptions {
@@ -136,7 +131,7 @@ external interface ParseSVGCallbackItem {
     /**
      * Parsed XML node.
      */
-    var node: dynamic
+    var node: ParsedXMLTagElement
 
     /**
      * SVG instance being parsed.
@@ -178,87 +173,22 @@ external interface AnalyseSVGStructureResult {
      *
      * Elements have extra internal properties that describe IDs, links, reuse and palette usage.
      */
-    var elements: dynamic
+    var elements: ElementsMap
 
     /**
      * IDs found in the SVG, keyed by ID and mapped to the element index.
      */
-    var ids: dynamic
+    var ids: Record<String, Double>
 
     /**
      * Links from elements to the IDs they reference.
      */
-    var links: dynamic
+    var links: Array<LinkToElementWithID>
 
     /**
      * Element tree for elements that inherit attributes from their parent.
      */
-    var tree: dynamic
-}
-
-/**
- * Options for [runSVGO].
- */
-external interface SVGOptions {
-    /**
-     * Parse the SVG multiple times for better optimisation.
-     *
-     * Defaults to `true`.
-     */
-    var multipass: Boolean?
-
-    /**
-     * SVGO plugin list.
-     *
-     * When omitted, the default Iconify plugin set is used.
-     */
-    var plugins: Array<dynamic>?
-
-    /**
-     * Clean up IDs: a prefix string, a function that maps old IDs to new ones, or `false` to
-     * disable.
-     *
-     * Defaults to `"svgID"`. Do not use dashes, they break some SVG animations.
-     */
-    var cleanupIDs: dynamic
-
-    /**
-     * Keep shapes: skip plugins that modify shapes.
-     */
-    var keepShapes: Boolean?
-}
-
-/**
- * Options for [importDirectory] and [importDirectorySync].
- */
-external interface ImportDirectoryOptions : CleanupSVGOptions {
-    /**
-     * Icon set prefix. Can also be set later.
-     */
-    var prefix: String?
-
-    /**
-     * Include files from subdirectories.
-     *
-     * Defaults to `true`.
-     */
-    var includeSubDirs: Boolean?
-
-    /**
-     * Callback that returns an icon keyword, or `undefined` to skip the file.
-     *
-     * Receives the file entry, the default keyword derived from the filename, and the icon set.
-     * Can return a promise.
-     */
-    var keyword: dynamic
-
-    /**
-     * How to handle icons that fail to import: `false` to throw, `"warn"` to print a warning, or
-     * `true` to ignore.
-     *
-     * Defaults to `false`.
-     */
-    var ignoreImportErrors: dynamic
+    var tree: ElementsTreeItem
 }
 
 /**
@@ -279,6 +209,18 @@ external interface ExportTargetOptions {
 }
 
 /**
+ * Value of a custom file in [ExportOptionsWithCustomFiles.customFiles].
+ *
+ * 上游 `string | Record<string, unknown> | null`。用同名工厂函数包装；`null` 表示删除
+ * 该文件，直接写进 [Record] 的值即可。
+ */
+external interface CustomFile
+
+fun CustomFile(value: String): CustomFile = unsafeCast(value)
+
+fun CustomFile(value: Record<String, JsAny?>): CustomFile = unsafeCast(value)
+
+/**
  * Options to write custom files during export.
  */
 external interface ExportOptionsWithCustomFiles {
@@ -287,7 +229,7 @@ external interface ExportOptionsWithCustomFiles {
      *
      * A string is written as-is, an object is written as JSON, and `null` deletes the file.
      */
-    var customFiles: dynamic
+    var customFiles: Record<String, CustomFile?>?
 }
 
 /**
@@ -329,8 +271,10 @@ external interface ExportToDirectoryOptions : ExportTargetOptions {
 external interface ExportIconPackageOptions : ExportTargetOptions, ExportOptionsWithCustomFiles {
     /**
      * Content of `package.json`.
+     *
+     * 上游类型是 `Record<string, unknown>`。
      */
-    var `package`: dynamic
+    var `package`: Record<String, JsAny?>?
 
     /**
      * Export ES modules instead of CommonJS.
@@ -358,13 +302,15 @@ external interface ExportIconPackageOptions : ExportTargetOptions, ExportOptions
 external interface ExportJSONPackageOptions : ExportTargetOptions, ExportOptionsWithCustomFiles {
     /**
      * Content of `package.json`.
+     *
+     * 上游类型是 `Record<string, unknown>`。
      */
-    var `package`: dynamic
+    var `package`: Record<String, JsAny?>?
 
     /**
      * Callback to update the generated `package.json` contents.
      */
-    var customisePackage: ((dynamic) -> Unit)?
+    var customisePackage: ((Record<String, JsAny?>) -> Unit)?
 
     /**
      * Use a wildcard version for `@iconify/types` in `package.json`.
@@ -411,48 +357,4 @@ external interface ExecResult {
      * Standard error.
      */
     var stderr: String
-}
-
-/**
- * Result of [parseColors] and [validateColors].
- */
-external interface FindColorsResult {
-    /**
-     * Custom colors found in the SVG.
-     *
-     * Parsed as [iconify.utils.Color] when possible, otherwise kept as a string.
-     */
-    var colors: Array<dynamic>
-
-    /**
-     * `true` if the SVG uses the default color.
-     */
-    var hasUnsetColor: Boolean
-
-    /**
-     * `true` if the SVG has a global style, which makes detecting the default fill unreliable.
-     */
-    var hasGlobalStyle: Boolean
-}
-
-/**
- * Options for [parseColors] and [validateColors].
- */
-external interface ParseColorsOptions : AnalyseSVGStructureOptions {
-    /**
-     * Callback invoked for each color.
-     *
-     * Receives the attribute, the color string, the parsed color or `null`, and, for colors in
-     * elements, the tag name and element. Return a new color, `"unset"` to remove the attribute,
-     * or `"remove"` to remove the shape or rule.
-     */
-    var callback: dynamic
-
-    /**
-     * Color for elements that use the default color.
-     *
-     * Can be a parsed color, a color string, or a callback that receives the property, element,
-     * tree item and analysis result.
-     */
-    var defaultColor: dynamic
 }

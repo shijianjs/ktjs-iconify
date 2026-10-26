@@ -6,7 +6,7 @@ import web.dom.document
  * Imports `iconify-icon`, which registers the `<iconify-icon>` custom element, and returns the
  * component.
  */
-fun registerIconifyIcon(): dynamic = IconifyModule.IconifyIconComponent
+fun registerIconifyIcon(): IconifyIconComponent = IconifyModule.IconifyIconComponent
 
 /**
  * Creates an `<iconify-icon>` element displaying [icon].
@@ -23,6 +23,6 @@ fun createIconifyIcon(
     document.createElement(IconifyIconTagName.iconifyIcon)
         .apply {
             registerIconifyIcon()
-            this.icon = icon
+            this.icon = StringOrIconifyIcon(icon)
             configure()
         }

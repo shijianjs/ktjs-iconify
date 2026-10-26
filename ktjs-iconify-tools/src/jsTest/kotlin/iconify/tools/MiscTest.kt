@@ -1,5 +1,6 @@
 package iconify.tools
 
+import kotlin.js.JsAny
 import kotlin.js.Promise
 import kotlin.js.unsafeCast
 import kotlin.test.Test
@@ -34,8 +35,8 @@ class MiscTest {
 
     @Test
     fun exposesQueueDefaults() {
-        assertEquals(5, defaultQueueParams.limit as Int)
-        assertEquals(3, defaultQueueParams.retries as Int)
+        assertEquals(5.0, defaultQueueParams.limit)
+        assertEquals(3.0, defaultQueueParams.retries)
     }
 
     @Test
@@ -69,7 +70,9 @@ class MiscTest {
             }"""
         )
 
-        val promise = runQueries(::runConcurrentQueries) as Promise<String>
+        val promise = runQueries(
+            { params: ConcurrentQueriesParams<JsAny> -> runConcurrentQueries(params) }
+        ) as Promise<String>
         return promise.then { value ->
             assertEquals("""{"result":[2,100,50,1],"order":[0,3,2,1]}""", value)
             Unit
@@ -93,7 +96,7 @@ class MiscTest {
         assertEquals(listOf("a.svg", "b.txt"), withoutSubdirs.sorted())
 
         val onlySvg = scanDirectorySync(dir, callback = { ext, file, subdir, _, _ ->
-            if (ext == ".svg") subdir + file + ext else null
+            if (ext == ".svg") ScanDirectoryCallbackResult(subdir + file + ext) else null
         })
         assertEquals(listOf("a.svg", "sub/c.svg"), onlySvg.sorted())
 

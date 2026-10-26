@@ -2,26 +2,29 @@
 
 package iconify.tools
 
+import kotlin.js.JsAny
 import kotlin.js.Promise
 
 /**
  * Write JSON to a file, using tab indentation and a trailing newline.
+ *
+ * 上游类型是 `unknown`，因此 [data] 是不透明的。
  */
-external fun writeJSONFile(filename: String, data: dynamic): Promise<Unit>
+external fun writeJSONFile(filename: String, data: JsAny?): Promise<Unit>
 
 /**
- * Find files in a directory. The callback can return a custom value per file.
+ * Find files in a directory. The callback can return a custom string per file.
  *
  * Hidden files and directories are skipped, and subdirectories are scanned unless
  * [subdirs] is `false`. The callback receives `ext` (starts with `.`, can be empty),
  * `file` (name without extension), `subdir` (ends with `/`, can be empty), the scanned
  * path and file stats. Return `false`, `null` or `undefined` to skip the file, `true` to
- * include `subdir + filename`, or a custom value to include it as-is. The callback may be
+ * include `subdir + filename`, or a custom string to include it as-is. The callback may be
  * asynchronous.
  */
 external fun scanDirectory(
     path: String,
-    callback: ((String, String, String, String, dynamic) -> dynamic)? = definedExternally,
+    callback: ScanDirectoryCallback? = definedExternally,
     subdirs: Boolean = definedExternally,
 ): Promise<Array<String>>
 
@@ -30,9 +33,31 @@ external fun scanDirectory(
  */
 external fun scanDirectorySync(
     path: String,
-    callback: ((String, String, String, String, dynamic) -> dynamic)? = definedExternally,
+    callback: ScanDirectorySyncCallback? = definedExternally,
     subdirs: Boolean = definedExternally,
 ): Array<String>
+
+/**
+ * Find files in a directory, returning a custom value per file.
+ *
+ * Same as [scanDirectory], but the callback can return any [T] instead of a string.
+ */
+@JsName("scanDirectory")
+external fun <T : JsAny?> scanDirectoryValues(
+    path: String,
+    callback: ScanDirectoryValueCallback<T>? = definedExternally,
+    subdirs: Boolean = definedExternally,
+): Promise<Array<T>>
+
+/**
+ * Synchronous version of [scanDirectoryValues].
+ */
+@JsName("scanDirectorySync")
+external fun <T : JsAny?> scanDirectoryValuesSync(
+    path: String,
+    callback: ScanDirectoryValueSyncCallback<T>? = definedExternally,
+    subdirs: Boolean = definedExternally,
+): Array<T>
 
 /**
  * Compare directories, returning `true` when all files are identical.
@@ -52,7 +77,10 @@ external fun compareDirectories(
  * Run a shell command. Resolves with `{ stdout, stderr }` and rejects when the command
  * fails. A relative `cwd` in [options] is resolved to an absolute path.
  */
-external fun execAsync(cmd: String, options: dynamic = definedExternally): Promise<ExecResult>
+external fun execAsync(
+    cmd: String,
+    options: ExecOptions? = definedExternally,
+): Promise<ExecResult>
 
 /**
  * Clean up an icon keyword.

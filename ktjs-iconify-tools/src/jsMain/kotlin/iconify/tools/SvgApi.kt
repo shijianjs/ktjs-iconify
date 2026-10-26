@@ -19,7 +19,7 @@ external class SVG {
     constructor(content: String)
 
     /** Parsed SVG root element. */
-    var `$svg`: dynamic
+    var `$svg`: ParsedXMLTagElement
 
     /** ViewBox as `{ left, top, width, height }`. */
     var viewBox: IconViewBox

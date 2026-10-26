@@ -50,7 +50,10 @@ class IconifyToolsTest {
 
         assertTrue(iconSet.setAlias("house", "home"))
         assertEquals(listOf("home"), iconSet.list().sorted())
-        assertEquals(listOf("home", "house"), iconSet.list(arrayOf("icon", "alias")).sorted())
+        assertEquals(
+            listOf("home", "house"),
+            iconSet.list(arrayOf(IconSetIconTypes.icon, IconSetIconTypes.alias)).sorted(),
+        )
         assertNotNull(iconSet.resolve("house"))
 
         val json = iconSet.export()

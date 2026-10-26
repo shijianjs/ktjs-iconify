@@ -379,7 +379,7 @@ class ImportExportTest {
                         keepTitles: true,
                         keyword: (item) => 'test-' + item.file
                     }"""
-                ).unsafeCast<ImportDirectoryOptions>()
+                ).unsafeCast<ImportDirectorySyncOptions>()
             )
             val syncExported = syncSet.export()
             syncExported.lastModified = exported.lastModified
@@ -411,12 +411,12 @@ class ImportExportTest {
             emptyList(),
             importDirectorySync(
                 dir,
-                jsObject("{includeSubDirs: false}").unsafeCast<ImportDirectoryOptions>()
+                jsObject("{includeSubDirs: false}").unsafeCast<ImportDirectorySyncOptions>()
             ).list().toList()
         )
 
-        val customKeyword = jsObject("{}").unsafeCast<ImportDirectoryOptions>()
-        customKeyword.keyword = { item: dynamic, _: dynamic, _: dynamic ->
+        val customKeyword = jsObject("{}").unsafeCast<ImportDirectorySyncOptions>()
+        customKeyword.keyword = { item: ImportDirectoryFileEntry, _: String, _: IconSet ->
             cleanupIconKeyword(item.subdir + item.file)
         }
         assertEquals(
@@ -447,10 +447,10 @@ class ImportExportTest {
                 // Ignore errors
                 val syncSet = importDirectorySync(
                     dir,
-                    jsObject("{ignoreImportErrors: true}").unsafeCast<ImportDirectoryOptions>()
+                    jsObject("{ignoreImportErrors: true}").unsafeCast<ImportDirectorySyncOptions>()
                 )
-                assertNull(syncSet.entries.`broken`)
-                assertNotNull(syncSet.entries.good)
+                assertNull(syncSet.entries["broken"])
+                assertNotNull(syncSet.entries["good"])
 
                 importDirectory(
                     dir,
@@ -458,14 +458,14 @@ class ImportExportTest {
                 )
             }
         ).then { set ->
-            assertNull(set.entries.`broken`)
-            assertNotNull(set.entries.good)
+            assertNull(set.entries["broken"])
+            assertNotNull(set.entries["good"])
 
             // "warn" logs a warning instead of throwing
             val warnings = captureWarnings {
                 importDirectorySync(
                     dir,
-                    jsObject("{ignoreImportErrors: 'warn'}").unsafeCast<ImportDirectoryOptions>()
+                    jsObject("{ignoreImportErrors: 'warn'}").unsafeCast<ImportDirectorySyncOptions>()
                 )
             }
             assertEquals(1, warnings.size)

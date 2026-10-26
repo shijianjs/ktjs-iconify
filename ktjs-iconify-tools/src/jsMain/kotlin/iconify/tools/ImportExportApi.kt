@@ -27,7 +27,7 @@ external fun importDirectory(
  */
 external fun importDirectorySync(
     path: String,
-    options: ImportDirectoryOptions? = definedExternally,
+    options: ImportDirectorySyncOptions? = definedExternally,
 ): IconSet
 
 /**

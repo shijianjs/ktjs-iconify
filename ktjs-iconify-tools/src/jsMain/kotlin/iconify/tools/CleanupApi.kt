@@ -41,7 +41,7 @@ external fun parseSVG(svg: SVG, callback: (ParseSVGCallbackItem) -> Unit)
  * keyframes (`type` `"keyframes"`). Return a new string to change the value, or
  * `undefined` to delete the rule. Asynchronous callbacks are not supported.
  */
-external fun parseSVGStyle(svg: SVG, callback: (dynamic) -> dynamic)
+external fun parseSVGStyle(svg: SVG, callback: (ParseSVGStyleCallbackItem) -> String?)
 
 /**
  * Find IDs, links and palette usage in an SVG.
@@ -75,7 +75,7 @@ external fun removeBadAttributes(svg: SVG)
  * `@font-face` and `@media`. The returned object contains `animations` and
  * `removedAtRules` sets, each omitted when empty.
  */
-external fun cleanupRootStyle(svg: SVG): dynamic
+external fun cleanupRootStyle(svg: SVG): CleanupRootStyleResult
 
 /**
  * Expand inline `style` attributes.

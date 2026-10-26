@@ -266,14 +266,16 @@ class IconSetTest {
         assertEquals(listOf("foo", "bar", "baz"), iconSet.list().toList())
 
         val entries = iconSet.entries
-        assertEquals("icon", entries.foo.type as String)
-        assertEquals("""<g id="foo"/>""", entries.foo.body as String)
-        assertEquals("""{}""", jsStringify(entries.foo.props))
-        assertEquals(0, entries.foo.chars.size as Int)
-        assertEquals(0, entries.foo.categories.size as Int)
-        assertEquals("variation", entries.baz.type as String)
-        assertEquals("bar", entries.baz.parent as String)
-        assertTrue(entries.baz.props.hFlip as Boolean)
+        val foo = entries["foo"]!!.unsafeCast<IconSetIcon>()
+        assertEquals(IconSetIconTypes.icon, foo.type)
+        assertEquals("""<g id="foo"/>""", foo.body)
+        assertEquals("""{}""", jsStringify(foo.props))
+        assertEquals(0, foo.chars.size)
+        assertEquals(0, foo.categories.size)
+        val baz = entries["baz"]!!.unsafeCast<IconSetIconVariation>()
+        assertEquals(IconSetIconTypes.variation, baz.type)
+        assertEquals("bar", baz.parent)
+        assertTrue(baz.props.hFlip == true)
 
         assertEquals(lastModified, iconSet.lastModified)
 
@@ -339,8 +341,9 @@ class IconSetTest {
             """{type: 'icon', body: '<g id="baz"/>', props: {width: 20, height: 20, rotate: 1}, chars: {}, categories: {}}""",
             entries["bar-20"],
         )
-        assertEquals(1, entries["bar-32"].chars.size as Int)
-        assertTrue(entries["bar-32"].chars.has("f00") as Boolean)
+        val bar32 = entries["bar-32"]!!.unsafeCast<IconSetIcon>()
+        assertEquals(1, bar32.chars.size)
+        assertTrue(bar32.chars.has("f00"))
 
         assertEquals(lastModified, iconSet.lastModified)
         assertTrue(iconSet.exists("bar-32"))

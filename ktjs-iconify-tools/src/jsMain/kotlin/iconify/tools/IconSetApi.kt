@@ -5,6 +5,8 @@ package iconify.tools
 import iconify.IconifyInfo
 import iconify.IconifyJSON
 import iconify.utils.IconifyIconCustomisations
+import js.collections.JsSet
+import js.objects.Record
 import kotlin.js.Promise
 
 /**
@@ -24,19 +26,19 @@ external class IconSet {
     var lastModified: Double
 
     /** Entries keyed by icon name. Use class methods to modify them. */
-    var entries: dynamic
+    var entries: Record<String, IconSetIconEntry>
 
     /** Icon set metadata. */
     var info: IconifyInfo?
 
     /** Native `Set<IconCategory>`. Use class methods to modify it. */
-    var categories: dynamic
+    var categories: JsSet<IconCategory>
 
     /** Theme prefixes: prefix without dash mapped to theme title. */
-    var prefixes: dynamic
+    var prefixes: Record<String, String>
 
     /** Theme suffixes: suffix without dash mapped to theme title. */
-    var suffixes: dynamic
+    var suffixes: Record<String, String>
 
     /**
      * Load icon set data, replacing the current contents.
@@ -56,7 +58,7 @@ external class IconSet {
      *
      * Defaults to `icon` and `variation`; aliases are not included unless requested.
      */
-    fun list(types: Array<String>? = definedExternally): Array<String>
+    fun list(types: Array<IconSetIconType>? = definedExternally): Array<String>
 
     /**
      * Iterate over entries. The callback can return `false` to stop the loop.
@@ -65,16 +67,16 @@ external class IconSet {
      * callbacks.
      */
     fun forEach(
-        callback: (name: String, type: String) -> dynamic,
-        types: Array<String>? = definedExternally,
+        callback: IconSetAsyncForEachCallback,
+        types: Array<IconSetIconType>? = definedExternally,
     ): Promise<Unit>
 
     /**
      * Synchronous version of [forEach]. The callback can return `false` to stop the loop.
      */
     fun forEachSync(
-        callback: (name: String, type: String) -> dynamic,
-        types: Array<String>? = definedExternally,
+        callback: IconSetSyncForEachCallback,
+        types: Array<IconSetIconType>? = definedExternally,
     )
 
     /**
@@ -83,7 +85,7 @@ external class IconSet {
      * The list starts with the direct parent and ends with the icon; it does not include
      * the icon itself. Icons have an empty list. Without [names], checks all entries.
      */
-    fun getTree(names: Array<String>? = definedExternally): dynamic
+    fun getTree(names: Array<String>? = definedExternally): IconSetTree
 
     /**
      * Resolve an icon, alias or variation to icon data.
@@ -126,7 +128,7 @@ external class IconSet {
     /**
      * Get the character map (`char` to icon name), optionally limited to [names].
      */
-    fun chars(names: Array<String>? = definedExternally): dynamic
+    fun chars(names: Array<String>? = definedExternally): Record<String, String>
 
     /**
      * Count icons, excluding aliases and hidden icons.
@@ -144,7 +146,7 @@ external class IconSet {
      * Updates the category count, excluding aliases and hidden icons, and removes the
      * category if it is empty. Returns `null` when the category does not exist or is empty.
      */
-    fun listCategory(category: dynamic): Array<String>?
+    fun listCategory(category: IconCategoryOrString): Array<String>?
 
     /** Check if an entry with this name exists. */
     fun exists(name: String): Boolean
@@ -157,7 +159,7 @@ external class IconSet {
      * dependants are re-parented and the method returns `0`. Otherwise returns the number
      * of removed entries.
      */
-    fun remove(name: String, removeDependencies: dynamic = definedExternally): Int
+    fun remove(name: String, removeDependencies: BooleanOrString? = definedExternally): Int
 
     /**
      * Rename an entry and update aliases that reference it.
@@ -172,7 +174,7 @@ external class IconSet {
      *
      * Returns `false` when the parent of an alias or variation does not exist.
      */
-    fun setItem(name: String, item: dynamic): Boolean
+    fun setItem(name: String, item: IconSetIconEntry): Boolean
 
     /** Add or update an icon from resolved icon data. */
     fun setIcon(name: String, icon: ResolvedIconifyIcon): Boolean

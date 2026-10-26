@@ -1,5 +1,6 @@
 package iconify.tools
 
+import kotlin.js.unsafeCast
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
@@ -9,32 +10,33 @@ class ParseStyleTest {
     fun parsesGlobalStyle() {
         val svg = SVG(ARROW_SVG)
 
-        parseSVGStyle(svg) { item ->
-            assertEquals("global", item.type as String)
+        parseSVGStyle(svg) { rawItem ->
+            assertEquals(ParseSVGStyleCallbackItemTypes.global, rawItem.type)
+            val item = rawItem.unsafeCast<ParseSVGStyleCallbackItemGlobal>()
 
-            when (item.prop as String) {
+            when (item.prop) {
                 "fill" -> {
-                    when (jsArray(item.selectors).joinToString(" ") { it as String }) {
+                    when (item.selectors.joinToString(" ")) {
                         ".cls-1" -> {
-                            assertEquals("#fff", item.value as String)
+                            assertEquals("#fff", item.value)
                             "black"
                         }
                         ".cls-2" -> {
-                            assertEquals("#231f20", item.value as String)
-                            js("undefined")
+                            assertEquals("#231f20", item.value)
+                            js("undefined") as String?
                         }
                         else -> error("Unexpected selectors")
                     }
                 }
                 "opacity" -> {
-                    assertEquals("0", item.value as String)
-                    assertEquals(listOf(".cls-1"), jsArray(item.selectors).map { it as String })
+                    assertEquals("0", item.value)
+                    assertEquals(listOf(".cls-1"), item.selectors.toList())
 
-                    val selectorToken = item.selectorTokens[0]
-                    if (selectorToken.type != "selector") {
+                    val selectorToken = item.selectorTokens[0].unsafeCast<CSSSelectorToken>()
+                    if (selectorToken.type != CSSTokenTypes.selector) {
                         error("Bad selector token")
                     }
-                    selectorToken.selectors = jsObject("['.whatever']")
+                    selectorToken.selectors = arrayOf(".whatever")
                     item.token.prop = "fill-opacity"
                     item.value
                 }
@@ -72,17 +74,19 @@ class ParseStyleTest {
         )
 
         parseSVGStyle(svg) { item ->
-            when (item.type as String) {
-                "global" -> {
+            when (item.type) {
+                ParseSVGStyleCallbackItemTypes.global -> {
                     if (item.prop == "animation" && item.value == "0.75s linear infinite rotate") {
                         "2s linear infinite spin"
                     } else {
                         item.value
                     }
                 }
-                "keyframes" -> {
-                    assertEquals("""{"transform":"rotate(0deg)"}""", jsStringify(item.from))
-                    assertEquals("rotate", item.value as String)
+                ParseSVGStyleCallbackItemTypes.keyframes -> {
+                    val keyframes =
+                        item.unsafeCast<ParseSVGStyleCallbackItemGlobalKeyframesAtRule>()
+                    assertEquals("""{"transform":"rotate(0deg)"}""", jsStringify(keyframes.from))
+                    assertEquals("rotate", item.value)
                     "spin"
                 }
                 else -> error("Unexpected type: ${item.type}")
@@ -114,7 +118,7 @@ class ParseStyleTest {
         var inlineRules = 0
 
         parseSVGStyle(svg) { item ->
-            assertEquals("inline", item.type as String)
+            assertEquals(ParseSVGStyleCallbackItemTypes.inline, item.type)
             inlineRules++
             item.value
         }

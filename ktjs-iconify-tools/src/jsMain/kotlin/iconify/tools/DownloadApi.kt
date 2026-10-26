@@ -2,6 +2,7 @@
 
 package iconify.tools
 
+import kotlin.js.JsAny
 import kotlin.js.Promise
 
 /**
@@ -10,7 +11,7 @@ import kotlin.js.Promise
  * Returns `"not_modified"` when the requested version or commit matches
  * `ifModifiedSince`.
  */
-external fun downloadPackage(options: dynamic): Promise<dynamic>
+external fun downloadPackage(options: DownloadParams): Promise<DownloadResult>
 
 /**
  * Download an npm package. Returns `"not_modified"` when `ifModifiedSince` matches.
@@ -20,7 +21,9 @@ external fun downloadPackage(options: dynamic): Promise<dynamic>
  * `target/package`; `target` also holds the cached `.tgz` archive. Returns
  * `{ downloadType: "npm", rootDir, contentsDir, version }`.
  */
-external fun downloadNPMPackage(options: DownloadNPMPackageOptions): Promise<dynamic>
+external fun downloadNPMPackage(
+    options: DownloadNPMPackageOptions,
+): Promise<DownloadNPMPackageResultOrNotModified>
 
 /**
  * Get the version of an npm package from the registry.
@@ -48,7 +51,9 @@ external fun getPackageVersion(target: String): Promise<String>
  * [DownloadGitHubRepoOptions.cleanupOldDirectories] to `false` to keep them.
  * [DownloadGitHubRepoOptions.cleanupOldFiles] defaults to `false`.
  */
-external fun downloadGitHubRepo(options: DownloadGitHubRepoOptions): Promise<dynamic>
+external fun downloadGitHubRepo(
+    options: DownloadGitHubRepoOptions,
+): Promise<DownloadGitHubRepoResultOrNotModified>
 
 /**
  * Get the latest commit SHA of a GitHub branch using the API.
@@ -62,7 +67,9 @@ external fun getGitHubRepoHash(options: GitHubAPIOptions): Promise<String>
  * `https://gitlab.com/api/v4/projects`). Returns
  * `{ downloadType: "gitlab", rootDir, contentsDir, hash }`.
  */
-external fun downloadGitLabRepo(options: DownloadGitLabRepoOptions): Promise<dynamic>
+external fun downloadGitLabRepo(
+    options: DownloadGitLabRepoOptions,
+): Promise<DownloadGitLabRepoResultOrNotModified>
 
 /**
  * Get the latest commit SHA of a GitLab branch using the API.
@@ -80,7 +87,9 @@ external fun getGitLabRepoHash(options: GitLabAPIOptions): Promise<String>
  * a previous result object. The target directory is not checked for the correct remote
  * or branch, so do not reuse it for different repositories or branches.
  */
-external fun downloadGitRepo(options: DownloadGitRepoOptions): Promise<dynamic>
+external fun downloadGitRepo(
+    options: DownloadGitRepoOptions,
+): Promise<DownloadGitRepoResultOrNotModified>
 
 /**
  * Get the current branch of a cloned repository, optionally checking out [checkout]
@@ -126,7 +135,7 @@ external fun untar(file: String, path: String): Promise<Unit>
  * counters, the generated [IconSet] and a list of icons that could not be imported.
  * `cacheDir` enables caching for API responses and SVG files.
  */
-external fun importFromFigma(options: FigmaImportOptions): Promise<dynamic>
+external fun importFromFigma(options: FigmaImportOptions): Promise<FigmaImportResultOrNotModified>
 
 /**
  * Send an API query and return the response body as text.
@@ -138,7 +147,7 @@ external fun importFromFigma(options: FigmaImportOptions): Promise<dynamic>
 external fun sendAPIQuery(
     query: APIQueryParams,
     cache: APICacheOptions? = definedExternally,
-): Promise<dynamic>
+): Promise<APIQueryResult>
 
 /**
  * Download a file to `target`. Throws when the response status is not 200.
@@ -148,13 +157,13 @@ external fun downloadFile(query: APIQueryParams, target: String): Promise<Unit>
 /**
  * Replace the `fetch` implementation used for API queries and file downloads.
  */
-external fun setFetch(fetchFunction: dynamic)
+external fun setFetch(fetchFunction: FetchFunction)
 
 /**
  * Default concurrency limit (`limit: 5`) and retry count (`retries: 3`) for
  * [runConcurrentQueries].
  */
-external val defaultQueueParams: dynamic
+external val defaultQueueParams: ConcurrentQueriesCommonParams<JsAny?>
 
 /**
  * Run asynchronous operations with concurrency and retry limits.
@@ -164,15 +173,17 @@ external val defaultQueueParams: dynamic
  * operations are retried; after the last attempt the promise is rejected unless
  * `onError` is provided, in which case its error handling decides whether to abort.
  */
-external fun runConcurrentQueries(params: dynamic): Promise<dynamic>
+external fun <T : JsAny?> runConcurrentQueries(
+    params: ConcurrentQueriesParams<T>,
+): Promise<Array<T>>
 
 /**
  * Extra options passed to every `fetch` call, such as proxy settings.
  */
-external val axiosConfig: dynamic
+external val axiosConfig: AxiosConfig
 
 /**
  * Logging callbacks called around API queries: `onStart`, `onSuccess` and `onError`.
  * By default `onStart` logs the URL.
  */
-external val fetchCallbacks: dynamic
+external val fetchCallbacks: AxiosCallbacks
