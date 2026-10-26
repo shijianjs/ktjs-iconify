@@ -1,5 +1,8 @@
 package iconify.utils
 
+import iconify.StringOrStringArray
+import js.objects.Record
+
 /**
  * How icons are rendered in CSS: `"mask"` or `"background"`.
  */
@@ -35,7 +38,7 @@ external interface IconCSSSharedOptions {
     /**
      * Additional CSS rules, keyed by property name.
      */
-    var rules: dynamic
+    var rules: Record<String, String>?
 }
 
 /**
@@ -129,7 +132,7 @@ external interface IconContentSharedOptions {
     /**
      * Additional CSS rules, keyed by property name.
      */
-    var rules: dynamic
+    var rules: Record<String, String>?
 }
 
 /**
@@ -189,10 +192,10 @@ external interface CSSUnformattedItem {
     /**
      * Selector, or a list of selectors.
      */
-    var selector: dynamic
+    var selector: StringOrStringArray
 
     /**
      * CSS rules, keyed by property name.
      */
-    var rules: dynamic
+    var rules: Record<String, String>
 }

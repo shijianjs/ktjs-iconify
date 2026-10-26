@@ -2,6 +2,7 @@ package iconify.utils
 
 import iconify.IconifyJSON
 import kotlin.js.js
+import js.objects.Record
 import kotlin.js.unsafeCast
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -60,7 +61,7 @@ class IconifyUtilsTest {
         assertEquals("0 0 24 24", build.attributes.viewBox)
         assertEquals("48", build.attributes.width)
 
-        val svg = iconToHTML(build.body, build.attributes)
+        val svg = iconToHTML(build.body, build.attributes.unsafeCast<Record<String, String>>())
         assertTrue(svg.startsWith("<svg"))
         assertTrue(svg.contains("viewBox=\"0 0 24 24\""))
     }

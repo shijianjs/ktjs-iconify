@@ -6,6 +6,7 @@ import iconify.createIconifyIcon
 import iconify.getIcon
 import iconify.loadIcon
 import iconify.utils.IconifyIconCustomisations
+import iconify.utils.StringOrDouble
 import iconify.utils.colorToString
 import iconify.utils.compareColors
 import iconify.utils.getEmojiSequenceFromString
@@ -14,6 +15,7 @@ import iconify.utils.iconToHTML
 import iconify.utils.iconToSVG
 import iconify.utils.stringToColor
 import iconify.utils.stringToIcon
+import js.objects.Record
 import kotlin.js.js
 import kotlin.js.unsafeCast
 import web.cssom.ClassName
@@ -349,13 +351,13 @@ private class DemoPage {
     private fun buildUtilsReport(): String? {
         val icon = getIcon("demo:star") ?: return null
         val customisations = js("({})").unsafeCast<IconifyIconCustomisations>().apply {
-            width = "2em"
-            height = "2em"
+            width = StringOrDouble("2em")
+            height = StringOrDouble("2em")
             hFlip = true
             rotate = 1.0
         }
         val built = iconToSVG(icon, customisations)
-        val svg = iconToHTML(built.body, built.attributes)
+        val svg = iconToHTML(built.body, built.attributes.unsafeCast<Record<String, String>>())
 
         val orange = stringToColor("#ff8800")
         val rgb = stringToColor("rgb(255, 136, 0)")

@@ -2,6 +2,8 @@
 
 package iconify.utils
 
+import js.objects.Record
+
 /**
  * Parse a CSS color string: a hex color, a color keyword, or an `rgb`, `hsl`, `lab` or `lch`
  * function.
@@ -35,4 +37,4 @@ external fun colorToString(color: Color, canRound: Boolean = definedExternally):
  *
  * Each value is a parsed [Color] object.
  */
-external val colorKeywords: dynamic
+external val colorKeywords: Record<String, Color>

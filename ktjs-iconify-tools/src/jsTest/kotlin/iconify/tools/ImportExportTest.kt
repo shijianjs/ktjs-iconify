@@ -321,10 +321,10 @@ class ImportExportTest {
         assertEquals(prefix, exported.prefix)
         assertEquals(10, exported.width as Int)
         assertEquals(10, exported.height as Int)
-        assertEquals(importedSetBody, exported.icons.`set`.body)
+        assertEquals(importedSetBody, exported.icons["set"]?.body)
         assertEquals(
             if (includeTitle) "<title>Circle</title>$importedStyleBody" else importedStyleBody,
-            exported.icons.style.body
+            exported.icons["style"]?.body
         )
     }
 
@@ -364,10 +364,10 @@ class ImportExportTest {
             assertEquals(listOf("test-set", "test-style").sorted(), set.list().sorted())
             val exported = set.export()
             assertEquals("foo", exported.prefix)
-            assertEquals(importedSetBody, exported.icons.`test-set`.body)
+            assertEquals(importedSetBody, exported.icons["test-set"]?.body)
             assertEquals(
                 "<title>Circle</title>$importedStyleBody",
-                exported.icons.`test-style`.body
+                exported.icons["test-style"]?.body
             )
 
             // Synchronous callback

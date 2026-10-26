@@ -1,5 +1,8 @@
 package iconify
 
+import js.objects.Record
+import js.reflect.unsafeCast
+
 /**
  * Icon dimensions.
  *
@@ -137,6 +140,76 @@ external interface ExtendedIconifyAlias : IconifyAlias {
 }
 
 /**
+ * 上游 `IconifyIcons`：图标名（不含前缀）到图标定义的映射。
+ */
+typealias IconifyIcons = Record<String, ExtendedIconifyIcon>
+
+/**
+ * 上游 `IconifyAliases`：别名名称（不含前缀）到别名定义的映射。
+ */
+typealias IconifyAliases = Record<String, ExtendedIconifyAlias>
+
+/**
+ * 上游 `IconifyChars`：字符编码（如 `f000`）到图标名的映射。
+ */
+typealias IconifyChars = Record<String, String>
+
+/**
+ * 上游 `IconifyCategories`：分类标题到该分类下图标名列表的映射。
+ */
+typealias IconifyCategories = Record<String, Array<String>>
+
+/**
+ * 上游 `LegacyIconifyThemes`：旧版主题格式，键是任意唯一字符串。
+ */
+typealias LegacyIconifyThemes = Record<String, LegacyIconifyTheme>
+
+/**
+ * 旧版主题定义。
+ */
+external interface LegacyIconifyTheme {
+    /**
+     * 主题标题。
+     */
+    var title: String
+
+    /**
+     * 图标前缀（含末尾的连字符），例如 `baseline-`。
+     *
+     * 以该前缀开头、以 [suffix] 结尾的图标属于此主题。
+     */
+    var prefix: String?
+
+    /**
+     * 图标后缀（含开头的连字符），例如 `-filled`。
+     */
+    var suffix: String?
+}
+
+/**
+ * 上游 `string | string[]`。
+ *
+ * 用同名工厂函数包装，调用方必须显式说明选的是哪一支：
+ * `StringOrStringArray("https://api.iconify.design")`。
+ */
+external interface StringOrStringArray
+
+fun StringOrStringArray(value: String): StringOrStringArray = unsafeCast(value)
+
+fun StringOrStringArray(value: Array<String>): StringOrStringArray = unsafeCast(value)
+
+/**
+ * 上游 `number | number[]`。
+ *
+ * 用同名工厂函数包装，调用方必须显式说明选的是哪一支。
+ */
+external interface DoubleOrDoubleArray
+
+fun DoubleOrDoubleArray(value: Double): DoubleOrDoubleArray = unsafeCast(value)
+
+fun DoubleOrDoubleArray(value: Array<Double>): DoubleOrDoubleArray = unsafeCast(value)
+
+/**
  * Author information.
  */
 external interface IconifyInfoAuthor {
@@ -210,7 +283,7 @@ external interface IconifyInfo {
     /**
      * Icon grid, for display purposes: a number or an array of numbers.
      */
-    var height: dynamic
+    var height: DoubleOrDoubleArray?
 
     /**
      * Display height of icon samples in pixels.
@@ -264,27 +337,27 @@ external interface IconifyMetaData {
     /**
      * Character to icon mappings, for font-based icon sets.
      */
-    var chars: dynamic
+    var chars: IconifyChars?
 
     /**
      * Categories, keyed by category title, each holding a list of icon names.
      */
-    var categories: dynamic
+    var categories: IconifyCategories?
 
     /**
      * Legacy themes format keyed by a unique string.
      */
-    var themes: dynamic
+    var themes: LegacyIconifyThemes?
 
     /**
      * Theme prefixes, keyed by icon name prefix including the dash.
      */
-    var prefixes: dynamic
+    var prefixes: Record<String, String>?
 
     /**
      * Theme suffixes, keyed by icon name suffix including the dash.
      */
-    var suffixes: dynamic
+    var suffixes: Record<String, String>?
 }
 
 /**
@@ -307,12 +380,12 @@ external interface IconifyJSONIconsData : IconifyDimenisons {
     /**
      * Icons, keyed by name without prefix.
      */
-    var icons: dynamic
+    var icons: IconifyIcons
 
     /**
      * Aliases, keyed by name without prefix.
      */
-    var aliases: dynamic?
+    var aliases: IconifyAliases?
 }
 
 /**
@@ -361,5 +434,5 @@ external interface IconifyJSONPackageExports {
     /**
      * Character to icon mappings, for font-based icon sets.
      */
-    var chars: dynamic
+    var chars: IconifyChars
 }

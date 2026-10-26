@@ -54,7 +54,7 @@ external interface APIProviderRawData {
      *
      * Usually redundant, because the endpoint that returned the data is already known.
      */
-    var api: dynamic
+    var api: StringOrStringArray?
 
     /**
      * Links to the provider's website.

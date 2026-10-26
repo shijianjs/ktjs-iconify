@@ -57,8 +57,8 @@ class MiscTest {
         )
 
         assertContentEquals(arrayOf("a", "c"), keys(result).sortedArray())
-        assertEquals(1.0, result.a.unsafeCast<Double>())
-        assertEquals(3.0, result.c.unsafeCast<Double>())
+        assertEquals(1.0, result["a"].unsafeCast<Double>())
+        assertEquals(3.0, result["c"].unsafeCast<Double>())
 
         val unchanged = unmergeObjects(js("({ a: 1 })"), js("({ b: 2 })"))
         assertContentEquals(arrayOf("a"), keys(unchanged))
@@ -72,8 +72,8 @@ class MiscTest {
         )
 
         assertContentEquals(arrayOf("a", "c"), keys(result).sortedArray())
-        assertEquals(1.0, result.a.unsafeCast<Double>())
-        assertEquals(3.0, result.c.unsafeCast<Double>())
+        assertEquals(1.0, result["a"].unsafeCast<Double>())
+        assertEquals(3.0, result["c"].unsafeCast<Double>())
 
         // Result has no prototype
         assertEquals("undefined", js("typeof result.hasOwnProperty"))

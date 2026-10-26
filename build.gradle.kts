@@ -33,6 +33,11 @@ dokka {
 // Setting the root `group` alone does not propagate to subprojects.
 val publishedGroup = "io.github.shijianjs"
 
+// `js.objects.Record` / `js.reflect.unsafeCast` come from kotlin-wrappers' kotlin-js artifact
+// (pulled in transitively by kotlin-browser). Wrapper modules that do not depend on the DOM still
+// need it for their public types, so add it to every JS main source set.
+val kotlinWrappersVersion = "2026.10.1"
+
 // npm package versions live in package.json so that Dependabot can update them.
 // Subprojects read this map to declare npm(...) dependencies and derive their version.
 @Suppress("UNCHECKED_CAST")
@@ -73,6 +78,23 @@ subprojects {
         config.setFrom(rootProject.files("detekt.yml"))
         // The plain detekt task is wired into check; point it at the multiplatform source tree.
         source.setFrom(files("src"))
+    }
+
+    // `kotlin.js.JsAny` is used instead of `dynamic` in the public API. The marker is still
+    // experimental, so every target has to opt in at the module level.
+    plugins.withId("org.jetbrains.kotlin.multiplatform") {
+        extensions.configure<org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension> {
+            compilerOptions {
+                optIn.add("kotlin.js.ExperimentalWasmJsInterop")
+            }
+            sourceSets.configureEach {
+                if (name == "jsMain") {
+                    dependencies {
+                        api("org.jetbrains.kotlin-wrappers:kotlin-js:$kotlinWrappersVersion")
+                    }
+                }
+            }
+        }
     }
 
     // Only the wrapper modules are published and documented; `demo` is the GitHub Pages site.

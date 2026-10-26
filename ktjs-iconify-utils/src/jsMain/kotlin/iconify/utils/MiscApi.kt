@@ -2,6 +2,9 @@
 
 package iconify.utils
 
+import js.objects.Record
+import kotlin.js.JsAny
+
 /**
  * Convert a kebab-case string to camelCase: `foo-bar` becomes `fooBar`.
  */
@@ -31,19 +34,29 @@ external fun snakelize(str: String): String
  * @return `true` if all keys in [ref] have strictly equal values and both objects have the same
  * number of keys.
  */
-external fun compareObjects(obj1: dynamic, obj2: dynamic, ref: dynamic = definedExternally): Boolean
+external fun compareObjects(
+    obj1: Record<String, JsAny?>,
+    obj2: Record<String, JsAny?>,
+    ref: Record<String, JsAny?> = definedExternally,
+): Boolean
 
 /**
  * Remove properties that are identical in both objects.
  *
  * @return a copy of [obj1] without the properties whose values equal those in [obj2].
  */
-external fun unmergeObjects(obj1: dynamic, obj2: dynamic): dynamic
+external fun unmergeObjects(
+    obj1: Record<String, JsAny?>,
+    obj2: Record<String, JsAny?>,
+): Record<String, JsAny?>
 
 /**
  * Get properties of [item] whose keys exist in [reference].
  */
-external fun commonObjectProps(item: dynamic, reference: dynamic): dynamic
+external fun commonObjectProps(
+    item: JsAny,
+    reference: Record<String, JsAny?>,
+): Record<String, JsAny?>
 
 /**
  * Remove characters that would break an XML attribute: `<`, `>` and `&`.

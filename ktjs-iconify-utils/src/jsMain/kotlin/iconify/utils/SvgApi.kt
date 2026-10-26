@@ -3,6 +3,7 @@
 package iconify.utils
 
 import iconify.IconifyIcon
+import js.objects.Record
 
 /**
  * Generate SVG attributes and body from an icon and customisations.
@@ -22,7 +23,7 @@ external fun iconToSVG(
  *
  * Adds the SVG namespace, and the `xlink` namespace when the body uses `xlink:`.
  */
-external fun iconToHTML(body: String, attributes: dynamic): String
+external fun iconToHTML(body: String, attributes: Record<String, String>): String
 
 /**
  * Calculate the second dimension when only one dimension is set.
@@ -33,11 +34,9 @@ external fun iconToHTML(body: String, attributes: dynamic): String
  * decimal digits.
  * @return the calculated size, in the same form as [size].
  */
-external fun calculateSize(
-    size: dynamic,
-    ratio: Double,
-    precision: Int = definedExternally,
-): dynamic
+external fun calculateSize(size: String, ratio: Double, precision: Int = definedExternally): String
+
+external fun calculateSize(size: Double, ratio: Double, precision: Int = definedExternally): Double
 
 /**
  * Parse a viewBox string such as `"0 0 24 24"`.

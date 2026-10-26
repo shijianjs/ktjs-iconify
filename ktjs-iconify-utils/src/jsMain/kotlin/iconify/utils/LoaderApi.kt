@@ -3,6 +3,7 @@
 package iconify.utils
 
 import iconify.IconifyJSON
+import js.objects.Record
 import kotlin.js.Promise
 
 /**
@@ -25,7 +26,7 @@ external fun loadIcon(
  * Returns `undefined` when the icon is missing.
  */
 external fun getCustomIcon(
-    custom: dynamic,
+    custom: CustomCollectionIconLoader,
     collection: String,
     icon: String,
     options: IconifyLoaderOptions? = definedExternally,
@@ -56,6 +57,6 @@ external fun mergeIconProps(
     collection: String,
     icon: String,
     options: IconifyLoaderOptions? = definedExternally,
-    propsProvider: (() -> dynamic)? = definedExternally,
-    afterCustomizations: ((dynamic) -> Unit)? = definedExternally,
+    propsProvider: (() -> AwaitableIconProps)? = definedExternally,
+    afterCustomizations: ((props: Record<String, String>) -> Unit)? = definedExternally,
 ): Promise<String>

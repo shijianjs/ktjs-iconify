@@ -10,6 +10,9 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class EmojiTest {
+    private fun emojis(vararg values: String): Array<StringOrDoubleArray> =
+        Array(values.size) { StringOrDoubleArray(values[it]) }
+
     @Test
     fun convertsUTF16CodePoint() {
         val codePoint = getEmojiCodePoint("2764")
@@ -17,7 +20,7 @@ class EmojiTest {
 
         assertNull(splitUTF32Number(codePoint))
         assertEquals(false, isUTF32SplitNumber(codePoint).unsafeCast<Boolean>())
-        assertEquals("\u2764", getEmojiUnicode(codePoint))
+        assertEquals("\u2764", getEmojiUnicode(DoubleOrString(codePoint.toDouble())))
     }
 
     @Test
@@ -32,7 +35,7 @@ class EmojiTest {
         assertEquals(2, isUTF32SplitNumber(sequence[1]).unsafeCast<Int>())
 
         assertEquals(codePoint, mergeUTF32Numbers(sequence[0], sequence[1]))
-        assertEquals("\uD83D\uDC9A", getEmojiUnicode(codePoint))
+        assertEquals("\uD83D\uDC9A", getEmojiUnicode(DoubleOrString(codePoint.toDouble())))
     }
 
     @Test
@@ -175,7 +178,7 @@ class EmojiTest {
 
     @Test
     fun matchesSimpleEmojiRegex() {
-        val regexValue = createOptimisedRegex(arrayOf("1F600", "1F603", "1F604"))
+        val regexValue = createOptimisedRegex(emojis("1F600", "1F603", "1F604"))
         val grinning = fromCodePoint(0x1f600)
         val bigEyes = fromCodePoint(0x1f603)
 
@@ -192,7 +195,7 @@ class EmojiTest {
 
     @Test
     fun matchesEmojiKeywords() {
-        val regexValue = createOptimisedRegex(arrayOf(":cat:", ":gray_cat:", ":tabby_cat:"))
+        val regexValue = createOptimisedRegex(emojis(":cat:", ":gray_cat:", ":tabby_cat:"))
 
         val matches = globalMatches(
             "Cat: :cat:\nTabby cat: :tabby_cat:\n",
@@ -207,7 +210,7 @@ class EmojiTest {
     @Test
     fun matchesEmojiSequences() {
         val regexValue = createOptimisedRegex(
-            arrayOf(
+            emojis(
                 "263A FE0F",
                 "1F62E 200D 1F4A7",
                 "1F62E 200D 1F4A8",
@@ -242,7 +245,7 @@ class EmojiTest {
     @Test
     fun matchesSkinTones() {
         val regexValue = createOptimisedRegex(
-            arrayOf(
+            emojis(
                 "1f44b", "1f44b-1f3fb", "1f44b-1f3fc", "1f44b-1f3fd", "1f44b-1f3fe",
                 "1f44b-1f3ff", "1f91a", "1f91a-1f3fb", "1f91a-1f3fc", "1f91a-1f3fd",
                 "1f91a-1f3fe", "1f91a-1f3ff", "1f590-fe0f", "1f590", "1f590-1f3fb",
@@ -287,7 +290,7 @@ class EmojiTest {
             fromCodePoint(0x1f5e8)
 
         val regex = createOptimisedRegex(
-            arrayOf(
+            emojis(
                 "1f63a",
                 "1f47d",
                 "1F441 FE0F",

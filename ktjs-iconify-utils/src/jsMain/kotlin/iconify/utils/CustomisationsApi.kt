@@ -2,10 +2,12 @@
 
 package iconify.utils
 
+import kotlin.js.JsAny
+
 /**
  * Default size customisations: `width` and `height` set to `null`.
  */
-external val defaultIconSizeCustomisations: dynamic
+external val defaultIconSizeCustomisations: FullIconSizeCustomisations
 
 /**
  * Default icon customisations: no size, no rotation, no flips.
@@ -46,4 +48,4 @@ external fun rotateFromString(value: String, defaultValue: Int = definedExternal
  * `true`, `"1"`, `"true"` and [name] itself are `true`; `false`, `"0"`, `"false"` and an empty
  * string are `false`; numbers use their truthiness. Anything else returns [defaultValue].
  */
-external fun toBoolean(name: String, value: dynamic, defaultValue: Boolean): Boolean
+external fun toBoolean(name: String, value: JsAny?, defaultValue: Boolean): Boolean

@@ -1,6 +1,7 @@
 package iconify.utils
 
 import iconify.IconifyIcon
+import js.objects.Record
 import kotlin.js.unsafeCast
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
@@ -37,12 +38,12 @@ class SvgTest {
 
         assertEquals("36", calculateSize("48", width / height).unsafeCast<String>())
         assertEquals("48", calculateSize("36", height / width).unsafeCast<String>())
-        assertEquals(36.0, calculateSize(48, width / height).unsafeCast<Double>())
-        assertEquals(48.0, calculateSize(36, height / width).unsafeCast<Double>())
+        assertEquals(36.0, calculateSize(48.0, width / height).unsafeCast<Double>())
+        assertEquals(48.0, calculateSize(36.0, height / width).unsafeCast<Double>())
 
-        assertEquals(18.0, calculateSize(24, width / height).unsafeCast<Double>())
-        assertEquals(22.5, calculateSize(30, width / height).unsafeCast<Double>())
-        assertEquals(74.25, calculateSize(99, width / height).unsafeCast<Double>())
+        assertEquals(18.0, calculateSize(24.0, width / height).unsafeCast<Double>())
+        assertEquals(22.5, calculateSize(30.0, width / height).unsafeCast<Double>())
+        assertEquals(74.25, calculateSize(99.0, width / height).unsafeCast<Double>())
         assertEquals(44.45, calculateSize(100.0 / 3, height / width).unsafeCast<Double>())
         assertEquals(8.34, calculateSize(11.1111111, width / height).unsafeCast<Double>())
         assertEquals(8.334, calculateSize(11.1111111, width / height, 1000).unsafeCast<Double>())
@@ -78,7 +79,7 @@ class SvgTest {
 
         assertEquals(
             "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1em\" height=\"1em\" viewBox=\"0 0 16 16\"></svg>",
-            iconToHTML(result.body, result.attributes),
+            iconToHTML(result.body, result.attributes.unsafeCast<Record<String, String>>()),
         )
     }
 

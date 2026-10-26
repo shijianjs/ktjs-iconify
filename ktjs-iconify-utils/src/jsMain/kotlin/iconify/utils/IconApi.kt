@@ -9,7 +9,7 @@ import kotlin.js.RegExp
 /**
  * Default dimensions: `left` and `top` `0`, `width` and `height` `16`.
  */
-external val defaultIconDimensions: dynamic
+external val defaultIconDimensions: FullIconDimensions
 
 /**
  * Default transformations: no rotation, no flips.
@@ -19,13 +19,13 @@ external val defaultIconTransformations: IconifyTransformations
 /**
  * Default dimensions and transformations.
  */
-external val defaultIconProps: dynamic
+external val defaultIconProps: FullIconProps
 
 /**
  * Default values for all properties of [ExtendedIconifyIcon]: [defaultIconProps], an empty body and
  * `hidden` set to `false`.
  */
-external val defaultExtendedIconProps: dynamic
+external val defaultExtendedIconProps: FullExtendedIconifyIcon
 
 /**
  * Expression matching a valid icon name part.
@@ -42,7 +42,7 @@ external val matchIconName: RegExp
  * taken from [child] when present, otherwise from [parent], with defaults filled in for missing
  * values.
  */
-external fun <T : ExtendedIconifyIcon> mergeIconData(parent: T, child: dynamic): T
+external fun <T : ExtendedIconifyIcon> mergeIconData(parent: T, child: ExtendedIconifyIcon): T
 
 /**
  * Merge transformations.

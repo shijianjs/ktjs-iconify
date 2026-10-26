@@ -3,6 +3,7 @@
 package iconify.utils
 
 import iconify.IconifyJSON
+import js.objects.Record
 
 /**
  * Parse an emoji sequence string into code points.
@@ -34,7 +35,7 @@ external fun splitUTF32Number(code: Int): Array<Int>?
  *
  * @return `1` for the first unit, `2` for the second, `false` otherwise.
  */
-external fun isUTF32SplitNumber(value: Int): dynamic
+external fun isUTF32SplitNumber(value: Int): DoubleOrBoolean
 
 /**
  * Merge a UTF-16 surrogate pair into one code point.
@@ -46,7 +47,7 @@ external fun mergeUTF32Numbers(part1: Int, part2: Int): Int?
 /**
  * Convert a code point, or a hexadecimal code string, to a Unicode string.
  */
-external fun getEmojiUnicode(code: dynamic): String
+external fun getEmojiUnicode(code: DoubleOrString): String
 
 /**
  * Convert an emoji sequence to UTF-16 code units.
@@ -71,7 +72,7 @@ external fun convertEmojiSequenceToUTF32(
  */
 external fun getEmojiUnicodeString(
     code: Int,
-    options: dynamic = definedExternally,
+    options: PartialUnicodeFormattingOptions? = definedExternally,
 ): String
 
 /**
@@ -81,7 +82,7 @@ external fun getEmojiUnicodeString(
  */
 external fun getEmojiSequenceString(
     sequence: Array<Int>,
-    options: dynamic = definedExternally,
+    options: PartialUnicodeFormattingOptions? = definedExternally,
 ): String
 
 /**
@@ -99,7 +100,7 @@ external fun getEmojiSequenceKeyword(sequence: Array<Int>): String
  * optimise the regular expression.
  */
 external fun prepareEmojiForIconsList(
-    icons: dynamic,
+    icons: Record<String, String>,
     rawTestData: String = definedExternally,
 ): PreparedEmojiResult
 
@@ -126,7 +127,7 @@ external fun createOptimisedRegexForEmojiSequences(sequences: Array<Array<Int>>)
  *
  * Each emoji can be a sequence string or an array of code points. Qualified variations are added.
  */
-external fun createOptimisedRegex(emojis: Array<dynamic>): String
+external fun createOptimisedRegex(emojis: Array<StringOrDoubleArray>): String
 
 /**
  * Replace emojis in text.
@@ -136,9 +137,9 @@ external fun createOptimisedRegex(emojis: Array<dynamic>): String
  * @return the text with replacements, or `null` if nothing was replaced.
  */
 external fun findAndReplaceEmojisInText(
-    regexp: dynamic,
+    regexp: EmojiRegexp,
     content: String,
-    callback: (EmojiRegexMatch, String) -> dynamic,
+    callback: (EmojiRegexMatch, String) -> String?,
 ): String?
 
 /**
@@ -147,7 +148,7 @@ external fun findAndReplaceEmojisInText(
  * Duplicate variants of the same emoji are merged into one item, keeping the fully-qualified
  * sequence.
  */
-external fun parseEmojiTestFile(data: String): dynamic
+external fun parseEmojiTestFile(data: String): EmojiTestData
 
 /**
  * Convert emoji sequences to their qualified forms, removing duplicates.
@@ -162,5 +163,5 @@ external fun <T : EmojiSequenceItem> getQualifiedEmojiVariations(items: Array<T>
  */
 external fun <T : EmojiSequenceItem> findMissingEmojis(
     sequences: Array<T>,
-    testDataTree: dynamic,
+    testDataTree: EmojiComponentsTree,
 ): Array<T>

@@ -5,6 +5,7 @@ package iconify.utils
 import iconify.ExtendedIconifyIcon
 import iconify.IconifyInfo
 import iconify.IconifyJSON
+import kotlin.js.JsAny
 import kotlin.js.Promise
 
 /**
@@ -40,7 +41,7 @@ external fun getIcons(
  */
 external fun parseIconSet(
     data: IconifyJSON,
-    callback: (name: String, data: ExtendedIconifyIcon?) -> Any?,
+    callback: (name: String, data: ExtendedIconifyIcon?) -> JsAny?,
 ): Array<String>
 
 /**
@@ -50,7 +51,7 @@ external fun parseIconSet(
  */
 external fun parseIconSetAsync(
     data: IconifyJSON,
-    callback: (name: String, data: ExtendedIconifyIcon?) -> dynamic,
+    callback: (name: String, data: ExtendedIconifyIcon?) -> Promise<JsAny?>,
 ): Promise<Array<String>>
 
 /**
@@ -62,7 +63,7 @@ external fun parseIconSetAsync(
  * @throws if the icon set is invalid and [IconSetValidationOptions.fix] is not `true`.
  */
 external fun validateIconSet(
-    obj: dynamic,
+    obj: JsAny?,
     options: IconSetValidationOptions? = definedExternally,
 ): IconifyJSON
 
@@ -74,7 +75,7 @@ external fun validateIconSet(
  *
  * @return the icon set on success, `null` on failure.
  */
-external fun quicklyValidateIconSet(obj: dynamic): IconifyJSON?
+external fun quicklyValidateIconSet(obj: JsAny?): IconifyJSON?
 
 /**
  * Expand a minified icon set in place.
@@ -97,7 +98,7 @@ external fun minifyIconSet(data: IconifyJSON)
  * @param expectedPrefix when set, reject data whose `prefix` does not match.
  * @return the converted information, or `null` if [data] is invalid.
  */
-external fun convertIconSetInfo(data: dynamic, expectedPrefix: String = definedExternally): IconifyInfo?
+external fun convertIconSetInfo(data: JsAny, expectedPrefix: String = definedExternally): IconifyInfo?
 
 /**
  * Parent icons for each icon.
@@ -108,4 +109,4 @@ external fun convertIconSetInfo(data: dynamic, expectedPrefix: String = definedE
  *
  * @param names only resolve these icons; defaults to all icons and aliases.
  */
-external fun getIconsTree(data: IconifyJSON, names: Array<String>? = definedExternally): dynamic
+external fun getIconsTree(data: IconifyJSON, names: Array<String>? = definedExternally): ParentIconsTree

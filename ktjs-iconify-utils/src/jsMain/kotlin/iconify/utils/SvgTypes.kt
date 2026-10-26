@@ -1,5 +1,7 @@
 package iconify.utils
 
+import js.objects.Record
+
 /**
  * SVG viewBox: `[x, y, width, height]`.
  */
@@ -12,7 +14,7 @@ external interface ParsedSVGContent {
     /**
      * Attributes of the `<svg>` element, keyed by attribute name.
      */
-    var attribs: dynamic
+    var attribs: Record<String, String>
 
     /**
      * Inner content of the `<svg>` element.
