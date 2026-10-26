@@ -186,6 +186,25 @@ python3 scripts/hub-release.py --project <owner>/<repo> --release release-1 \
 `AGENTS.md`，不要回灌模板。升级项目时从模板仓 `git diff` 取变更，人工 cherry-pick；不要反向把项目仓当模板源，
 否则通用配置会被某个项目的特例污染。
 
+## 类型安全封装
+
+上游类型到 Kotlin 类型的完整对照与写法整理在同目录的 [TYPE-MAPPING.md](TYPE-MAPPING.md)：联合类型的
+同名工厂模式、字符串字面量的 `sealed external interface` + 常量对象、`web.cssom` / `web.canvas` 值类型、
+`js.objects.unsafeJso`、上游 mixin 与 Kotlin 公共基接口的取舍、`JsAny` / `dynamic` 的边界、上游
+`Omit<...> & { ... }` / `data` 收窄 / 元组 / `T | "none"` 这些 Kotlin 表达不了的写法的固定处理方式、包与
+文件划分、落地检查清单和反模式速查。新增或修改 wrapper 声明前先读它。该文档保持通用措辞，与模板仓库
+`ktjs-wrapper-template` 同步维护。
+
+- 上游 `.d.ts` 声明了类型的成员必须映射成 Kotlin 类型：`any` / `unknown` / `object` 用 `kotlin.js.JsAny`
+  （可空时 `JsAny?`），数组 / 集合 / 字典 / 日期 / Promise 映射到对应类型，回调按签名展开成 Kotlin 函数
+  类型。
+- `dynamic` 只留给「上游自己也没写类型、实现也无法推断」的情况，且要在 KDoc 里注明原因；上游写了
+  `any` / `unknown` 就用 `JsAny`，不要用 `dynamic`。改到已有 `dynamic` 的声明时按上游 `.d.ts` 收紧，
+  不要沿用旧的写法。退化到这两者之前，先按 TYPE-MAPPING 第 12 节过一遍。
+- 字符串字面量用 `sealed external interface` + `Xxx(String)` 工厂 + 常量对象，不要用 `enum class`
+  或 `const val` 字符串常量；CSS 语义字段优先用 `web.cssom` / `web.canvas` 现成类型。
+- 普通对象用 `js.objects.unsafeJso`，不要自造 builder，也不要用 `js("({})")`。
+
 ## 浏览器 DOM 类型体系
 
 统一使用 JetBrains `kotlin-browser`（`org.jetbrains.kotlin-wrappers:kotlin-browser`）的 `web.*` 类型，不要在公开 API 中混用 `org.w3c.dom.*`（Kotlin/JS 自带）或 `kotlinx.browser.*`：
