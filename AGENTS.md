@@ -398,12 +398,13 @@ deployment，Release Count 才只算一次；归档也可以跨项目攒批。�
 归档和注册。
 
 ```bash
-gh workflow run release.yml -f release=release-2 \
+gh workflow run release.yml -f release=release-kt.5 \
   -f modules=ktjs-iconify-icon,ktjs-iconify-utils
 ```
 
-- `release`：`release-<数字>`，本次为 `release-2`。tag 由工作流创建（指向触发时的提交），
-  工作流不会移动已有 tag。
+- `release`：接受 `release-<数字>` 与 `release-kt.<数字>`（当前为 `release-kt.5`）。新发版优先用
+  `release-kt.<N>`，与模块的 `-kt.N` 修订号对齐；历史 tag `release-1` / `release-2` 保持不变。
+  tag 由工作流创建（指向触发时的提交），工作流不会移动已有 tag。
 - `modules`：逗号分隔；留空表示四个模块全发。按上游发版节奏，只列本次修订号变化的模块。
 - `register`（默认 true）：把注册推到 hub；关掉则只做构建和 GitHub Release。
 - `verify`（默认 true）：触发 hub 的 dry run 并等待；关掉则到 Release 为止。

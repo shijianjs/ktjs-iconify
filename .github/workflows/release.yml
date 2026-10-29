@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
     inputs:
       release:
-        description: "Release tag to create or update, e.g. release-2"
+        description: "Release tag to create or update, e.g. release-kt.5"
         required: true
         type: string
       modules:
@@ -57,8 +57,8 @@ jobs:
           RELEASE: ${{ inputs.release }}
         run: |
           set -euo pipefail
-          if [[ ! "$RELEASE" =~ ^release-[0-9]+$ ]]; then
-            echo "::error::release must look like release-<number>, got '$RELEASE'"
+          if [[ ! "$RELEASE" =~ ^release-([0-9]+|kt\.[0-9]+)$ ]]; then
+            echo "::error::release must look like release-<number> or release-kt.<number>, got '$RELEASE'"
             exit 1
           fi
 
