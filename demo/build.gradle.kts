@@ -19,7 +19,7 @@ kotlin {
         jsMain.dependencies {
             implementation(project(":ktjs-iconify-icon"))
             implementation(project(":ktjs-iconify-utils"))
-            implementation("org.jetbrains.kotlin-wrappers:kotlin-browser:2026.10.3")
+            implementation("org.jetbrains.kotlin-wrappers:kotlin-browser:2026.10.4")
         }
 
         jvmTest.dependencies {

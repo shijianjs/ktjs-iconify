@@ -29,7 +29,7 @@ kotlin {
     sourceSets {
         jsMain.dependencies {
             api(project(":ktjs-iconify-types"))
-            api("org.jetbrains.kotlin-wrappers:kotlin-browser:2026.10.3")
+            api("org.jetbrains.kotlin-wrappers:kotlin-browser:2026.10.4")
             implementation(npm("iconify-icon", upstreamVersion))
         }
         jsTest.dependencies {
