@@ -2,7 +2,6 @@ package iconify.utils
 
 import js.objects.Record
 import js.reflect.unsafeCast
-import kotlin.js.JsAny
 
 /**
  * 上游 `number | string`。
