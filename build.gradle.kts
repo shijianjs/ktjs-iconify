@@ -36,7 +36,7 @@ val publishedGroup = "io.github.shijianjs"
 // `js.objects.Record` / `js.reflect.unsafeCast` come from kotlin-wrappers' kotlin-js artifact
 // (pulled in transitively by kotlin-browser). Wrapper modules that do not depend on the DOM still
 // need it for their public types, so add it to every JS main source set.
-val kotlinWrappersVersion = "2026.10.6"
+val kotlinWrappersVersion = "2026.11.0"
 
 // npm package versions live in package.json so that Dependabot can update them.
 // Subprojects read this map to declare npm(...) dependencies and derive their version.
