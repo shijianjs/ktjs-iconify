@@ -4,6 +4,9 @@
 [kotlin-wrappers](https://github.com/JetBrains/kotlin-wrappers) 官方的封装手法，以及在没有生成器 / seskar
 插件时如何写出等价效果。新增或修改 wrapper 声明前先读一遍。
 
+文中的类名（`ZRColor`、`SeriesOption`、`EChartsOption` …）取自 ktjs-echarts，只是示例；换到 iconify /
+vaadin / docusaurus 等项目时替换成本项目对应的类型名和包名，规则本身不变。
+
 核心原则：**上游 `.d.ts` 里写了类型，Kotlin 侧就必须是被编译器检查的类型。** `dynamic` 只用于「上游
 自己也只写了裸 `Function` / `any` 且实现无法推断」的情况；`JsAny` 只用于「上游写 `any` / `unknown` /
 `object` / manifest 缺类型」的成员。退化到 `dynamic` 或 `JsAny` 是最后手段，不是省事手段。
@@ -235,7 +238,15 @@ external interface TooltipOption {
 - 回调直接展开成 Kotlin 函数类型，不用 `dynamic`、不用 `(dynamic) -> dynamic`。
 - 异步返回 `Promise<T>`，不要包一层 `dynamic`。
 - 集合 / 字典 / 日期 / 正则按第 1 节表格映射，别用 `Array<JsAny>` 当万能容器。
-- 上游是 `T | T[]` 时用联合类型或 `Array<T>` + 单值工厂（如 `one(x)`），不要 `Any`。
+- 上游是 `T | T[]` 时统一用 `Array<T>` + 单值工厂（如 `one(x)`），不要 `Any`，也不要同一个接口里
+  一会儿单值一会儿数组：ECharts 的 `getOption()` 会把每个组件字段归一成数组，只有数组类型才能和运行时
+  对得上。
+- 上游是「值 | 回调」时，用两份同名工厂表达：`ZRColor("#5470c6")` 与
+  `ZRColor { params -> ... }`。回调的入参按上游签名展开（颜色回调收的是 `CallbackDataParams`，
+  不是裸 `dynamic`），Kotlin 侧返回值仍是具体类型（颜色回调返回 `String`，由调用方再包一层）。
+- 值可能是「颜色」也可能是「图案」时不要另立字段：zrender 的 `ZRColor` 本来就覆盖
+  `string | gradient | pattern`，给 `PatternObject` 补一份 `ZRColor(...)` 重载即可；
+  反过来，一个 `backgroundColor` 只给了 `String` 就必须改类型，而不是让调用方自己 `unsafeCast`。
 
 ## 8. `JsAny` 与 `dynamic` 的边界
 
@@ -315,13 +326,48 @@ external interface GaugeAxisLineStyleOption : ShadowOption {
 ```
 
 - 只有上游单纯把 `k` 收窄成子类型时才可以直接复用；收窄成**另一类类型**时必须走上面那条。
-- 收窄是 `var`、Kotlin 无法表达时，保留基类型并在 KDoc 写清限制（例如系列级 `itemStyle` 已写进未建模清单）。
+
+### 继承来的 `var` 需要收窄（如各系列的 `coordinateSystem`）
+
+Kotlin 的 `var` 覆盖要求类型完全一致，子接口不能把基接口的 `string` 收窄成 `'cartesian2d' | 'polar'`。此时保留基接口的原字段，在子接口里再加一个映射到**同一个 JS 属性**的强类型成员：
+
+```kotlin
+external interface SeriesOption {
+    var coordinateSystem: String?
+}
+
+external interface LineSeriesOption : SeriesOption {
+    /** 上游 `'cartesian2d' | 'polar'`。 */
+    override var coordinateSystem: String?
+
+    /** [coordinateSystem] 的强类型视图；两个属性写的是同一个 JS 属性。 */
+    @JsName("coordinateSystem")
+    var typedCoordinateSystem: CartesianPolarCoordinateSystem?
+}
+```
+
+- 两个 Kotlin 属性在 JS 侧是同一个属性，赋值后互相可见；`external interface` 上重复声明并在其中一个用 `@JsName` 映射回原名，编译器接受（用探针接口在测试里验证）。
+- 命名统一用 `typed<原字段名>`：它表示「同一个字段的强类型视图」，不是第 9 节里为了避开 DOM 同名冲突的 `Property` 后缀。
+- 基接口保留可写 `String` 访问器，子类型额外提供收窄类型；不要反过来把基接口改成联合，子类型仍然收窄不了，收益更小。
+- 收窄后仍要补 KDoc 说明上游允许的取值，并在测试里同时验证常量字符串与「两个属性指向同一 JS 属性」。
+- 只有「收窄成一组关键字」时值得这么做；上游把字段收窄成另一套复杂对象（系列级 `itemStyle` / `label`）时不要这么做：那种精确类型本身就是基类型的子接口，直接 `unsafeJso<精确类型> { }` 赋给基接口字段即可，读回来时按需 `unsafeCast`。
+- 同一个做法覆盖三种收窄：关键字字段（`coordinateSystem` → `typedCoordinateSystem`）、data item 的 `value`
+  被收窄成数组或联合（`typedValue`，如 `CandlestickDataItemOption`）、以及 label 的 `rotate` 被收窄成
+  `number | 关键字`（`typedRotate`，如 `PieLabelOption` / `GaugeAxisLabelOption` / `SunburstLabelOption`）。
+- **加宽**同一个字段时也是同一套写法。上游 `SankeyEdgeStyleOption.color` 是
+  `ZRColor | "gradient" | "source" | "target"`，而基接口 `LineStyleOption.color` 是窄的 `ZRColor`：
+  建一个不透明联合（`SankeyEdgeColor` + 每支一个同名工厂），再在子接口里加 `@JsName("color") var typedColor`。
+  判断标准是「子接口要表达的类型和基接口不同、又改不了基接口」，收窄加宽都一样。
+- 问题的边界：`@JsName` 同名字段解决的是「一个 `var` 字段被收窄」；「一个字段接受多种类型」属于第 3 节的
+  联合类型，两者常常一起用（`typedPayload: NumberOrCallback`）。
+
 
 ### `data?: unknown` 被各子类型收窄
 
-上游把 `data` 声明在基接口上是 `unknown`（或 `unknown[]`），每个具体类型再收窄成自己的 item 类型。Kotlin 无法收窄 `var`，因此：
+上游把 `data` 声明在基接口上是 `unknown`（或 `unknown[]`），每个具体类型再收窄成自己的 item 类型。
+Kotlin 的 `var` 覆盖要求类型完全一致，所以按基接口的角色分两种处理：
 
-- **不要在基接口声明 `data`**（会挡住子接口的精确类型）；把它放到每个具体类型上：
+- **调用方不需要按基接口读 `data`** 时（如 mark 系列），不要在基接口声明 `data`，直接放到具体类型上：
 
 ```kotlin
 external interface MarkOption { /* 没有 data */ }
@@ -331,8 +377,29 @@ external interface MarkPointOption : MarkOption {
 }
 ```
 
-- 反过来，基接口已经有 `data`、又需要**更富**的 item 时（如层级图的节点），让 item 类型继承
-  `OptionDataItemObject`，再用 `items(...)` 放进通用的 `Array<OptionDataItem?>`。上游没有显式继承但字段一致时同样这样做，并在 KDoc 注明。
+- **基接口被所有具体类型共用、且要能按基接口读**时（`EChartsOption.series` 是 `Array<SeriesOption>`，遍历时
+  要读 `data`），基接口保留**只读**视图，各具体类型再用 `@JsName` 同名属性给出精确的可写视图：
+
+```kotlin
+external interface SeriesOption {
+    /** 通用只读视图；写数据走各具体类型的 `typedData`。 */
+    val data: Array<OptionDataItem?>?
+}
+
+external interface LineSeriesOption : SeriesOption {
+    /** 精确视图；与 `data` 读写同一个 JS 属性。 */
+    @JsName("data")
+    var typedData: Array<LineDataItem?>?
+}
+```
+
+  - item 的「单个值 / 值数组 / item 对象」三种形态用 §3 的联合表达（`LineDataItem`、`BarDataItem`…），
+    每个成员一个同名工厂；item 接口继承 `OptionDataItemObject` 时，还可以用 `items(...)` 塞进通用视图。
+  - item 收窄了 `value`（数组，或 `OptionDataValue | OptionDataValue[]`）时 `OptionDataItemObject.value`
+    的窄类型不够用，再加 `@JsName("value") var typedValue`，见「继承来的 `var` 需要收窄」。
+  - 填充这些属性的 helper（`numbers` / `strings` / `points` / `items` / `dataItems`）是泛型的，元素类型从
+    目标属性推断：`typedData = numbers(1.0, 2.0)`；脱离目标位置使用时（如 `val x = numbers(1.0)`）必须显式
+    标注类型，否则推断不出类型参数。
 
 ### 元组类型 `[A, B]`
 
@@ -358,11 +425,54 @@ fun gaugeColorStop(offset: Double, color: String): GaugeColorStop =
 在字面量类型（第 4 节）之外补一个布尔工厂，把 `false` 也收进同一个类型，例如
 `NodeClickBehavior(false)` / `FocusNodeAdjacency(true)`；需要 `false` 有名字时再给常量（`NodeClickBehaviors.none`）。
 
+### 同一个联合有两个上游名字
+
+上游会把结构相同的联合声明两次，例如 `TopLevelFormatterParams` 与 `TooltipPositionCallbackParams` 都是
+`CallbackDataParams | CallbackDataParams[]`。只建一个不透明接口 + 工厂，另一个名字用 `typealias` 指过来，
+回调签名也直接写前者：
+
+```kotlin
+external interface TopLevelFormatterParams
+fun TopLevelFormatterParams(value: CallbackDataParams): TopLevelFormatterParams = …
+fun TopLevelFormatterParams(values: Array<CallbackDataParams>): TopLevelFormatterParams = …
+typealias TooltipPositionCallbackParams = TopLevelFormatterParams
+```
+
+不要建两个不透明接口：它们在 Kotlin 侧互不赋值，调用方被迫到处 `unsafeCast`，而 JS 侧其实是同一个值。
+
+### `number | callback`
+
+`animationDuration` / `animationDelay` 这类「数字或逐元素回调」用不透明接口 + 数字工厂 + 回调工厂，
+字段类型写成不透明接口，调用方显式包装（`AnimationDuration(500.0)` / `AnimationDuration { 500.0 }`）。
+这与 `SymbolSize` 的做法一致；不要加一整套 `@JsName` 同名字段来覆盖每个分支，ECharts 读的是同一个 JS
+属性，联合类型可以直接透传。
+
 ### 关键字字段要成组处理
 
 上游同一批成员里的关键字字段（如 `layout` / `edgeShape` / `symbolPosition` / `axis.position`）往往是同一轮
 书面里补的。补一个字段时顺手把同一文件里性质相同的字段一起补上，否则会出现「同一个 interface 里一个字段
 是字面量、隔壁字段还是 `String`」的割裂；确实这轮不做的，写进 TODO 并说明原因。
+
+### 泛型 mixin 与 `AnimationKeyframe<T>`
+
+上游把「元素属性包」当类型参数塞进 mixin：
+
+```ts
+interface TransitionOptionMixin<T = Record<string, any>> {
+    transition?: keyof T | (keyof T)[] | 'all';
+    enterFrom?: T;
+}
+interface AnimationKeyframe<T> extends T { easing?: AnimationEasing; percent?: number; }
+```
+
+`AnimationKeyframe<T> extends T` 这种「继承类型参数」在 Kotlin 里无法表达，所以：
+
+- 把 `GroupProps` / `PathProps` / `TextProps` / `ImageProps` 的公共成员收进一个具体的 props 接口
+  （如 `CustomElementProps`），mixin 与关键帧都用它，KDoc 注明上游的泛型参数；
+- 不要给 mixin 加类型参数再用不同的实参去继承——`T & { ... }` 的交叉类型仍然落不下来，只会让
+  调用方多写一层泛型；
+- props 里指向具体子类型（`style` / `shape`）的成员用现成的 `ZRStyleProps` / `ZRShapeProps` 顶替，
+  具体 shape 的差异在 KDoc 里列出，不另建 12 个 builder。
 
 ### 上游真的只写了 `unknown`
 
@@ -396,6 +506,8 @@ enum class AxisType { value, category }            // ❌ 运行时不是字符�
 object AxisType { const val CATEGORY = "category" } // ❌ 字段仍是 String，拼错不报错
 class OptionBuilder { fun build(): JsAny }         // ❌ 用 unsafeJso
 external interface S : LineStyleOption { var color: Array<Stop>? } // ❌ 与基类成员类型冲突，见第 12 节
-override var data: Array<NodeOption>?              // ❌ 基接口是 unknown，var 不能收窄
+override var data: Array<NodeOption>?              // ❌ 基接口的 var 不能收窄成别的类型
+val data: Array<OptionDataItem?>?                  // ✅ 基接口只留给只读视图
+@JsName("data") var typedData: Array<NodeOption>?  // ✅ 具体类型的精确可写视图
 fun stop(o: Double, c: String): Stop = unsafeJso { offset = o; color = c } // ❌ 上游是数组元组
 ```
