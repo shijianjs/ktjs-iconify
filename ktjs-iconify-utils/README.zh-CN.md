@@ -32,11 +32,11 @@
 ## 用法
 
 ```kotlin
-import iconify.IconifyJSON
-import iconify.utils.getIconCSS
-import iconify.utils.getIconData
-import iconify.utils.iconToHTML
-import iconify.utils.iconToSVG
+import io.github.shijianjs.ktjs.iconify.IconifyJSON
+import io.github.shijianjs.ktjs.iconify.utils.getIconCSS
+import io.github.shijianjs.ktjs.iconify.utils.getIconData
+import io.github.shijianjs.ktjs.iconify.utils.iconToHTML
+import io.github.shijianjs.ktjs.iconify.utils.iconToSVG
 import kotlin.js.js
 
 fun renderHome(iconSet: IconifyJSON): String {

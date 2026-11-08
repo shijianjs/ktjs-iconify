@@ -44,7 +44,7 @@ TypeScript 的索引签名（`Record<string, IconifyIcon>` 等）声明为 `dyna
 ## 用法
 
 ```kotlin
-import iconify.IconifyJSON
+import io.github.shijianjs.ktjs.iconify.IconifyJSON
 import kotlin.js.js
 import kotlin.js.unsafeCast
 

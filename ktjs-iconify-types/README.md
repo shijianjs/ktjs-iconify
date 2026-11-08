@@ -46,7 +46,7 @@ because Kotlin has no index signatures. This affects `icons`, `aliases`, `chars`
 ## Usage
 
 ```kotlin
-import iconify.IconifyJSON
+import io.github.shijianjs.ktjs.iconify.IconifyJSON
 import kotlin.js.js
 import kotlin.js.unsafeCast
 

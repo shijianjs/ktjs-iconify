@@ -18,9 +18,9 @@ Iconify API，也可来自本地注册的图标数据。
 ## 用法
 
 ```kotlin
-import iconify.IconifyIcon
-import iconify.addIcon
-import iconify.createIconifyIcon
+import io.github.shijianjs.ktjs.iconify.IconifyIcon
+import io.github.shijianjs.ktjs.iconify.addIcon
+import io.github.shijianjs.ktjs.iconify.createIconifyIcon
 import kotlin.js.js
 import kotlin.js.unsafeCast
 import web.dom.document

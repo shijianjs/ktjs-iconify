@@ -227,7 +227,7 @@ Detekt 版本固定为 `2.0.0-alpha.6`：1.23.8 在 JDK 25 下直接失败，而
 - `@JsModule` 声明必须按 ESM 语义书写：`@file:JsModule` 的顶层函数/类会生成具名导入，安全；
   但顶层 `external val` 配 `@JsName` 会生成 default import，对只有具名导出的包
   （如 `iconify-icon`）必须写成 `@JsModule` + `external object` + 具名属性，见
-  `ktjs-iconify-icon/src/jsMain/kotlin/iconify/IconifyModule.kt`。
+  `ktjs-iconify-icon/src/jsMain/kotlin/io/github/shijianjs/ktjs/iconify/IconifyModule.kt`。
 - 浏览器测试使用新版测试 DSL：`@OptIn(ExperimentalJsTestDsl::class) browser { test { chromium() } }`，
   由 Playwright 驱动并按需安装浏览器。Karma 已废弃，不要再新增 `testTask { useKarma { ... } }`。
 - Node 侧的 `jsNodeTest` 同样按 ESM 产物运行。

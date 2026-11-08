@@ -18,9 +18,9 @@ custom element; icons can come from the Iconify API or from locally registered i
 ## Usage
 
 ```kotlin
-import iconify.IconifyIcon
-import iconify.addIcon
-import iconify.createIconifyIcon
+import io.github.shijianjs.ktjs.iconify.IconifyIcon
+import io.github.shijianjs.ktjs.iconify.addIcon
+import io.github.shijianjs.ktjs.iconify.createIconifyIcon
 import kotlin.js.js
 import kotlin.js.unsafeCast
 import web.dom.document

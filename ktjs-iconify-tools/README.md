@@ -41,9 +41,9 @@ helpers.
 ## Usage
 
 ```kotlin
-import iconify.tools.SVG
-import iconify.tools.blankIconSet
-import iconify.tools.cleanupSVG
+import io.github.shijianjs.ktjs.iconify.tools.SVG
+import io.github.shijianjs.ktjs.iconify.tools.blankIconSet
+import io.github.shijianjs.ktjs.iconify.tools.cleanupSVG
 
 val svg = SVG(
     """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
