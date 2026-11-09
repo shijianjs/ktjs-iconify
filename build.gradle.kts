@@ -86,6 +86,12 @@ subprojects {
         extensions.configure<org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension> {
             compilerOptions {
                 optIn.add("kotlin.js.ExperimentalWasmJsInterop")
+
+                // Kotlin/JS dead-code-eliminates a library's JS output down to the reachable
+                // @JsExport roots, which leaves modules without an export surface empty. Keep the
+                // whole public API: a library cannot know whether it runs as part of a bundle.
+                // Bundling still shakes the unused parts. See AGENTS.md.
+                freeCompilerArgs.add("-Xir-dce=false")
             }
             sourceSets.configureEach {
                 if (name == "jsMain") {
