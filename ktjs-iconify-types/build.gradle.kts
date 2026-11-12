@@ -9,7 +9,10 @@ val npmVersions = rootProject.extra["npmVersions"] as Map<String, String>
 val wrapperRevisions = rootProject.extra["wrapperRevisions"] as Map<String, Int>
 val upstreamVersion = npmVersions.getValue("@iconify/types")
 val wrapperRevision = wrapperRevisions.getValue(project.name)
-version = "$upstreamVersion-kt.$wrapperRevision"
+// Empty in a release build, `-SNAPSHOT` in a working tree: see the note in the root build script.
+@Suppress("UNCHECKED_CAST")
+val versionSuffix = rootProject.extra["versionSuffix"] as String
+version = "$upstreamVersion-kt.$wrapperRevision$versionSuffix"
 description = "Kotlin/JS type declarations for the @iconify/types package."
 
 kotlin {

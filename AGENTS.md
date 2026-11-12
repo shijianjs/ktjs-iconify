@@ -346,6 +346,9 @@ bundle，而消费方打包时本来就会摇树，保留 public API 没有额�
 每个子模块独立版本，格式为 `{上游 npm 版本}-kt.{修订号}`。上游 npm 版本只在根目录 `package.json` 的 `dependencies` 中声明；每个模块的修订号在根目录 `wrapper-revisions.properties` 中维护。根 `build.gradle.kts` 解析这两份数据，分别放入 `extra["npmVersions"]` 与 `extra["wrapperRevisions"]`，各子模块读取后声明 `npm(...)` 并推导版本。禁止在模块脚本里硬编码 npm 版本或 `kt.N`。
 
 - 只发布带 `-kt.N` 后缀的版本，不存在不带后缀的版本。
+- **工作树里的版本一律再带 `-SNAPSHOT`**：推导出的 `X-kt.N` 是「下一个要发的版本」，Central 上还没有，
+  所以开发构建不冒用这个名字（本地发布也不会遮蔽真实版本，消费方能一眼分辨）。`-Pktjs.release=true`
+  去掉后缀，`release.yml` 的两处 Gradle 调用都带着它；本地要发真版本时自己加。
 - 每个模块的修订号独立递增，永不重置为 `kt.1`。它表示该模块的第 N 次 wrapper 发布，与上游 npm 版本各自独立演进。
 - wrapper 代码或该模块的已发布元数据变化时，只把 `wrapper-revisions.properties` 中对应模块的修订号加一；其他模块保持原版本，发布时命令里不列它们，因此不会为它们产生新版本、新文件。Release Count 按 deployment 计，不受模块数影响，见「发布额度与产物瘦身」。
 - 仅上游 npm 版本变化、wrapper 代码没变时，修订号保持不变；Dependabot 改 `package.json` 后，受影响模块的基础版本自动跟随（如 `3.0.4-kt.3` → `3.0.5-kt.3`），该模块作为新版本发布。
