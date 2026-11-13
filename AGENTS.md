@@ -241,6 +241,8 @@ Detekt 版本固定为 `2.0.0-alpha.6`：1.23.8 在 JDK 25 下直接失败，而
 ## UI 编程约定
 
 以下为维护者的通用 UI 编码偏好（源自 duckfn-docs-kit 的约定，只保留与具体项目无关的部分）。新增任何 UI 代码（本仓库的 Web Component 包装、演示页，以及由本仓库派生的 wrapper 项目）都按此执行；与具体模块绑定的细节不写在这里。
+规范正文以 [`.agents/skills/ui-code-style/`](.agents/skills/ui-code-style/SKILL.md) 为准（由
+[`shijianjs/dev-agent-skills`](https://github.com/shijianjs/dev-agent-skills) 分发），本节是它的摘要，只保留与具体项目无关的部分。
 
 ### 包划分：一个包一个概念
 
