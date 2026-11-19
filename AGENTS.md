@@ -626,6 +626,30 @@ klibs.io 没有需要提交的元数据文件，它从 Maven Central 和 GitHub 
   它认不出的值会被静默忽略，只能在浏览器里核对。
 - 本地预览：`./gradlew pagesSite` 后给 `build/pages` 起静态服务器；站点挂在 `/ktjs-iconify/` 前缀下，直接开
   `file://` 会因相对路径与 CORS 打不开。
+- **demo 用 `ktjs-demo-kit` 的外壳**：`index.html` 只剩一个 `<ktjs-demo-layout id="demo">` 加两条 Lumo 样式
+  链接，页面、导航、语言与主题切换、面包屑、版本号都在 kit 里；`demo` 只留内容：
+
+  ```text
+  demo/src/jsMain/kotlin/io/github/shijianjs/ktjs/iconify/demo/
+  ├── Main.kt          挂载外壳：菜单 DemoMenu + 文案 SiteTexts + 版本 / 三个站点链接
+  ├── SiteMenu.kt      siteMenu()（分组与图标）与 siteCatalog()
+  ├── SiteTexts.kt     中英文案
+  └── page/
+      ├── gallery/     GalleryPage.kt          # 概览：八张图标卡
+      ├── element/     TransformationsPage.kt  # rotate / flip / inline
+      ├── element/     ModesPage.kt            # svg / bg / mask
+      ├── utils/       UtilsPage.kt            # 本地注册 + iconToSVG / getIconCSS
+      └── loader/      LoaderPage.kt           # 按名字 loadIcon
+  ```
+
+  四条路由 + 概览，分组是 `start` / `element` / `utils`；**每页一个 `DemoPage` 子类**，只做
+  `page.setTitle/setSummary`、往 `page.body` 加区块，翻译走 `Translations` + `Binder`（切换语言时
+  由外壳调 `applyTranslation`，页面不能自己重建）。
+- demo 的两个构建期拷贝任务：`copyLumoStyles` 从 npm workspace 的
+  `node_modules/@vaadin/vaadin-lumo-styles/dist` 拷 `lumo.css` / `utility.css`（kit 外壳用 Vaadin 组件，
+  缺 Lumo 变量会裸样式），`brandAssets` 从 `docs/src/jsMain/resources/static/img` 拷 logo 进 `img/`——
+  两处都挂在 `jsProcessResources` 上。`compilerOptions.target = "es2015"`：Vaadin 25 的组件包是 ES2022
+  起点，目标不能留默认的 ES5。
 - demo 的端到端测试是 `demo` 的 JVM 目标里的 Playwright JUnit 5 套件
   （`demo/src/jvmTest/kotlin/demo/e2e`）：Playwright 驱动打包后的
   `demo/build/dist/js/productionExecutable`，`DemoServer` 用 Hutool 的 `SimpleServer` 在测试 JVM 内
@@ -634,6 +658,12 @@ klibs.io 没有需要提交的元数据文件，它从 Maven Central 和 GitHub 
   与 Chromium 复用 `:ktjs-iconify-icon:kotlinInstallPlaywrightBrowsers`，因此
   `com.microsoft.playwright:playwright` 的版本必须与 KGP 安装的 npm `playwright` 一致（当前都是
   1.61.0），升级 KGP 后若浏览器版本不匹配，重新跑安装任务。
+- 断言写法跟外壳走：页面内容在 `ktjs-demo-page` 自己的 shadow tree 里，`document.querySelectorAll`
+  恒为空——「每个 icon 都渲染完」这类判断要穿透两层 shadow（`ktjs-demo-layout` → `ktjs-demo-page`）
+  并且要求 `length > 0`，否则空数组的 `every` 恒真、等不到渲染就判过。路由靠点菜单项
+  （`#demo vaadin-side-nav-item[data-route='modes']`），语言靠 `[data-menu='lang']` +
+  `[data-action='lang:zh-Hans']`。`vaadin-text-field` 不是 `<input>`，不要用 `fill()`，用
+  `evaluate("(el, value) => { el.value = value }")`；它的 `label` 是属性，文本节点不会显示。
 - Dokka 2.2.0 同时应用到根项目和四个 wrapper 子模块；聚合入口是根项目的
   `dependencies { dokka(project(...)) }`，任务为 `dokkaGeneratePublicationHtml`（2.x 已移除旧的
   `dokkaHtmlMultiModule`）。
