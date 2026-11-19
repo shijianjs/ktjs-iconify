@@ -57,7 +57,7 @@ kotlin {
         }
 
         jsMain.dependencies {
-            implementation("org.jetbrains.kotlin-wrappers:kotlin-browser:2026.11.0")
+            implementation("org.jetbrains.kotlin-wrappers:kotlin-browser:2026.11.2")
             // The wrappers this page demonstrates.
             implementation(project(":ktjs-iconify-icon"))
             implementation(project(":ktjs-iconify-utils"))
