@@ -604,8 +604,28 @@ klibs.io 没有需要提交的元数据文件，它从 Maven Central 和 GitHub 
 
 ## 演示页面与 GitHub Pages
 
-- `demo` 模块是演示站点，只消费公共 API，不发布、也不进入 Dokka。根 `build.gradle.kts` 的发布与
-  Dokka 配置都按 `ktjs-iconify-` 前缀过滤子模块，新增非发布模块时沿用该约定。
+- 站点分三块，全部由 `./gradlew pagesSite` 组装进 `build/pages`：**文档在根目录**、演示在 `demo/`、API 文档
+  在 `api/`。`pages.yml` 只有 `workflow_dispatch`，不随 push 自动部署；Settings → Pages 的 Source 必须选
+  **GitHub Actions**。
+- 站点地址为 `https://shijianjs.github.io/ktjs-iconify/`，演示在 `/demo/`，API 文档在 `/api/`；README、
+  模块 README 与 `Config.kt` 的导航都把这两个地址写成完整 URL（写成 `/demo/` 这类站内路径会被
+  `onBrokenLinks = throw` 判成死链，因为那不是本 Docusaurus 构建的路由）。
+- **docs 模块**（`:docs`）是 Docusaurus 站点，配置在 Kotlin 里：`docs/src/jsMain/kotlin/…/Config.kt`（导航、
+  i18n、侧栏、prism、mermaid）、`ClientModule.kt`（route 变化后装 kit 元素与右侧目录折叠）、
+  `resources/{css,pages,docs,static,i18n}`。文案与页面都放在 `resources` 下，构建产物在
+  `build/js/docusaurus/docs/build`。
+- 首页一律用 **ktjs-docusaurus-kit** 的组件（`<ktjs-hero>` / `<ktjs-features>` / `<ktjs-next-steps>` /
+  `<ktjs-action>` / `<ktjs-badge>`），不要手搓等价版式；这些元素在各自 shadow root 里，用普通 CSS 选择器
+  在文档页面上找不到它们，验收要连 shadow 一起看。
+- 每页中英成对：英文在 `resources/docs/`，中文在 `resources/i18n/zh-Hans/docusaurus-plugin-content-docs/current/`
+  的同名相对路径；`Config.kt` 的 `sidebars()` 列的是这些 doc id，漏一边就是 404。
+- **`startArguments = listOf("--locale", "zh-Hans")`**：`./gradlew :docs:docusaurusStart` 默认起中文站；开发
+  另一个语言时用 `--locale en`。
+- 图用 mermaid 围栏块（` ```mermaid `），不要贴图片：主题在 `themes` 里注册了 `@docusaurus/theme-mermaid`，
+  亮暗切换会跟着变。`themeConfig.mermaid.theme` 用的是 mermaid 自家的 `redux-color` / `redux-dark-color`，
+  它认不出的值会被静默忽略，只能在浏览器里核对。
+- 本地预览：`./gradlew pagesSite` 后给 `build/pages` 起静态服务器；站点挂在 `/ktjs-iconify/` 前缀下，直接开
+  `file://` 会因相对路径与 CORS 打不开。
 - demo 的端到端测试是 `demo` 的 JVM 目标里的 Playwright JUnit 5 套件
   （`demo/src/jvmTest/kotlin/demo/e2e`）：Playwright 驱动打包后的
   `demo/build/dist/js/productionExecutable`，`DemoServer` 用 Hutool 的 `SimpleServer` 在测试 JVM 内
@@ -614,24 +634,20 @@ klibs.io 没有需要提交的元数据文件，它从 Maven Central 和 GitHub 
   与 Chromium 复用 `:ktjs-iconify-icon:kotlinInstallPlaywrightBrowsers`，因此
   `com.microsoft.playwright:playwright` 的版本必须与 KGP 安装的 npm `playwright` 一致（当前都是
   1.61.0），升级 KGP 后若浏览器版本不匹配，重新跑安装任务。
-- `./gradlew pagesSite` 把 `demo/build/dist/js/productionExecutable` 与 `build/dokka/html`
-  组装到 `build/pages`：演示页在根目录，API 文档在 `api/`。演示页内部链接使用相对路径，因此
-  `/api/` 在本地和 Pages 上都可用。
 - Dokka 2.2.0 同时应用到根项目和四个 wrapper 子模块；聚合入口是根项目的
   `dependencies { dokka(project(...)) }`，任务为 `dokkaGeneratePublicationHtml`（2.x 已移除旧的
   `dokkaHtmlMultiModule`）。
-- `.github/workflows/pages.yml` 只有 `workflow_dispatch`：**不再由 push 到 `master` 自动部署**，
-  站点更新要在内容值得上线后手动执行 `gh workflow run pages.yml`（或 Actions 页面点 Run workflow）。
-  它会重新跑 `pagesSite` 再部署，所以线上内容始终对应触发时 `master` 的提交。仓库
-  Settings → Pages 的 Source 必须选 **GitHub Actions**（一次性配置，工作流不会自动改）。
-- 站点地址为 `https://shijianjs.github.io/ktjs-iconify/`，API 文档在 `/api/`；README、模块
-  README 和演示页导航都链接到这两个地址，改仓库名时要一起更新。
-- 本地预览：执行 `./gradlew pagesSite` 后给 `build/pages` 起任意静态服务器。直接开
-  `file://` 会因相对路径与 CORS 导致图标和文档跳转异常。
+- 文档站构建的两个坑：① `mavenLocal()` 里 POM-only 的 `kotlin-stdlib` 会让 `:docs:compileKotlinJs` 在每个文件上
+  报 `Missing stdlib class`，`settings.gradle.kts` 因此用 `exclusiveContent` 把 `org.jetbrains.kotlin` 钉到
+  Central；② 根 `package.json` 缺 `browserslist` 时 Babel 没有目标、async/await 降级，mermaid 的
+  `__DOCUSAURUS_MERMAID_LAYOUT_ELK_ENABLED__` 守卫不再被摇掉，构建会去找没装的
+  `@mermaid-js/layout-elk` 而失败。
 
 ## 文档约定
 
 - 需要跨会话、跨上下文感知的信息（环境约定、构建方式、模块结构、容易踩的坑）记录在本文件。
 - 只与某个目录强相关、篇幅较长的说明，放在该目录下的 `AGENTS.md`（如 `ktjs-iconify-tools/AGENTS.md`），根文件只保留指向它的简短索引。
 - 跨项目需要感知的信息也记录在本文件：本仓库会作为模板创建更多 wrapper 项目，约定应写成不依赖具体模块名的通用规则，而不是只活在当前模块或当前对话里。
+- **能画就画**：结构、依赖方向、数据流向、调用时序、状态机能用 mermaid 说清的一定画图，不要只堆段落和表格；
+  图与正文同语言，图里不写实现细节。表格留给并列取值与选项对照。
 - 公开声明都要有 KDoc：上游源码或 README 有说明的，翻译并改写过来；没有的按实际行为补充。描述以源码为准，不要照搬过时或错误的理解。

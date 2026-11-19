@@ -1,0 +1,57 @@
+---
+title: ktjs-iconify
+description: Kotlin/JS wrappers for the Iconify ecosystem
+hide_table_of_contents: true
+---
+
+import logo from '@site/static/img/ktjs-iconify-logo.png';
+
+{/* The `<ktjs-…>` sections come from the ktjs-docusaurus kit: the Gradle plugin publishes its bundle
+    under `static/ktjs-client/`, and `ClientModule.kt` loads it once the page is hydrated. `href`s stay
+    relative so the same page works under both locale prefixes; `logo` is imported so the URL carries
+    whatever `baseUrl` this site is deployed under. */}
+
+<ktjs-hero logo-src={logo} title="ktjs-iconify" tagline="The Iconify ecosystem in Kotlin/JS, typed from the upstream declarations">
+
+<ktjs-action kind="primary" href="guide/getting-started">Get started</ktjs-action>
+
+<ktjs-action kind="secondary" href="https://github.com/shijianjs/ktjs-iconify" icon="simple-icons:github">GitHub</ktjs-action>
+
+<ktjs-action kind="secondary" href="https://shijianjs.github.io/ktjs-iconify/demo/" icon="lucide:play">Demo</ktjs-action>
+
+<ktjs-badge href="https://github.com/shijianjs/ktjs-iconify/blob/main/LICENSE" src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></ktjs-badge>
+
+<ktjs-badge href="https://github.com/shijianjs/ktjs-iconify" src="https://img.shields.io/badge/Kotlin%2FJS-2.4.21-7F52FF?logo=kotlin&logoColor=white" alt="Kotlin/JS"></ktjs-badge>
+</ktjs-hero>
+
+<ktjs-features section-title="What the wrappers give you" tinted>
+
+<ktjs-feature icon="lucide:component" title="The element, typed">`<iconify-icon>` as an external class: `icon`, `mode`, `inline`, `width` / `height`, `rotate` / `flip` and `status`, all Kotlin properties.</ktjs-feature>
+
+<ktjs-feature icon="lucide:palette" title="Icon sets without an API call">`addIcon` / `addCollection` register data locally; `loadIcon` / `loadIcons` fetch from the Iconify API when you want it.</ktjs-feature>
+
+<ktjs-feature icon="lucide:cpu" title="SVG and CSS generation">`iconToSVG`, `iconToHTML`, `getIconCSS` / `getIconsCSS` and `iconToSVG` customisations come from `@iconify/utils`.</ktjs-feature>
+
+<ktjs-feature icon="lucide:folder-tree" title="Build-time tooling">`@iconify/tools` in Node: `SVG`, `IconSet`, `importDirectory` / `exportIconPackage`, `cleanupSVG`, `runSVGO`, `parseColors`.</ktjs-feature>
+
+<ktjs-feature icon="lucide:shapes" title="Shared types">`@iconify/types` declares `IconifyJSON`, `IconifyIcon`, `IconifyAlias` and the customisation records the other modules build on.</ktjs-feature>
+
+<ktjs-feature icon="lucide:languages" title="Docs and demo in two languages">The documentation and the demo page both switch between English and Chinese.</ktjs-feature>
+
+</ktjs-features>
+
+<ktjs-next-steps section-title="Where to go next">
+
+<ktjs-step href="intro" title="Introduction">The four modules, how they depend on each other and how they are versioned.</ktjs-step>
+
+<ktjs-step href="guide/getting-started" title="Getting started">Install a module, render an icon and register icon data locally.</ktjs-step>
+
+<ktjs-step href="guide/icon-element" title="The icon element">Modes, transformations, inline rendering and the loader functions.</ktjs-step>
+
+<ktjs-step href="guide/utils" title="Utils">Parsing icon sets, generating SVG and CSS, colour helpers.</ktjs-step>
+
+<ktjs-step href="https://shijianjs.github.io/ktjs-iconify/demo/" title="Live demo">The icon gallery, the SVG / background / mask modes and a loader for any icon name.</ktjs-step>
+
+<ktjs-step href="https://shijianjs.github.io/ktjs-iconify/api/" title="API reference">Dokka output for the published modules.</ktjs-step>
+
+</ktjs-next-steps>

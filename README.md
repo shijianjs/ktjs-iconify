@@ -4,7 +4,8 @@ Kotlin/JS wrappers for the [Iconify](https://iconify.design/) ecosystem.
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
-**[Live demo](https://shijianjs.github.io/ktjs-iconify/)** ·
+**[Documentation](https://shijianjs.github.io/ktjs-iconify/)** ·
+**[Live demo](https://shijianjs.github.io/ktjs-iconify/demo/)** ·
 **[API reference](https://shijianjs.github.io/ktjs-iconify/api/)**
 
 The repository keeps one `ktjs-*` Gradle module per npm package because the four upstream packages
@@ -63,10 +64,18 @@ the `npm(...)` dependency from these two files:
 ./gradlew :demo:e2eTest
 ```
 
-The GitHub Pages site (demo at the root, Dokka output under `/api/`) is assembled by:
+The GitHub Pages site (documentation at the root, demo under `/demo/`, Dokka output under `/api/`) is
+assembled by:
 
 ```bash
 ./gradlew pagesSite
+```
+
+The documentation site on its own, with the Kotlin/JS dev server:
+
+```bash
+./gradlew :docs:docusaurusStart      # Chinese by default; --locale en for English
+./gradlew :docs:docusaurusBuild
 ```
 
 After adding or upgrading an npm dependency in a module, refresh the shared lock file:

@@ -4,7 +4,8 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
-**[在线演示](https://shijianjs.github.io/ktjs-iconify/)** ·
+**[文档](https://shijianjs.github.io/ktjs-iconify/)** ·
+**[在线演示](https://shijianjs.github.io/ktjs-iconify/demo/)** ·
 **[API 文档](https://shijianjs.github.io/ktjs-iconify/api/)**
 
 本仓库为每个 npm 包保留一个 `ktjs-*` Gradle 子模块，因为这四个上游包的版本相互独立。
@@ -60,10 +61,17 @@
 ./gradlew :demo:e2eTest
 ```
 
-GitHub Pages 站点（根目录为演示页，`/api/` 为 Dokka 文档）由以下任务组装：
+GitHub Pages 站点（根目录为文档，`/demo/` 为演示页，`/api/` 为 Dokka 文档）由以下任务组装：
 
 ```bash
 ./gradlew pagesSite
+```
+
+文档站单独开发时用 Kotlin/JS 的开发服务器：
+
+```bash
+./gradlew :docs:docusaurusStart      # 默认中文；要英文加 --locale en
+./gradlew :docs:docusaurusBuild
 ```
 
 在模块中新增或升级 npm 依赖后，需要刷新共享锁文件：

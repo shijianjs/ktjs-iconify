@@ -1,0 +1,56 @@
+---
+title: ktjs-iconify
+description: Iconify 生态的 Kotlin/JS 封装
+hide_table_of_contents: true
+---
+
+import logo from '@site/static/img/ktjs-iconify-logo.png';
+
+{/* `<ktjs-…>` 这一段来自 ktjs-docusaurus kit：Gradle 插件把它的 bundle 发布到 `static/ktjs-client/`，
+    `ClientModule.kt` 在页面 hydrate 之后加载它。`href` 一律相对，这样两种 locale 前缀下都能用；
+    `logo` 通过 import 拿 URL，部署在哪个 `baseUrl` 下都正确。 */}
+
+<ktjs-hero logo-src={logo} title="ktjs-iconify" tagline="Iconify 生态的 Kotlin/JS 封装，类型来自上游声明">
+
+<ktjs-action kind="primary" href="guide/getting-started">开始使用</ktjs-action>
+
+<ktjs-action kind="secondary" href="https://github.com/shijianjs/ktjs-iconify" icon="simple-icons:github">GitHub</ktjs-action>
+
+<ktjs-action kind="secondary" href="https://shijianjs.github.io/ktjs-iconify/demo/" icon="lucide:play">演示</ktjs-action>
+
+<ktjs-badge href="https://github.com/shijianjs/ktjs-iconify/blob/main/LICENSE" src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></ktjs-badge>
+
+<ktjs-badge href="https://github.com/shijianjs/ktjs-iconify" src="https://img.shields.io/badge/Kotlin%2FJS-2.4.21-7F52FF?logo=kotlin&logoColor=white" alt="Kotlin/JS"></ktjs-badge>
+</ktjs-hero>
+
+<ktjs-features section-title="这套封装给你什么" tinted>
+
+<ktjs-feature icon="lucide:component" title="元素也是类型">`<iconify-icon>` 声明成 external class：`icon`、`mode`、`inline`、`width` / `height`、`rotate` / `flip`、`status` 全是 Kotlin 属性。</ktjs-feature>
+
+<ktjs-feature icon="lucide:palette" title="不发请求也能有图标">`addIcon` / `addCollection` 本地注册数据；想走 Iconify API 时用 `loadIcon` / `loadIcons`。</ktjs-feature>
+
+<ktjs-feature icon="lucide:cpu" title="SVG 与 CSS 生成">`iconToSVG`、`iconToHTML`、`getIconCSS` / `getIconsCSS` 与定制项，来自 `@iconify/utils`。</ktjs-feature>
+
+<ktjs-feature icon="lucide:folder-tree" title="构建期工具">Node 里的 `@iconify/tools`：`SVG`、`IconSet`、`importDirectory` / `exportIconPackage`、`cleanupSVG`、`runSVGO`、`parseColors`。</ktjs-feature>
+
+<ktjs-feature icon="lucide:shapes" title="共享类型">`@iconify/types` 声明了 `IconifyJSON`、`IconifyIcon`、`IconifyAlias` 与其他模块依赖的定制项记录。</ktjs-feature>
+
+<ktjs-feature icon="lucide:languages" title="文档与演示都有中英">文档与演示页都能在英文与简体中文之间切换。</ktjs-feature>
+
+</ktjs-features>
+
+<ktjs-next-steps section-title="接下来看哪里">
+
+<ktjs-step href="intro" title="简介">四个模块、它们之间怎么依赖、版本怎么定。</ktjs-step>
+
+<ktjs-step href="guide/getting-started" title="快速开始">装一个模块、渲染一个图标、本地注册图标数据。</ktjs-step>
+
+<ktjs-step href="guide/icon-element" title="图标元素">模式、变换、内联渲染与加载函数。</ktjs-step>
+
+<ktjs-step href="guide/utils" title="Utils">解析图标集、生成 SVG 与 CSS、颜色辅助。</ktjs-step>
+
+<ktjs-step href="https://shijianjs.github.io/ktjs-iconify/demo/" title="在线演示">图标墙、svg / bg / mask 三种模式，以及任意图标名的加载器。</ktjs-step>
+
+<ktjs-step href="https://shijianjs.github.io/ktjs-iconify/api/" title="API 参考">已发布模块的 Dokka 输出。</ktjs-step>
+
+</ktjs-next-steps>
