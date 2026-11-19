@@ -1,14 +1,17 @@
 package io.github.shijianjs.ktjs.iconify.demo.page.loader
 
+import io.github.shijianjs.ktjs.demo.page.DemoPage
+import io.github.shijianjs.ktjs.dom.element.invoke
+import io.github.shijianjs.ktjs.dom.webcomponent.defineIfMissing
+import web.components.CustomElementReference
+import web.dom.TagName
 import io.github.shijianjs.ktjs.demo.i18n.Binder
 import io.github.shijianjs.ktjs.demo.i18n.Lang
 import io.github.shijianjs.ktjs.demo.i18n.Langs
 import io.github.shijianjs.ktjs.demo.i18n.Translations
 import io.github.shijianjs.ktjs.demo.i18n.texts
-import io.github.shijianjs.ktjs.demo.nav.Page
 import io.github.shijianjs.ktjs.demo.page.Readout
 import io.github.shijianjs.ktjs.demo.page.exampleBox
-import io.github.shijianjs.ktjs.demo.page.newPage
 import io.github.shijianjs.ktjs.demo.page.paragraph
 import io.github.shijianjs.ktjs.demo.page.row
 import io.github.shijianjs.ktjs.demo.page.sectionBlock
@@ -91,11 +94,9 @@ private val texts: Translations<LoaderTexts> = texts(
 )
 
 /** One form: a field, a button, a status line and the rendered result. */
-internal class LoaderPage : Page {
-    private val page = newPage()
+internal class LoaderPage : DemoPage() {
     private val binder = Binder(texts)
 
-    override val node: HTMLElement get() = page
 
     private val field = createTextField {
         placeholder = "mdi:home"
@@ -137,7 +138,7 @@ internal class LoaderPage : Page {
         binder.bind(note) { it.note }
         section.body.append(note)
 
-        page.body.append(section.root)
+        body.append(section.root)
     }
 
     private fun submit() {
@@ -167,7 +168,7 @@ internal class LoaderPage : Page {
     }
 
     private fun showState() {
-        val current = texts[lang]
+        val current = texts[shownIn]
         status.set(
             when (val value = state) {
                 is LoaderState.Idle -> current.idle
@@ -181,16 +182,35 @@ internal class LoaderPage : Page {
         field.disabled = state is LoaderState.Loading
     }
 
-    /** The language the page is currently shown in; the layout calls [applyTranslation] first. */
-    private var lang: Lang = Langs.EN
+    /**
+     * The language the page is currently shown in; the layout calls [applyTranslation] first.
+     *
+     * Not lang: that name is an attribute of HTMLElement (the lang a page element would carry).
+     */
+    private var shownIn: Lang = Langs.EN
 
     override fun applyTranslation(lang: Lang) {
-        this.lang = lang
-        val current = texts[lang]
-        page.setTitle(current.title)
-        page.setSummary(current.summary)
+        shownIn = lang
+        val current = texts[shownIn]
+        setTitle(current.title)
+        setSummary(current.summary)
         field.label = current.fieldLabel
         binder.apply(lang)
         showState()
     }
+
+    companion object : CustomElementReference<LoaderPage>(LoaderPage::class.js) {
+        val NAME: TagName<LoaderPage> = TagName("iconify-loader-page")
+
+        fun define() {
+            defineIfMissing(NAME, this)
+        }
+    }
 }
+
+/** Creates a defined `<iconify-loader-page>`. */
+internal fun newLoaderPage(): LoaderPage {
+    LoaderPage.define()
+    return LoaderPage.NAME()
+}
+

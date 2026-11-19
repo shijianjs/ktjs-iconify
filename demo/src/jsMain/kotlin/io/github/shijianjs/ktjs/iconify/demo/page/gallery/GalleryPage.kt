@@ -1,15 +1,18 @@
 package io.github.shijianjs.ktjs.iconify.demo.page.gallery
 
+import io.github.shijianjs.ktjs.demo.page.DemoPage
+import io.github.shijianjs.ktjs.dom.element.invoke
+import io.github.shijianjs.ktjs.dom.webcomponent.defineIfMissing
+import web.components.CustomElementReference
+import web.dom.TagName
 import io.github.shijianjs.ktjs.demo.i18n.Binder
 import io.github.shijianjs.ktjs.demo.i18n.Lang
 import io.github.shijianjs.ktjs.demo.i18n.Langs
 import io.github.shijianjs.ktjs.demo.i18n.Translations
 import io.github.shijianjs.ktjs.demo.i18n.texts
-import io.github.shijianjs.ktjs.demo.nav.Page
 import io.github.shijianjs.ktjs.demo.page.anchor
 import io.github.shijianjs.ktjs.demo.page.exampleBox
 import io.github.shijianjs.ktjs.demo.page.grid
-import io.github.shijianjs.ktjs.demo.page.newPage
 import io.github.shijianjs.ktjs.demo.page.paragraph
 import io.github.shijianjs.ktjs.demo.page.sectionBlock
 import io.github.shijianjs.ktjs.iconify.createIconifyIcon
@@ -65,15 +68,13 @@ private val texts: Translations<GalleryTexts> = texts(
 )
 
 /** The landing page: one section of cards, one card per icon. */
-internal class GalleryPage : Page {
-    private val page = newPage()
+internal class GalleryPage : DemoPage() {
     private val binder = Binder(texts)
 
-    override val node: HTMLElement get() = page
 
     init {
         binder.bind(anchor(english.docsLink, "docs/guide/icon-element")) { it.docsLink }
-            .also { page.addLink(it) }
+            .also { addLink(it) }
 
         val section = sectionBlock(english.sectionTitle, english.sectionHint)
         binder.bind(section.title) { it.sectionTitle }
@@ -88,13 +89,27 @@ internal class GalleryPage : Page {
         binder.bind(note) { it.note }
         section.body.append(note)
 
-        page.body.append(section.root)
+        body.append(section.root)
     }
 
     override fun applyTranslation(lang: Lang) {
         val current = texts[lang]
-        page.setTitle(current.title)
-        page.setSummary(current.summary)
+        setTitle(current.title)
+        setSummary(current.summary)
         binder.apply(lang)
     }
+
+    companion object : CustomElementReference<GalleryPage>(GalleryPage::class.js) {
+        val NAME: TagName<GalleryPage> = TagName("iconify-gallery-page")
+
+        fun define() {
+            defineIfMissing(NAME, this)
+        }
+    }
+}
+
+/** Creates a defined `<iconify-gallery-page>`. */
+internal fun newGalleryPage(): GalleryPage {
+    GalleryPage.define()
+    return GalleryPage.NAME()
 }

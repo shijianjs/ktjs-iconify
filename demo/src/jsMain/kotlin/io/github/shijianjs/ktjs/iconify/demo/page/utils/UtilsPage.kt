@@ -1,15 +1,18 @@
 package io.github.shijianjs.ktjs.iconify.demo.page.utils
 
+import io.github.shijianjs.ktjs.demo.page.DemoPage
+import io.github.shijianjs.ktjs.dom.element.invoke
+import io.github.shijianjs.ktjs.dom.webcomponent.defineIfMissing
+import web.components.CustomElementReference
+import web.dom.TagName
 import io.github.shijianjs.ktjs.demo.i18n.Binder
 import io.github.shijianjs.ktjs.demo.i18n.Lang
 import io.github.shijianjs.ktjs.demo.i18n.Langs
 import io.github.shijianjs.ktjs.demo.i18n.Translations
 import io.github.shijianjs.ktjs.demo.i18n.texts
-import io.github.shijianjs.ktjs.demo.nav.Page
 import io.github.shijianjs.ktjs.demo.page.Readout
 import io.github.shijianjs.ktjs.demo.page.codeText
 import io.github.shijianjs.ktjs.demo.page.exampleBox
-import io.github.shijianjs.ktjs.demo.page.newPage
 import io.github.shijianjs.ktjs.demo.page.paragraph
 import io.github.shijianjs.ktjs.demo.page.row
 import io.github.shijianjs.ktjs.demo.page.sectionBlock
@@ -95,11 +98,9 @@ private val texts: Translations<UtilsTexts> = texts(
 )
 
 /** Three sections: local registration, SVG generation and CSS generation. */
-internal class UtilsPage : Page {
-    private val page = newPage()
+internal class UtilsPage : DemoPage() {
     private val binder = Binder(texts)
 
-    override val node: HTMLElement get() = page
 
     /** Computed once: the values are deterministic, so a language switch must not re-run them. */
     private val storedBodyLength: Int
@@ -152,14 +153,22 @@ internal class UtilsPage : Page {
         binder.bind(cssSection.hint) { it.cssHint }
         cssSection.body.append(codeText(buildCss()))
 
-        page.body.append(registrationSection.root, svgSection.root, cssSection.root)
+        body.append(registrationSection.root, svgSection.root, cssSection.root)
     }
 
     override fun applyTranslation(lang: Lang) {
         val current = texts[lang]
-        page.setTitle(current.title)
-        page.setSummary(current.summary)
+        setTitle(current.title)
+        setSummary(current.summary)
         binder.apply(lang)
+    }
+
+    companion object : CustomElementReference<UtilsPage>(UtilsPage::class.js) {
+        val NAME: TagName<UtilsPage> = TagName("iconify-utils-page")
+
+        fun define() {
+            defineIfMissing(NAME, this)
+        }
     }
 }
 
@@ -198,4 +207,10 @@ private fun buildSvg(): SvgReport {
 private fun buildCss(): String {
     val icon = getIcon("demo:star") ?: return "(icon data unavailable)"
     return getIconCSS(icon, js("({ iconSelector: '.demo-star' })"))
+}
+
+/** Creates a defined `<iconify-utils-page>`. */
+internal fun newUtilsPage(): UtilsPage {
+    UtilsPage.define()
+    return UtilsPage.NAME()
 }

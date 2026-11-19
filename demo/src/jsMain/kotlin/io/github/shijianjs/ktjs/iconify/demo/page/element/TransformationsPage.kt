@@ -1,15 +1,18 @@
 package io.github.shijianjs.ktjs.iconify.demo.page.element
 
+import io.github.shijianjs.ktjs.demo.page.DemoPage
+import io.github.shijianjs.ktjs.dom.element.invoke
+import io.github.shijianjs.ktjs.dom.webcomponent.defineIfMissing
+import web.components.CustomElementReference
+import web.dom.TagName
 import io.github.shijianjs.ktjs.demo.i18n.Binder
 import io.github.shijianjs.ktjs.demo.i18n.Lang
 import io.github.shijianjs.ktjs.demo.i18n.Langs
 import io.github.shijianjs.ktjs.demo.i18n.Translations
 import io.github.shijianjs.ktjs.demo.i18n.texts
-import io.github.shijianjs.ktjs.demo.nav.Page
 import io.github.shijianjs.ktjs.demo.page.codeText
 import io.github.shijianjs.ktjs.demo.page.exampleBox
 import io.github.shijianjs.ktjs.demo.page.grid
-import io.github.shijianjs.ktjs.demo.page.newPage
 import io.github.shijianjs.ktjs.demo.page.paragraph
 import io.github.shijianjs.ktjs.demo.page.sectionBlock
 import io.github.shijianjs.ktjs.iconify.IconifyIconElement
@@ -63,11 +66,9 @@ private val texts: Translations<TransformationsTexts> = texts(
 )
 
 /** Two sections: the attribute matrix, and what `inline` changes. */
-internal class TransformationsPage : Page {
-    private val page = newPage()
+internal class TransformationsPage : DemoPage() {
     private val binder = Binder(texts)
 
-    override val node: HTMLElement get() = page
 
     init {
         val transformSection = sectionBlock(english.transformTitle, english.transformHint)
@@ -98,13 +99,27 @@ internal class TransformationsPage : Page {
         )
         inlineSection.body.append(sentence, codeText("createIconifyIcon(\"mdi:heart\") { inline = true }"))
 
-        page.body.append(transformSection.root, inlineSection.root)
+        body.append(transformSection.root, inlineSection.root)
     }
 
     override fun applyTranslation(lang: Lang) {
         val current = texts[lang]
-        page.setTitle(current.title)
-        page.setSummary(current.summary)
+        setTitle(current.title)
+        setSummary(current.summary)
         binder.apply(lang)
     }
+
+    companion object : CustomElementReference<TransformationsPage>(TransformationsPage::class.js) {
+        val NAME: TagName<TransformationsPage> = TagName("iconify-transformations-page")
+
+        fun define() {
+            defineIfMissing(NAME, this)
+        }
+    }
+}
+
+/** Creates a defined `<iconify-transformations-page>`. */
+internal fun newTransformationsPage(): TransformationsPage {
+    TransformationsPage.define()
+    return TransformationsPage.NAME()
 }

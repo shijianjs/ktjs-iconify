@@ -1,15 +1,18 @@
 package io.github.shijianjs.ktjs.iconify.demo.page.element
 
+import io.github.shijianjs.ktjs.demo.page.DemoPage
+import io.github.shijianjs.ktjs.dom.element.invoke
+import io.github.shijianjs.ktjs.dom.webcomponent.defineIfMissing
+import web.components.CustomElementReference
+import web.dom.TagName
 import io.github.shijianjs.ktjs.demo.i18n.Binder
 import io.github.shijianjs.ktjs.demo.i18n.Lang
 import io.github.shijianjs.ktjs.demo.i18n.Langs
 import io.github.shijianjs.ktjs.demo.i18n.Translations
 import io.github.shijianjs.ktjs.demo.i18n.texts
-import io.github.shijianjs.ktjs.demo.nav.Page
 import io.github.shijianjs.ktjs.demo.page.codeText
 import io.github.shijianjs.ktjs.demo.page.exampleBox
 import io.github.shijianjs.ktjs.demo.page.grid
-import io.github.shijianjs.ktjs.demo.page.newPage
 import io.github.shijianjs.ktjs.demo.page.paragraph
 import io.github.shijianjs.ktjs.demo.page.sectionBlock
 import io.github.shijianjs.ktjs.dom.element.inlineStyle
@@ -57,11 +60,9 @@ private val texts: Translations<ModesTexts> = texts(
 )
 
 /** One section of mode cards; the mask example is tinted to show that it takes the text colour. */
-internal class ModesPage : Page {
-    private val page = newPage()
+internal class ModesPage : DemoPage() {
     private val binder = Binder(texts)
 
-    override val node: HTMLElement get() = page
 
     init {
         val section = sectionBlock(english.sectionTitle, english.sectionHint)
@@ -83,13 +84,27 @@ internal class ModesPage : Page {
         binder.bind(note) { it.maskNote }
         section.body.append(note, codeText("createIconifyIcon(\"mdi:star\") { mode = \"mask\" }"))
 
-        page.body.append(section.root)
+        body.append(section.root)
     }
 
     override fun applyTranslation(lang: Lang) {
         val current = texts[lang]
-        page.setTitle(current.title)
-        page.setSummary(current.summary)
+        setTitle(current.title)
+        setSummary(current.summary)
         binder.apply(lang)
     }
+
+    companion object : CustomElementReference<ModesPage>(ModesPage::class.js) {
+        val NAME: TagName<ModesPage> = TagName("iconify-modes-page")
+
+        fun define() {
+            defineIfMissing(NAME, this)
+        }
+    }
+}
+
+/** Creates a defined `<iconify-modes-page>`. */
+internal fun newModesPage(): ModesPage {
+    ModesPage.define()
+    return ModesPage.NAME()
 }
