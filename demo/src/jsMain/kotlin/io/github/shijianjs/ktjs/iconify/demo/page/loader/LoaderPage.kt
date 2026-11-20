@@ -26,38 +26,6 @@ import web.html.HtmlTagName
 import web.pointer.CLICK
 import web.pointer.PointerEvent
 
-/** What the form is showing right now; the states that name an icon carry that name. */
-private sealed interface LoaderState {
-    data object Idle : LoaderState
-
-    data object MissingName : LoaderState
-
-    data class Loading(val name: String) : LoaderState
-
-    data class Loaded(val name: String, val width: Int, val height: Int) : LoaderState
-
-    data class Failed(val name: String, val error: String?) : LoaderState
-}
-
-private class LoaderTexts(
-    val title: String,
-    val summary: String,
-    val sectionTitle: String,
-    val sectionHint: String,
-    val fieldLabel: String,
-    val buttonLabel: String,
-    val idle: String,
-    val missingName: String,
-    val unknownError: String,
-    val note: String,
-) {
-    fun loading(name: String): String = "Loading $name …"
-
-    fun loaded(name: String, width: Int, height: Int): String = "$name → ${width}×${height}"
-
-    fun failed(name: String, error: String): String = "$name failed: $error"
-}
-
 private val english: LoaderTexts = LoaderTexts(
     title = "Load an icon by name",
     summary = "`loadIcon` asks the Iconify API for one name and resolves with the icon data. The element " +
@@ -94,7 +62,6 @@ private val texts: Translations<LoaderTexts> = texts(
 /** One form: a field, a button, a status line and the rendered result. */
 internal class LoaderPage : DemoPage() {
     private val binder = Binder(texts)
-
 
     private val field = createTextField {
         placeholder = "mdi:home"
@@ -199,4 +166,3 @@ internal class LoaderPage : DemoPage() {
 
     companion object : CustomElementReferenceAdapter<LoaderPage>(LoaderPage::class.js, "iconify-loader-page")
 }
-

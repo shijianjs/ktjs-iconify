@@ -13,13 +13,8 @@ import io.github.shijianjs.ktjs.demo.page.Blocks.exampleBox
 import io.github.shijianjs.ktjs.demo.page.Blocks.paragraph
 import io.github.shijianjs.ktjs.demo.page.Grid
 import io.github.shijianjs.ktjs.demo.page.SectionBlock
-import io.github.shijianjs.ktjs.iconify.IconifyIconElement
 import io.github.shijianjs.ktjs.iconify.createIconifyIcon
 import web.dom.document
-import web.html.HTMLElement
-
-/** One transformation example: the caption is data (an attribute value), not copy. */
-private class Transform(val caption: String, val configure: IconifyIconElement.() -> Unit)
 
 private val transforms: List<Transform> = listOf(
     Transform("rotate 0°") { },
@@ -28,15 +23,6 @@ private val transforms: List<Transform> = listOf(
     Transform("rotate 270°") { rotate = "270deg" },
     Transform("flip horizontal") { flip = "horizontal" },
     Transform("flip vertical") { flip = "vertical" },
-)
-
-private class TransformationsTexts(
-    val title: String,
-    val summary: String,
-    val transformTitle: String,
-    val transformHint: String,
-    val inlineTitle: String,
-    val inlineHint: String,
 )
 
 private val english: TransformationsTexts = TransformationsTexts(
@@ -66,7 +52,6 @@ private val texts: Translations<TransformationsTexts> = texts(
 /** Two sections: the attribute matrix, and what `inline` changes. */
 internal class TransformationsPage : DemoPage() {
     private val binder = Binder(texts)
-
 
     init {
         val transformSection = SectionBlock.NAME { show(english.transformTitle, english.transformHint) }

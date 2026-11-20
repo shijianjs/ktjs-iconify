@@ -16,23 +16,11 @@ import io.github.shijianjs.ktjs.dom.element.inlineStyle
 import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementReferenceAdapter
 import io.github.shijianjs.ktjs.iconify.createIconifyIcon
 import web.cssom.Color
-import web.html.HTMLElement
-
-/** One mode example: the mode name is the string the attribute takes, so it stays untranslated. */
-private class ModeExample(val name: String, val mode: String, val icon: String)
 
 private val modes: List<ModeExample> = listOf(
     ModeExample("svg", "svg", "mdi:star"),
     ModeExample("bg", "bg", "twemoji:star"),
     ModeExample("mask", "mask", "mdi:star"),
-)
-
-private class ModesTexts(
-    val title: String,
-    val summary: String,
-    val sectionTitle: String,
-    val sectionHint: String,
-    val maskNote: String,
 )
 
 private val english: ModesTexts = ModesTexts(
@@ -60,7 +48,6 @@ private val texts: Translations<ModesTexts> = texts(
 /** One section of mode cards; the mask example is tinted to show that it takes the text colour. */
 internal class ModesPage : DemoPage() {
     private val binder = Binder(texts)
-
 
     init {
         val section = SectionBlock.NAME { show(english.sectionTitle, english.sectionHint) }

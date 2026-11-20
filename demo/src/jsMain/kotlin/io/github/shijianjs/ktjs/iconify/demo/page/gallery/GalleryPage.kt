@@ -14,7 +14,6 @@ import io.github.shijianjs.ktjs.demo.page.Blocks.paragraph
 import io.github.shijianjs.ktjs.demo.page.Grid
 import io.github.shijianjs.ktjs.demo.page.SectionBlock
 import io.github.shijianjs.ktjs.iconify.createIconifyIcon
-import web.html.HTMLElement
 
 /** The icon names this page shows; a name is data, so it is never translated. */
 private val featuredIcons: List<String> = listOf(
@@ -26,16 +25,6 @@ private val featuredIcons: List<String> = listOf(
     "mdi:github",
     "ph:palette",
     "simple-icons:iconify",
-)
-
-/** Everything this page says, in one language. */
-private class GalleryTexts(
-    val title: String,
-    val summary: String,
-    val sectionTitle: String,
-    val sectionHint: String,
-    val note: String,
-    val docsLink: String,
 )
 
 private val english: GalleryTexts = GalleryTexts(
@@ -68,7 +57,6 @@ private val texts: Translations<GalleryTexts> = texts(
 /** The landing page: one section of cards, one card per icon. */
 internal class GalleryPage : DemoPage() {
     private val binder = Binder(texts)
-
 
     init {
         binder.bind(anchor(english.docsLink, "docs/guide/icon-element")) { it.docsLink }

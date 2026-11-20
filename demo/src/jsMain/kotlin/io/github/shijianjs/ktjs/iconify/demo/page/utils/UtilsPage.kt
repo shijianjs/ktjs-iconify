@@ -32,7 +32,6 @@ import io.github.shijianjs.ktjs.iconify.utils.stringToIcon
 import js.objects.Record
 import kotlin.js.js
 import kotlin.js.unsafeCast
-import web.html.HTMLElement
 
 /** An icon registered from data embedded in this page — no request, no API dependency. */
 private val starIconData = js(
@@ -41,21 +40,6 @@ private val starIconData = js(
         width: 24,
         height: 24
     }""",
-)
-
-private class UtilsTexts(
-    val title: String,
-    val summary: String,
-    val registrationTitle: String,
-    val registrationHint: String,
-    val registrationNote: String,
-    val svgTitle: String,
-    val svgHint: String,
-    val colourLine: String,
-    val emojiLine: String,
-    val nameLine: String,
-    val cssTitle: String,
-    val cssHint: String,
 )
 
 private val english: UtilsTexts = UtilsTexts(
@@ -98,7 +82,6 @@ private val texts: Translations<UtilsTexts> = texts(
 /** Three sections: local registration, SVG generation and CSS generation. */
 internal class UtilsPage : DemoPage() {
     private val binder = Binder(texts)
-
 
     /** Computed once: the values are deterministic, so a language switch must not re-run them. */
     private val storedBodyLength: Int
@@ -163,9 +146,6 @@ internal class UtilsPage : DemoPage() {
 
     companion object : CustomElementReferenceAdapter<UtilsPage>(UtilsPage::class.js, "iconify-utils-page")
 }
-
-/** The values one run of the utils examples produced. */
-private class SvgReport(val svg: String, val colour: String, val emoji: String, val name: String)
 
 private fun buildSvg(): SvgReport {
     val icon = getIcon("demo:star") ?: return SvgReport("(icon data unavailable)", "—", "—", "—")
