@@ -26,39 +26,6 @@ import web.html.HtmlTagName
 import web.pointer.CLICK
 import web.pointer.PointerEvent
 
-private val english: LoaderTexts = LoaderTexts(
-    title = "Load an icon by name",
-    summary = "`loadIcon` asks the Iconify API for one name and resolves with the icon data. The element " +
-        "that renders it is created from the same name.",
-    sectionTitle = "Any name, on demand",
-    sectionHint = "Try `mdi:home`, `lucide:rocket` or a set you have registered locally.",
-    fieldLabel = "Icon name",
-    buttonLabel = "Load",
-    idle = "Nothing loaded yet.",
-    missingName = "Type a name first.",
-    unknownError = "unknown error",
-    note = "The promise rejects when the name does not exist, which is the difference between " +
-        "`loadIcon` (throws) and `getIcon` (answers null).",
-)
-
-private val chinese: LoaderTexts = LoaderTexts(
-    title = "按名字加载图标",
-    summary = "`loadIcon` 向 Iconify API 索要一个名字并解析出图标数据，渲染它的元素由同一个名字创建。",
-    sectionTitle = "任意名字，按需加载",
-    sectionHint = "可以试 `mdi:home`、`lucide:rocket`，或者你在本地注册过的图标集。",
-    fieldLabel = "图标名",
-    buttonLabel = "加载",
-    idle = "还没有加载任何图标。",
-    missingName = "先输入一个名字。",
-    unknownError = "未知错误",
-    note = "名字不存在时 promise 会失败——这正是 `loadIcon`（抛错）与 `getIcon`（给 null）的区别。",
-)
-
-private val texts: Translations<LoaderTexts> = texts(
-    Langs.EN to english,
-    Langs.ZH_HANS to chinese,
-)
-
 /** One form: a field, a button, a status line and the rendered result. */
 internal class LoaderPage : DemoPage() {
     private val binder = Binder(texts)
@@ -164,5 +131,36 @@ internal class LoaderPage : DemoPage() {
         showState()
     }
 
-    companion object : CustomElementReferenceAdapter<LoaderPage>(LoaderPage::class.js, "iconify-loader-page")
+    companion object : CustomElementReferenceAdapter<LoaderPage>(LoaderPage::class.js, "iconify-loader-page") {
+        private val english: LoaderTexts = LoaderTexts(
+            title = "Load an icon by name",
+            summary = "`loadIcon` asks the Iconify API for one name and resolves with the icon data. The element " +
+                "that renders it is created from the same name.",
+            sectionTitle = "Any name, on demand",
+            sectionHint = "Try `mdi:home`, `lucide:rocket` or a set you have registered locally.",
+            fieldLabel = "Icon name",
+            buttonLabel = "Load",
+            idle = "Nothing loaded yet.",
+            missingName = "Type a name first.",
+            unknownError = "unknown error",
+            note = "The promise rejects when the name does not exist, which is the difference between " +
+                "`loadIcon` (throws) and `getIcon` (answers null).",
+        )
+        private val chinese: LoaderTexts = LoaderTexts(
+            title = "按名字加载图标",
+            summary = "`loadIcon` 向 Iconify API 索要一个名字并解析出图标数据，渲染它的元素由同一个名字创建。",
+            sectionTitle = "任意名字，按需加载",
+            sectionHint = "可以试 `mdi:home`、`lucide:rocket`，或者你在本地注册过的图标集。",
+            fieldLabel = "图标名",
+            buttonLabel = "加载",
+            idle = "还没有加载任何图标。",
+            missingName = "先输入一个名字。",
+            unknownError = "未知错误",
+            note = "名字不存在时 promise 会失败——这正是 `loadIcon`（抛错）与 `getIcon`（给 null）的区别。",
+        )
+        private val texts: Translations<LoaderTexts> = texts(
+            Langs.EN to english,
+            Langs.ZH_HANS to chinese,
+        )
+    }
 }

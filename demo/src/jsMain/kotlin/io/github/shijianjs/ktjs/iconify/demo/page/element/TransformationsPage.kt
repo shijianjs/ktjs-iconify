@@ -16,39 +16,6 @@ import io.github.shijianjs.ktjs.demo.page.SectionBlock
 import io.github.shijianjs.ktjs.iconify.createIconifyIcon
 import web.dom.document
 
-private val transforms: List<Transform> = listOf(
-    Transform("rotate 0°") { },
-    Transform("rotate 90°") { rotate = "90deg" },
-    Transform("rotate 180°") { rotate = "180deg" },
-    Transform("rotate 270°") { rotate = "270deg" },
-    Transform("flip horizontal") { flip = "horizontal" },
-    Transform("flip vertical") { flip = "vertical" },
-)
-
-private val english: TransformationsTexts = TransformationsTexts(
-    title = "Rotate and flip",
-    summary = "`rotate` and `flip` are element attributes rather than CSS transforms, so they also work " +
-        "in the modes where a CSS transform would not.",
-    transformTitle = "Six orientations of the same icon",
-    transformHint = "All six cards render `mdi:arrow-right`; only the attributes differ.",
-    inlineTitle = "Inline rendering",
-    inlineHint = "`inline = true` drops the shadow DOM, so the glyph behaves like a character in the text run.",
-)
-
-private val chinese: TransformationsTexts = TransformationsTexts(
-    title = "旋转与镜像",
-    summary = "`rotate` 与 `flip` 是元素属性而不是 CSS transform，所以在 CSS transform 不起作用的模式下同样有效。",
-    transformTitle = "同一个图标的六种朝向",
-    transformHint = "六张卡片渲染的都是 `mdi:arrow-right`，只有属性不同。",
-    inlineTitle = "内联渲染",
-    inlineHint = "`inline = true` 不使用 shadow DOM，字形就像文本里的一个字符。",
-)
-
-private val texts: Translations<TransformationsTexts> = texts(
-    Langs.EN to english,
-    Langs.ZH_HANS to chinese,
-)
-
 /** Two sections: the attribute matrix, and what `inline` changes. */
 internal class TransformationsPage : DemoPage() {
     private val binder = Binder(texts)
@@ -92,5 +59,35 @@ internal class TransformationsPage : DemoPage() {
         binder.apply(lang)
     }
 
-    companion object : CustomElementReferenceAdapter<TransformationsPage>(TransformationsPage::class.js, "iconify-transformations-page")
+    companion object : CustomElementReferenceAdapter<TransformationsPage>(TransformationsPage::class.js, "iconify-transformations-page") {
+        private val transforms: List<Transform> = listOf(
+            Transform("rotate 0°") { },
+            Transform("rotate 90°") { rotate = "90deg" },
+            Transform("rotate 180°") { rotate = "180deg" },
+            Transform("rotate 270°") { rotate = "270deg" },
+            Transform("flip horizontal") { flip = "horizontal" },
+            Transform("flip vertical") { flip = "vertical" },
+        )
+        private val english: TransformationsTexts = TransformationsTexts(
+            title = "Rotate and flip",
+            summary = "`rotate` and `flip` are element attributes rather than CSS transforms, so they also work " +
+                "in the modes where a CSS transform would not.",
+            transformTitle = "Six orientations of the same icon",
+            transformHint = "All six cards render `mdi:arrow-right`; only the attributes differ.",
+            inlineTitle = "Inline rendering",
+            inlineHint = "`inline = true` drops the shadow DOM, so the glyph behaves like a character in the text run.",
+        )
+        private val chinese: TransformationsTexts = TransformationsTexts(
+            title = "旋转与镜像",
+            summary = "`rotate` 与 `flip` 是元素属性而不是 CSS transform，所以在 CSS transform 不起作用的模式下同样有效。",
+            transformTitle = "同一个图标的六种朝向",
+            transformHint = "六张卡片渲染的都是 `mdi:arrow-right`，只有属性不同。",
+            inlineTitle = "内联渲染",
+            inlineHint = "`inline = true` 不使用 shadow DOM，字形就像文本里的一个字符。",
+        )
+        private val texts: Translations<TransformationsTexts> = texts(
+            Langs.EN to english,
+            Langs.ZH_HANS to chinese,
+        )
+    }
 }
