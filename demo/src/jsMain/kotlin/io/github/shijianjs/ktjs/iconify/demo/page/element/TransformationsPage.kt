@@ -2,19 +2,17 @@ package io.github.shijianjs.ktjs.iconify.demo.page.element
 
 import io.github.shijianjs.ktjs.demo.page.DemoPage
 import io.github.shijianjs.ktjs.dom.element.invoke
-import io.github.shijianjs.ktjs.dom.webcomponent.defineIfMissing
-import web.components.CustomElementReference
-import web.dom.TagName
+import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementReferenceAdapter
 import io.github.shijianjs.ktjs.demo.i18n.Binder
 import io.github.shijianjs.ktjs.demo.i18n.Lang
 import io.github.shijianjs.ktjs.demo.i18n.Langs
 import io.github.shijianjs.ktjs.demo.i18n.Translations
 import io.github.shijianjs.ktjs.demo.i18n.texts
-import io.github.shijianjs.ktjs.demo.page.codeText
-import io.github.shijianjs.ktjs.demo.page.exampleBox
-import io.github.shijianjs.ktjs.demo.page.grid
-import io.github.shijianjs.ktjs.demo.page.paragraph
-import io.github.shijianjs.ktjs.demo.page.sectionBlock
+import io.github.shijianjs.ktjs.demo.page.Blocks.codeText
+import io.github.shijianjs.ktjs.demo.page.Blocks.exampleBox
+import io.github.shijianjs.ktjs.demo.page.Blocks.paragraph
+import io.github.shijianjs.ktjs.demo.page.Grid
+import io.github.shijianjs.ktjs.demo.page.SectionBlock
 import io.github.shijianjs.ktjs.iconify.IconifyIconElement
 import io.github.shijianjs.ktjs.iconify.createIconifyIcon
 import web.dom.document
@@ -71,7 +69,7 @@ internal class TransformationsPage : DemoPage() {
 
 
     init {
-        val transformSection = sectionBlock(english.transformTitle, english.transformHint)
+        val transformSection = SectionBlock.NAME { show(english.transformTitle, english.transformHint) }
         binder.bind(transformSection.heading) { it.transformTitle }
         binder.bind(transformSection.hint) { it.transformHint }
 
@@ -85,9 +83,9 @@ internal class TransformationsPage : DemoPage() {
                 },
             )
         }
-        transformSection.body.append(grid(minColumnWidth = 160, *cards.toTypedArray()))
+        transformSection.body.append(Grid.NAME { show(160); add(*cards.toTypedArray()) })
 
-        val inlineSection = sectionBlock(english.inlineTitle, english.inlineHint)
+        val inlineSection = SectionBlock.NAME { show(english.inlineTitle, english.inlineHint) }
         binder.bind(inlineSection.heading) { it.inlineTitle }
         binder.bind(inlineSection.hint) { it.inlineHint }
 
@@ -109,17 +107,5 @@ internal class TransformationsPage : DemoPage() {
         binder.apply(lang)
     }
 
-    companion object : CustomElementReference<TransformationsPage>(TransformationsPage::class.js) {
-        val NAME: TagName<TransformationsPage> = TagName("iconify-transformations-page")
-
-        fun define() {
-            defineIfMissing(NAME, this)
-        }
-    }
-}
-
-/** Creates a defined `<iconify-transformations-page>`. */
-internal fun newTransformationsPage(): TransformationsPage {
-    TransformationsPage.define()
-    return TransformationsPage.NAME()
+    companion object : CustomElementReferenceAdapter<TransformationsPage>(TransformationsPage::class.js, "iconify-transformations-page")
 }

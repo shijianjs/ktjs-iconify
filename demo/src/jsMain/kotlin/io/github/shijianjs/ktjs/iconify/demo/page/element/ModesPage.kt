@@ -2,20 +2,18 @@ package io.github.shijianjs.ktjs.iconify.demo.page.element
 
 import io.github.shijianjs.ktjs.demo.page.DemoPage
 import io.github.shijianjs.ktjs.dom.element.invoke
-import io.github.shijianjs.ktjs.dom.webcomponent.defineIfMissing
-import web.components.CustomElementReference
-import web.dom.TagName
 import io.github.shijianjs.ktjs.demo.i18n.Binder
 import io.github.shijianjs.ktjs.demo.i18n.Lang
 import io.github.shijianjs.ktjs.demo.i18n.Langs
 import io.github.shijianjs.ktjs.demo.i18n.Translations
 import io.github.shijianjs.ktjs.demo.i18n.texts
-import io.github.shijianjs.ktjs.demo.page.codeText
-import io.github.shijianjs.ktjs.demo.page.exampleBox
-import io.github.shijianjs.ktjs.demo.page.grid
-import io.github.shijianjs.ktjs.demo.page.paragraph
-import io.github.shijianjs.ktjs.demo.page.sectionBlock
+import io.github.shijianjs.ktjs.demo.page.Blocks.codeText
+import io.github.shijianjs.ktjs.demo.page.Blocks.exampleBox
+import io.github.shijianjs.ktjs.demo.page.Blocks.paragraph
+import io.github.shijianjs.ktjs.demo.page.Grid
+import io.github.shijianjs.ktjs.demo.page.SectionBlock
 import io.github.shijianjs.ktjs.dom.element.inlineStyle
+import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementReferenceAdapter
 import io.github.shijianjs.ktjs.iconify.createIconifyIcon
 import web.cssom.Color
 import web.html.HTMLElement
@@ -65,7 +63,7 @@ internal class ModesPage : DemoPage() {
 
 
     init {
-        val section = sectionBlock(english.sectionTitle, english.sectionHint)
+        val section = SectionBlock.NAME { show(english.sectionTitle, english.sectionHint) }
         binder.bind(section.heading) { it.sectionTitle }
         binder.bind(section.hint) { it.sectionHint }
 
@@ -78,7 +76,7 @@ internal class ModesPage : DemoPage() {
             }
             exampleBox(example.name, element)
         }
-        section.body.append(grid(minColumnWidth = 180, *cards.toTypedArray()))
+        section.body.append(Grid.NAME { show(180); add(*cards.toTypedArray()) })
 
         val note = paragraph(english.maskNote)
         binder.bind(note) { it.maskNote }
@@ -94,17 +92,5 @@ internal class ModesPage : DemoPage() {
         binder.apply(lang)
     }
 
-    companion object : CustomElementReference<ModesPage>(ModesPage::class.js) {
-        val NAME: TagName<ModesPage> = TagName("iconify-modes-page")
-
-        fun define() {
-            defineIfMissing(NAME, this)
-        }
-    }
-}
-
-/** Creates a defined `<iconify-modes-page>`. */
-internal fun newModesPage(): ModesPage {
-    ModesPage.define()
-    return ModesPage.NAME()
+    companion object : CustomElementReferenceAdapter<ModesPage>(ModesPage::class.js, "iconify-modes-page")
 }

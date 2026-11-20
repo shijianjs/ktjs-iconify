@@ -2,20 +2,18 @@ package io.github.shijianjs.ktjs.iconify.demo.page.utils
 
 import io.github.shijianjs.ktjs.demo.page.DemoPage
 import io.github.shijianjs.ktjs.dom.element.invoke
-import io.github.shijianjs.ktjs.dom.webcomponent.defineIfMissing
-import web.components.CustomElementReference
-import web.dom.TagName
+import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementReferenceAdapter
 import io.github.shijianjs.ktjs.demo.i18n.Binder
 import io.github.shijianjs.ktjs.demo.i18n.Lang
 import io.github.shijianjs.ktjs.demo.i18n.Langs
 import io.github.shijianjs.ktjs.demo.i18n.Translations
 import io.github.shijianjs.ktjs.demo.i18n.texts
-import io.github.shijianjs.ktjs.demo.page.newReadout
-import io.github.shijianjs.ktjs.demo.page.codeText
-import io.github.shijianjs.ktjs.demo.page.exampleBox
-import io.github.shijianjs.ktjs.demo.page.paragraph
-import io.github.shijianjs.ktjs.demo.page.row
-import io.github.shijianjs.ktjs.demo.page.sectionBlock
+import io.github.shijianjs.ktjs.demo.page.Blocks.codeText
+import io.github.shijianjs.ktjs.demo.page.Blocks.exampleBox
+import io.github.shijianjs.ktjs.demo.page.Blocks.paragraph
+import io.github.shijianjs.ktjs.demo.page.Blocks.row
+import io.github.shijianjs.ktjs.demo.page.SectionBlock
+import io.github.shijianjs.ktjs.demo.page.Readout
 import io.github.shijianjs.ktjs.iconify.addIcon
 import io.github.shijianjs.ktjs.iconify.createIconifyIcon
 import io.github.shijianjs.ktjs.iconify.IconifyIcon
@@ -114,11 +112,11 @@ internal class UtilsPage : DemoPage() {
         storedWidth = (stored?.width ?: 0.0).toInt()
         storedHeight = (stored?.height ?: 0.0).toInt()
 
-        val registrationSection = sectionBlock(english.registrationTitle, english.registrationHint)
+        val registrationSection = SectionBlock.NAME { show(english.registrationTitle, english.registrationHint) }
         binder.bind(registrationSection.heading) { it.registrationTitle }
         binder.bind(registrationSection.hint) { it.registrationHint }
 
-        val readout = newReadout()
+        val readout = Readout.NAME { show() }
         readout.set("demo:star · body ${storedBodyLength} chars · ${storedWidth}×${storedHeight}")
         registrationSection.body.append(
             row(
@@ -132,7 +130,7 @@ internal class UtilsPage : DemoPage() {
         binder.bind(registrationNote) { it.registrationNote }
         registrationSection.body.append(registrationNote)
 
-        val svgSection = sectionBlock(english.svgTitle, english.svgHint)
+        val svgSection = SectionBlock.NAME { show(english.svgTitle, english.svgHint) }
         binder.bind(svgSection.heading) { it.svgTitle }
         binder.bind(svgSection.hint) { it.svgHint }
 
@@ -148,7 +146,7 @@ internal class UtilsPage : DemoPage() {
 
         svgSection.body.append(exampleBox(null, codeText(built.svg)), colourLine, emojiLine, nameLine)
 
-        val cssSection = sectionBlock(english.cssTitle, english.cssHint)
+        val cssSection = SectionBlock.NAME { show(english.cssTitle, english.cssHint) }
         binder.bind(cssSection.heading) { it.cssTitle }
         binder.bind(cssSection.hint) { it.cssHint }
         cssSection.body.append(codeText(buildCss()))
@@ -163,13 +161,7 @@ internal class UtilsPage : DemoPage() {
         binder.apply(lang)
     }
 
-    companion object : CustomElementReference<UtilsPage>(UtilsPage::class.js) {
-        val NAME: TagName<UtilsPage> = TagName("iconify-utils-page")
-
-        fun define() {
-            defineIfMissing(NAME, this)
-        }
-    }
+    companion object : CustomElementReferenceAdapter<UtilsPage>(UtilsPage::class.js, "iconify-utils-page")
 }
 
 /** The values one run of the utils examples produced. */
@@ -207,10 +199,4 @@ private fun buildSvg(): SvgReport {
 private fun buildCss(): String {
     val icon = getIcon("demo:star") ?: return "(icon data unavailable)"
     return getIconCSS(icon, js("({ iconSelector: '.demo-star' })"))
-}
-
-/** Creates a defined `<iconify-utils-page>`. */
-internal fun newUtilsPage(): UtilsPage {
-    UtilsPage.define()
-    return UtilsPage.NAME()
 }

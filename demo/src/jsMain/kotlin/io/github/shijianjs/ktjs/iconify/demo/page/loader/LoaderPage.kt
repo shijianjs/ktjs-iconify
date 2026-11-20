@@ -2,19 +2,17 @@ package io.github.shijianjs.ktjs.iconify.demo.page.loader
 
 import io.github.shijianjs.ktjs.demo.page.DemoPage
 import io.github.shijianjs.ktjs.dom.element.invoke
-import io.github.shijianjs.ktjs.dom.webcomponent.defineIfMissing
-import web.components.CustomElementReference
-import web.dom.TagName
+import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementReferenceAdapter
 import io.github.shijianjs.ktjs.demo.i18n.Binder
 import io.github.shijianjs.ktjs.demo.i18n.Lang
 import io.github.shijianjs.ktjs.demo.i18n.Langs
 import io.github.shijianjs.ktjs.demo.i18n.Translations
 import io.github.shijianjs.ktjs.demo.i18n.texts
-import io.github.shijianjs.ktjs.demo.page.newReadout
-import io.github.shijianjs.ktjs.demo.page.exampleBox
-import io.github.shijianjs.ktjs.demo.page.paragraph
-import io.github.shijianjs.ktjs.demo.page.row
-import io.github.shijianjs.ktjs.demo.page.sectionBlock
+import io.github.shijianjs.ktjs.demo.page.Blocks.exampleBox
+import io.github.shijianjs.ktjs.demo.page.Blocks.paragraph
+import io.github.shijianjs.ktjs.demo.page.Blocks.row
+import io.github.shijianjs.ktjs.demo.page.SectionBlock
+import io.github.shijianjs.ktjs.demo.page.Readout
 import io.github.shijianjs.ktjs.iconify.createIconifyIcon
 import io.github.shijianjs.ktjs.iconify.loadIcon
 import io.github.shijianjs.ktjs.vaadin.button.ButtonVariants
@@ -109,7 +107,7 @@ internal class LoaderPage : DemoPage() {
         textContent = english.buttonLabel
     }
 
-    private val status = newReadout()
+    private val status = Readout.NAME { show() }
 
     /** Holds the rendered `<iconify-icon>`; empty until a load succeeds. */
     private val output: HTMLElement = document.createElement(HtmlTagName.div)
@@ -118,7 +116,7 @@ internal class LoaderPage : DemoPage() {
     private var state: LoaderState = LoaderState.Idle
 
     init {
-        val section = sectionBlock(english.sectionTitle, english.sectionHint)
+        val section = SectionBlock.NAME { show(english.sectionTitle, english.sectionHint) }
         binder.bind(section.heading) { it.sectionTitle }
         binder.bind(section.hint) { it.sectionHint }
 
@@ -199,18 +197,6 @@ internal class LoaderPage : DemoPage() {
         showState()
     }
 
-    companion object : CustomElementReference<LoaderPage>(LoaderPage::class.js) {
-        val NAME: TagName<LoaderPage> = TagName("iconify-loader-page")
-
-        fun define() {
-            defineIfMissing(NAME, this)
-        }
-    }
-}
-
-/** Creates a defined `<iconify-loader-page>`. */
-internal fun newLoaderPage(): LoaderPage {
-    LoaderPage.define()
-    return LoaderPage.NAME()
+    companion object : CustomElementReferenceAdapter<LoaderPage>(LoaderPage::class.js, "iconify-loader-page")
 }
 

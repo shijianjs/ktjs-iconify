@@ -3,11 +3,12 @@ package io.github.shijianjs.ktjs.iconify.demo
 import io.github.shijianjs.ktjs.demo.nav.DemoMenu
 import io.github.shijianjs.ktjs.demo.nav.Entry
 import io.github.shijianjs.ktjs.demo.nav.Group
-import io.github.shijianjs.ktjs.iconify.demo.page.element.newModesPage
-import io.github.shijianjs.ktjs.iconify.demo.page.element.newTransformationsPage
-import io.github.shijianjs.ktjs.iconify.demo.page.gallery.newGalleryPage
-import io.github.shijianjs.ktjs.iconify.demo.page.loader.newLoaderPage
-import io.github.shijianjs.ktjs.iconify.demo.page.utils.newUtilsPage
+import io.github.shijianjs.ktjs.iconify.demo.page.element.ModesPage
+import io.github.shijianjs.ktjs.iconify.demo.page.element.TransformationsPage
+import io.github.shijianjs.ktjs.iconify.demo.page.gallery.GalleryPage
+import io.github.shijianjs.ktjs.iconify.demo.page.loader.LoaderPage
+import io.github.shijianjs.ktjs.iconify.demo.page.utils.UtilsPage
+import io.github.shijianjs.ktjs.dom.element.invoke
 
 /** The upstream npm releases the wrappers follow; the navbar shows the Kotlin version instead. */
 const val SITE_VERSION: String = "Kotlin/JS 2.4.21"
@@ -34,10 +35,10 @@ internal val UTILS: Group = Group("utils", "lucide:braces")
  */
 fun siteMenu(): DemoMenu = DemoMenu(
     listOf(
-        Entry("overview", START) { newGalleryPage() },
-        Entry("transformations", ELEMENT) { newTransformationsPage() },
-        Entry("modes", ELEMENT) { newModesPage() },
-        Entry("utils", UTILS) { newUtilsPage() },
-        Entry("loader", UTILS) { newLoaderPage() },
+        Entry("overview", START) { GalleryPage.NAME() },
+        Entry("transformations", ELEMENT) { TransformationsPage.NAME() },
+        Entry("modes", ELEMENT) { ModesPage.NAME() },
+        Entry("utils", UTILS) { UtilsPage.NAME() },
+        Entry("loader", UTILS) { LoaderPage.NAME() },
     ),
 )

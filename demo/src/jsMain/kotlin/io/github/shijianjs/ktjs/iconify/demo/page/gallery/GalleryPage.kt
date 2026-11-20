@@ -2,19 +2,17 @@ package io.github.shijianjs.ktjs.iconify.demo.page.gallery
 
 import io.github.shijianjs.ktjs.demo.page.DemoPage
 import io.github.shijianjs.ktjs.dom.element.invoke
-import io.github.shijianjs.ktjs.dom.webcomponent.defineIfMissing
-import web.components.CustomElementReference
-import web.dom.TagName
+import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementReferenceAdapter
 import io.github.shijianjs.ktjs.demo.i18n.Binder
 import io.github.shijianjs.ktjs.demo.i18n.Lang
 import io.github.shijianjs.ktjs.demo.i18n.Langs
 import io.github.shijianjs.ktjs.demo.i18n.Translations
 import io.github.shijianjs.ktjs.demo.i18n.texts
-import io.github.shijianjs.ktjs.demo.page.anchor
-import io.github.shijianjs.ktjs.demo.page.exampleBox
-import io.github.shijianjs.ktjs.demo.page.grid
-import io.github.shijianjs.ktjs.demo.page.paragraph
-import io.github.shijianjs.ktjs.demo.page.sectionBlock
+import io.github.shijianjs.ktjs.demo.page.Blocks.anchor
+import io.github.shijianjs.ktjs.demo.page.Blocks.exampleBox
+import io.github.shijianjs.ktjs.demo.page.Blocks.paragraph
+import io.github.shijianjs.ktjs.demo.page.Grid
+import io.github.shijianjs.ktjs.demo.page.SectionBlock
 import io.github.shijianjs.ktjs.iconify.createIconifyIcon
 import web.html.HTMLElement
 
@@ -76,14 +74,14 @@ internal class GalleryPage : DemoPage() {
         binder.bind(anchor(english.docsLink, "docs/guide/icon-element")) { it.docsLink }
             .also { addLink(it) }
 
-        val section = sectionBlock(english.sectionTitle, english.sectionHint)
+        val section = SectionBlock.NAME { show(english.sectionTitle, english.sectionHint) }
         binder.bind(section.heading) { it.sectionTitle }
         binder.bind(section.hint) { it.sectionHint }
 
         val cards = featuredIcons.map { name ->
             exampleBox(name, createIconifyIcon(name) { width = "2rem"; height = "2rem" })
         }
-        section.body.append(grid(minColumnWidth = 200, *cards.toTypedArray()))
+        section.body.append(Grid.NAME { show(200); add(*cards.toTypedArray()) })
 
         val note = paragraph(english.note)
         binder.bind(note) { it.note }
@@ -99,17 +97,5 @@ internal class GalleryPage : DemoPage() {
         binder.apply(lang)
     }
 
-    companion object : CustomElementReference<GalleryPage>(GalleryPage::class.js) {
-        val NAME: TagName<GalleryPage> = TagName("iconify-gallery-page")
-
-        fun define() {
-            defineIfMissing(NAME, this)
-        }
-    }
-}
-
-/** Creates a defined `<iconify-gallery-page>`. */
-internal fun newGalleryPage(): GalleryPage {
-    GalleryPage.define()
-    return GalleryPage.NAME()
+    companion object : CustomElementReferenceAdapter<GalleryPage>(GalleryPage::class.js, "iconify-gallery-page")
 }
