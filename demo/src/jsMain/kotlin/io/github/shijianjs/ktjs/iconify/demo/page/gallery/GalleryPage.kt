@@ -77,7 +77,7 @@ internal class GalleryPage : DemoPage() {
             .also { addLink(it) }
 
         val section = sectionBlock(english.sectionTitle, english.sectionHint)
-        binder.bind(section.title) { it.sectionTitle }
+        binder.bind(section.heading) { it.sectionTitle }
         binder.bind(section.hint) { it.sectionHint }
 
         val cards = featuredIcons.map { name ->

@@ -66,7 +66,7 @@ internal class ModesPage : DemoPage() {
 
     init {
         val section = sectionBlock(english.sectionTitle, english.sectionHint)
-        binder.bind(section.title) { it.sectionTitle }
+        binder.bind(section.heading) { it.sectionTitle }
         binder.bind(section.hint) { it.sectionHint }
 
         val cards = modes.map { example ->

@@ -119,7 +119,7 @@ internal class LoaderPage : DemoPage() {
 
     init {
         val section = sectionBlock(english.sectionTitle, english.sectionHint)
-        binder.bind(section.title) { it.sectionTitle }
+        binder.bind(section.heading) { it.sectionTitle }
         binder.bind(section.hint) { it.sectionHint }
 
         // The field's label is a property, not text content: a text node on the host would land in the

@@ -72,7 +72,7 @@ internal class TransformationsPage : DemoPage() {
 
     init {
         val transformSection = sectionBlock(english.transformTitle, english.transformHint)
-        binder.bind(transformSection.title) { it.transformTitle }
+        binder.bind(transformSection.heading) { it.transformTitle }
         binder.bind(transformSection.hint) { it.transformHint }
 
         val cards = transforms.map { transform ->
@@ -88,7 +88,7 @@ internal class TransformationsPage : DemoPage() {
         transformSection.body.append(grid(minColumnWidth = 160, *cards.toTypedArray()))
 
         val inlineSection = sectionBlock(english.inlineTitle, english.inlineHint)
-        binder.bind(inlineSection.title) { it.inlineTitle }
+        binder.bind(inlineSection.heading) { it.inlineTitle }
         binder.bind(inlineSection.hint) { it.inlineHint }
 
         val sentence = paragraph()

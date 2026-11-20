@@ -115,7 +115,7 @@ internal class UtilsPage : DemoPage() {
         storedHeight = (stored?.height ?: 0.0).toInt()
 
         val registrationSection = sectionBlock(english.registrationTitle, english.registrationHint)
-        binder.bind(registrationSection.title) { it.registrationTitle }
+        binder.bind(registrationSection.heading) { it.registrationTitle }
         binder.bind(registrationSection.hint) { it.registrationHint }
 
         val readout = Readout()
@@ -133,7 +133,7 @@ internal class UtilsPage : DemoPage() {
         registrationSection.body.append(registrationNote)
 
         val svgSection = sectionBlock(english.svgTitle, english.svgHint)
-        binder.bind(svgSection.title) { it.svgTitle }
+        binder.bind(svgSection.heading) { it.svgTitle }
         binder.bind(svgSection.hint) { it.svgHint }
 
         // Computed once. The three lines below are bound rather than written, so a language switch
@@ -149,7 +149,7 @@ internal class UtilsPage : DemoPage() {
         svgSection.body.append(exampleBox(null, codeText(built.svg)), colourLine, emojiLine, nameLine)
 
         val cssSection = sectionBlock(english.cssTitle, english.cssHint)
-        binder.bind(cssSection.title) { it.cssTitle }
+        binder.bind(cssSection.heading) { it.cssTitle }
         binder.bind(cssSection.hint) { it.cssHint }
         cssSection.body.append(codeText(buildCss()))
 
