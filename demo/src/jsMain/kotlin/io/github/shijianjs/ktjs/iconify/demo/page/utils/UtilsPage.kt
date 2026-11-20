@@ -10,7 +10,7 @@ import io.github.shijianjs.ktjs.demo.i18n.Lang
 import io.github.shijianjs.ktjs.demo.i18n.Langs
 import io.github.shijianjs.ktjs.demo.i18n.Translations
 import io.github.shijianjs.ktjs.demo.i18n.texts
-import io.github.shijianjs.ktjs.demo.page.Readout
+import io.github.shijianjs.ktjs.demo.page.newReadout
 import io.github.shijianjs.ktjs.demo.page.codeText
 import io.github.shijianjs.ktjs.demo.page.exampleBox
 import io.github.shijianjs.ktjs.demo.page.paragraph
@@ -118,7 +118,7 @@ internal class UtilsPage : DemoPage() {
         binder.bind(registrationSection.heading) { it.registrationTitle }
         binder.bind(registrationSection.hint) { it.registrationHint }
 
-        val readout = Readout()
+        val readout = newReadout()
         readout.set("demo:star · body ${storedBodyLength} chars · ${storedWidth}×${storedHeight}")
         registrationSection.body.append(
             row(
