@@ -2,7 +2,6 @@ package io.github.shijianjs.ktjs.iconify.demo.page.loader
 
 import io.github.shijianjs.ktjs.demo.page.DemoPage
 import io.github.shijianjs.ktjs.dom.element.invoke
-import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementReferenceAdapter
 import io.github.shijianjs.ktjs.demo.i18n.Binder
 import io.github.shijianjs.ktjs.demo.i18n.Lang
 import io.github.shijianjs.ktjs.demo.i18n.Langs
@@ -131,7 +130,7 @@ internal class LoaderPage : DemoPage() {
         showState()
     }
 
-    companion object : CustomElementReferenceAdapter<LoaderPage>(LoaderPage::class.js, "iconify-loader-page") {
+    companion object : LoaderPageDefaultReference() {
         private val english: LoaderTexts = LoaderTexts(
             title = "Load an icon by name",
             summary = "`loadIcon` asks the Iconify API for one name and resolves with the icon data. The element " +

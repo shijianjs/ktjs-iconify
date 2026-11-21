@@ -2,7 +2,6 @@ package io.github.shijianjs.ktjs.iconify.demo.page.element
 
 import io.github.shijianjs.ktjs.demo.page.DemoPage
 import io.github.shijianjs.ktjs.dom.element.invoke
-import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementReferenceAdapter
 import io.github.shijianjs.ktjs.demo.i18n.Binder
 import io.github.shijianjs.ktjs.demo.i18n.Lang
 import io.github.shijianjs.ktjs.demo.i18n.Langs
@@ -59,7 +58,7 @@ internal class TransformationsPage : DemoPage() {
         binder.apply(lang)
     }
 
-    companion object : CustomElementReferenceAdapter<TransformationsPage>(TransformationsPage::class.js, "iconify-transformations-page") {
+    companion object : TransformationsPageDefaultReference() {
         private val transforms: List<Transform> = listOf(
             Transform("rotate 0°") { },
             Transform("rotate 90°") { rotate = "90deg" },

@@ -2,7 +2,6 @@ package io.github.shijianjs.ktjs.iconify.demo.page.gallery
 
 import io.github.shijianjs.ktjs.demo.page.DemoPage
 import io.github.shijianjs.ktjs.dom.element.invoke
-import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementReferenceAdapter
 import io.github.shijianjs.ktjs.demo.i18n.Binder
 import io.github.shijianjs.ktjs.demo.i18n.Lang
 import io.github.shijianjs.ktjs.demo.i18n.Langs
@@ -46,7 +45,7 @@ internal class GalleryPage : DemoPage() {
         binder.apply(lang)
     }
 
-    companion object : CustomElementReferenceAdapter<GalleryPage>(GalleryPage::class.js, "iconify-gallery-page") {
+    companion object : GalleryPageDefaultReference() {
         /** The icon names this page shows; a name is data, so it is never translated. */
         private val featuredIcons: List<String> = listOf(
             "mdi:home",

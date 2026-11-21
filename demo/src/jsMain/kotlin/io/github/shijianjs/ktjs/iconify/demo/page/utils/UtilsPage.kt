@@ -2,7 +2,6 @@ package io.github.shijianjs.ktjs.iconify.demo.page.utils
 
 import io.github.shijianjs.ktjs.demo.page.DemoPage
 import io.github.shijianjs.ktjs.dom.element.invoke
-import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementReferenceAdapter
 import io.github.shijianjs.ktjs.demo.i18n.Binder
 import io.github.shijianjs.ktjs.demo.i18n.Lang
 import io.github.shijianjs.ktjs.demo.i18n.Langs
@@ -98,7 +97,7 @@ internal class UtilsPage : DemoPage() {
         binder.apply(lang)
     }
 
-    companion object : CustomElementReferenceAdapter<UtilsPage>(UtilsPage::class.js, "iconify-utils-page") {
+    companion object : UtilsPageDefaultReference() {
         /** An icon registered from data embedded in this page — no request, no API dependency. */
         private val starIconData = js(
             """{

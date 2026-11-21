@@ -13,7 +13,6 @@ import io.github.shijianjs.ktjs.demo.page.Blocks.paragraph
 import io.github.shijianjs.ktjs.demo.page.Grid
 import io.github.shijianjs.ktjs.demo.page.SectionBlock
 import io.github.shijianjs.ktjs.dom.element.inlineStyle
-import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementReferenceAdapter
 import io.github.shijianjs.ktjs.iconify.createIconifyIcon
 import web.cssom.Color
 
@@ -51,7 +50,7 @@ internal class ModesPage : DemoPage() {
         binder.apply(lang)
     }
 
-    companion object : CustomElementReferenceAdapter<ModesPage>(ModesPage::class.js, "iconify-modes-page") {
+    companion object : ModesPageDefaultReference() {
         private val modes: List<ModeExample> = listOf(
             ModeExample("svg", "svg", "mdi:star"),
             ModeExample("bg", "bg", "twemoji:star"),
