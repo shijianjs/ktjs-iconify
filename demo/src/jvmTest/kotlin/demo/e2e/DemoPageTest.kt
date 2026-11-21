@@ -22,11 +22,11 @@ class DemoPageTest {
 
         assertTrue(page.title().contains("ktjs-iconify"), "title: ${page.title()}")
         assertTrue(page.locator("#demo img.layout__logo").isVisible(), "the shell serves the project logo")
-        assertEquals("Overview", page.locator("#demo ktjs-demo-page h1").first().textContent())
+        assertEquals("Overview", page.locator("#demo iconify-gallery-page h1").first().textContent())
         assertEquals(5, page.locator("#demo vaadin-side-nav-item[data-route]").count())
 
         // The gallery is the landing page: eight cards, one icon each, all of them painted.
-        assertEquals(8, page.locator("#demo ktjs-demo-page vaadin-card").count())
+        assertEquals(8, page.locator("#demo iconify-gallery-page vaadin-card").count())
         waitForIcons(page)
         assertEveryIconRendered(page)
     }
@@ -35,9 +35,9 @@ class DemoPageTest {
     fun `transformations page applies the attributes`(page: Page) {
         openPage(page)
         openRoute(page, "transformations")
-        assertEquals("Rotate and flip", page.locator("#demo ktjs-demo-page h1").first().textContent())
+        assertEquals("Rotate and flip", page.locator("#demo iconify-transformations-page h1").first().textContent())
 
-        val icons = page.locator("#demo ktjs-demo-page vaadin-card iconify-icon")
+        val icons = page.locator("#demo iconify-transformations-page vaadin-card iconify-icon")
         assertEquals(6, icons.count(), "six orientations of the same icon")
         // Attributes, not CSS: the rotation is readable on the element itself.
         assertEquals("90deg", icons.nth(1).getAttribute("rotate"))
@@ -49,9 +49,9 @@ class DemoPageTest {
     fun `modes page paints the three rendering modes`(page: Page) {
         openPage(page)
         openRoute(page, "modes")
-        assertEquals("Rendering modes", page.locator("#demo ktjs-demo-page h1").first().textContent())
+        assertEquals("Rendering modes", page.locator("#demo iconify-modes-page h1").first().textContent())
 
-        val icons = page.locator("#demo ktjs-demo-page vaadin-card iconify-icon")
+        val icons = page.locator("#demo iconify-modes-page vaadin-card iconify-icon")
         assertEquals(3, icons.count())
         assertEquals("svg", icons.nth(0).getAttribute("mode"))
         assertEquals("bg", icons.nth(1).getAttribute("mode"))
@@ -64,14 +64,14 @@ class DemoPageTest {
     fun `utils page registers an icon locally and generates markup`(page: Page) {
         openPage(page)
         openRoute(page, "utils")
-        assertEquals("SVG, CSS and registration", page.locator("#demo ktjs-demo-page h1").first().textContent())
+        assertEquals("SVG, CSS and registration", page.locator("#demo iconify-utils-page h1").first().textContent())
 
         // Registered from embedded data: no request is involved, so the readout is filled on first paint.
-        val readout = page.locator("#demo ktjs-demo-page .readout").first().textContent()!!
+        val readout = page.locator("#demo iconify-utils-page .readout").first().textContent()!!
         assertTrue(readout.contains("demo:star"), "readout: $readout")
         assertTrue(readout.contains("24×24"), "readout: $readout")
 
-        val svg = page.locator("#demo ktjs-demo-page code").nth(1).textContent()!!
+        val svg = page.locator("#demo iconify-utils-page code").nth(1).textContent()!!
         assertTrue(svg.contains("<svg"), "generated markup: ${svg.take(80)}")
         assertTrue(svg.contains("transform"), "the customisation reached the markup: ${svg.take(120)}")
         waitForIcons(page)
@@ -81,16 +81,16 @@ class DemoPageTest {
     fun `loader fetches an icon from the Iconify API`(page: Page) {
         openPage(page)
         openRoute(page, "loader")
-        assertEquals("Load an icon by name", page.locator("#demo ktjs-demo-page h1").first().textContent())
+        assertEquals("Load an icon by name", page.locator("#demo iconify-loader-page h1").first().textContent())
 
-        page.locator("#demo ktjs-demo-page vaadin-text-field").first().evaluate(
+        page.locator("#demo iconify-loader-page vaadin-text-field").first().evaluate(
             "(el, value) => { el.value = value }",
             "mdi:home",
         )
-        page.locator("#demo ktjs-demo-page vaadin-button").first().click()
-        page.waitForSelector("#demo ktjs-demo-page .readout:has-text(\"mdi:home →\")")
+        page.locator("#demo iconify-loader-page vaadin-button").first().click()
+        page.waitForSelector("#demo iconify-loader-page .readout:has-text(\"mdi:home →\")")
 
-        assertEquals(1, page.locator("#demo ktjs-demo-page iconify-icon").count())
+        assertEquals(1, page.locator("#demo iconify-loader-page iconify-icon").count())
         waitForIcons(page)
     }
 
@@ -98,13 +98,13 @@ class DemoPageTest {
     fun `the language switch rewrites the page in place`(page: Page) {
         openPage(page)
         openRoute(page, "utils")
-        val svgBefore = page.locator("#demo ktjs-demo-page code").first().textContent()
+        val svgBefore = page.locator("#demo iconify-utils-page code").first().textContent()
 
         switchLanguage(page, "zh-Hans")
-        assertEquals("SVG、CSS 与本地注册", page.locator("#demo ktjs-demo-page h1").first().textContent())
+        assertEquals("SVG、CSS 与本地注册", page.locator("#demo iconify-utils-page h1").first().textContent())
 
         // The generated markup is data: switching the language must not re-run the conversion.
-        assertEquals(svgBefore, page.locator("#demo ktjs-demo-page code").first().textContent())
+        assertEquals(svgBefore, page.locator("#demo iconify-utils-page code").first().textContent())
     }
 
     @RetryingTest(maxAttempts = 2)
@@ -115,7 +115,7 @@ class DemoPageTest {
         page.evaluate("() => localStorage.removeItem('ktjs-iconify-language')")
         page.navigate("/", Page.NavigateOptions().setWaitUntil(WaitUntilState.NETWORKIDLE))
         switchLanguage(page, "zh-Hans")
-        assertEquals("概览", page.locator("#demo ktjs-demo-page h1").first().textContent())
+        assertEquals("概览", page.locator("#demo iconify-gallery-page h1").first().textContent())
     }
 
     @RetryingTest(maxAttempts = 2)
@@ -143,7 +143,7 @@ class DemoPageTest {
     /** Clicks the drawer item for [route]; the router is also what the menu drives. */
     private fun openRoute(page: Page, route: String) {
         page.locator("#demo vaadin-side-nav-item[data-route='$route']").first().click()
-        page.waitForSelector("#demo ktjs-demo-page h1")
+        page.waitForSelector("#demo iconify-$route-page h1")
     }
 
     /** Opens the layout's language menu and picks [code]. */
@@ -156,16 +156,22 @@ class DemoPageTest {
     /**
      * Iconify renders icons asynchronously, so wait until every `iconify-icon` reports `rendered`.
      *
-     * The page's content sits in the page element's own shadow tree, so a `document.querySelectorAll`
-     * would find nothing and pass vacuously; the walk goes through both shadow roots.
+     * Every page is its own element with its own shadow tree, so neither `document.querySelectorAll`
+     * nor a query on the layout's shadow root reaches the icons — they would come back empty and the
+     * wait would pass vacuously. The walk collects `iconify-icon` through every shadow root it meets.
      */
     private fun waitForIcons(page: Page) {
         page.waitForFunction(
             """
             () => {
-              const layout = document.querySelector('ktjs-demo-layout');
-              const pageEl = layout?.shadowRoot?.querySelector('ktjs-demo-page');
-              const icons = [...(pageEl?.shadowRoot?.querySelectorAll('iconify-icon') ?? [])];
+              const icons = [];
+              const walk = (root) => {
+                for (const node of root.querySelectorAll('*')) {
+                  if (node.tagName.toLowerCase() === 'iconify-icon') icons.push(node);
+                  if (node.shadowRoot) walk(node.shadowRoot);
+                }
+              };
+              walk(document);
               return icons.length > 0 && icons.every((node) => node.status === 'rendered');
             }
             """,
@@ -173,7 +179,7 @@ class DemoPageTest {
     }
 
     private fun assertEveryIconRendered(page: Page) {
-        val icons = page.locator("#demo ktjs-demo-page iconify-icon")
+        val icons = page.locator("#demo iconify-icon")
         val total = icons.count()
         val rendered = icons.evaluateAll(
             "(nodes) => nodes.filter((node) => node.status === 'rendered').length",
