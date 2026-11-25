@@ -19,7 +19,16 @@ kotlin {
     js {
         useEsModules()
 
-        nodejs()
+        nodejs {
+            testTask {
+                // The git cases shell out to `git` a handful of times (init, add, commit, rev-parse,
+                // clone, rev-parse) and then read the checkout back; Mocha's 2 s default is too tight
+                // for a cold run on Windows, where process spawning is the expensive part.
+                useMocha {
+                    timeout = "30s"
+                }
+            }
+        }
     }
 
     sourceSets {
