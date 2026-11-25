@@ -5,20 +5,26 @@ sidebar_position: 3
 
 # 图标元素
 
-`IconifyIconElement` 是继承 `web.html.HTMLElement` 的 `abstract external class`；上游的每个 attribute 都是
-Kotlin 属性，不通过拼 HTML 字符串来写。
+`IconifyIconElement` 是继承 `web.html.HTMLElement` 的 `abstract external class`。上游真正反射成属性的成员
+是 Kotlin 属性，不通过拼 HTML 字符串来写；它只按 attribute 读的两个开关则用类型化的 attribute 访问器。
 
 | 成员 | 作用 |
 | --- | --- |
 | `icon` | 图标名（如 `mdi:home`），或图标数据 |
 | `mode` | 渲染模式：`style`、`bg`、`mask`、`svg` |
 | `inline` | 内联渲染（不走 shadow DOM），而不是块级 |
-| `noobserver` | 关掉 mutation observer |
+| `noObserverAttr` | `Attribute<Boolean>`：让图标在视口外也保持渲染（上游只认这个 attribute，没有对应属性） |
+| `ariaHiddenAttr` | `Attribute<Boolean>`：把图标从辅助阅读器里隐藏，按 ARIA 文本写 |
 | `width` / `height` | 图标尺寸 |
 | `rotate` / `flip` | 变换，例如 `"90deg"` 与 `"horizontal"` |
 | `preserveAspectRatio` | 转发给 SVG |
 | `status` | 当前加载状态 |
 | `restartAnimation()` | 图标变化后重播 CSS 动画 |
+
+`noobserver` 故意**不**做成属性：上游对它只装了通用的 attribute 反射，`false` 会写成
+`noobserver="false"`——attribute 仍然存在，于是这个开关永远关不掉。`noObserverAttr` 在 `true` 时写裸
+attribute，在 `false` 时删掉它。`aria-hidden` 同理，它是 ARIA 文本而不是 HTML 的 presence 型布尔
+attribute；`ariaHiddenAttr` 总是明确写 `"true"` / `"false"`。
 
 ```mermaid
 flowchart LR
@@ -29,6 +35,26 @@ flowchart LR
     mode -->|mask| mask["用 currentColor 的 CSS mask"]
     mode -->|style| style["上游默认"]
 ```
+
+## 装饰性图标
+
+页面上的大多数图标都在重复旁边的文字已经说的事——标题前的标记、带文字按钮里的图形、列表前的圆点。
+`createDecorativeIcon` 把这类图标总需要的两件事预设好，再执行 `configure` 块：
+
+```kotlin
+import io.github.shijianjs.ktjs.iconify.createDecorativeIcon
+
+val marker = createDecorativeIcon("lucide:layers") {
+    inlineStyle.apply { fontSize = 18.px }
+}
+```
+
+- `aria-hidden="true"` —— 辅助阅读器跳过这个图标。
+- `noobserver` —— 图标被滚出视口或折叠隐藏后仍然保留。`iconify-icon` 一旦被 `IntersectionObserver`
+  判定为不可见就丢掉自己的 `<svg>`，却把 `status` 留在 `"rendered"`，于是被隐藏过的菜单项下次打开是空
+  的；这个 attribute 就是上游给的关闭开关。
+
+`configure` 最后执行，所以两个预设都能覆盖。
 
 ## 三种模式
 

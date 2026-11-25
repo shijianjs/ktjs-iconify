@@ -33,6 +33,9 @@ kotlin {
         jsMain.dependencies {
             api(project(":ktjs-iconify-types"))
             api(libs.kotlin.browser)
+            // `api`: the attribute accessors (`noObserverAttr`) expose wrapper-kit's `Attribute` in
+            // the public surface. It is the attribute-only half of the kit — no npm, no cssom.
+            api(libs.ktjs.wrapper.kit)
             implementation(npm("iconify-icon", upstreamVersion))
         }
         jsTest.dependencies {

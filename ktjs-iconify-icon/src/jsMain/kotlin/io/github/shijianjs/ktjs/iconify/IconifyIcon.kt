@@ -1,5 +1,6 @@
 package io.github.shijianjs.ktjs.iconify
 
+import io.github.shijianjs.ktjs.dom.attribute.ariaHiddenAttr
 import web.dom.document
 
 /**
@@ -26,3 +27,33 @@ fun createIconifyIcon(
             this.icon = StringOrIconifyIcon(icon)
             configure()
         }
+
+/**
+ * Creates an `<iconify-icon>` for an icon that is **decoration**: a mark next to a label, a bullet
+ * in a list, a glyph inside a button that already has its own text.
+ *
+ * Both presets are what almost every call site used to write by hand, and both are the reason the
+ * element needed raw `setAttribute` strings:
+ *
+ * - `aria-hidden="true"` — the icon repeats what the nearby text already says, so an assistive
+ *   reader should skip it. [ariaHiddenAttr] spells the ARIA value instead of taking a raw string
+ *   (ARIA is text, not presence: `"'false'"` is a *present* attribute meaning "not hidden").
+ * - `noobserver` — `iconify-icon` drops its own `<svg>` as soon as its `IntersectionObserver`
+ *   reports the element as not visible, yet keeps `status === "rendered"`; a hidden menu entry
+ *   then comes back blank on the next open. [noObserverAttr] writes the attribute the way upstream
+ *   reads it (presence, not `"false"`).
+ *
+ * [configure] runs last, so a caller can still override either preset (for example, a decorated
+ * icon that does need a label).
+ *
+ * @param icon icon name such as `mdi:home`, or serialised icon data.
+ */
+fun createDecorativeIcon(
+    icon: String,
+    configure: IconifyIconElement.() -> Unit = {},
+): IconifyIconElement =
+    createIconifyIcon(icon) {
+        ariaHiddenAttr.value = true
+        noObserverAttr.value = true
+        configure()
+    }

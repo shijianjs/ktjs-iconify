@@ -19,6 +19,12 @@ fun StringOrIconifyIcon(value: IconifyIcon): StringOrIconifyIcon = unsafeCast(va
  * Renders icons from the Iconify API or from locally registered icon data. The rendered icon
  * lives in the element's shadow DOM.
  *
+ * Only what upstream really reflects is declared as a property here. The flags it does not (for
+ * example `noobserver`) are [io.github.shijianjs.ktjs.dom.attribute.Attribute] accessors in
+ * `IconifyAttributes.kt`; `aria-hidden` uses wrapper-kit's
+ * [io.github.shijianjs.ktjs.dom.attribute.ariaHiddenAttr], which spells the ARIA value instead of
+ * writing a bare presence attribute.
+ *
  * [Online Documentation](https://iconify.design/docs/iconify-icon/)
  */
 abstract external class IconifyIconElement : HTMLElement {
@@ -45,13 +51,6 @@ abstract external class IconifyIconElement : HTMLElement {
      * Align the icon with text by adding `vertical-align: -0.125em`.
      */
     var inline: Boolean
-
-    /**
-     * Render the icon even when it is outside the viewport.
-     *
-     * By default rendering is delayed until the element becomes visible.
-     */
-    var noobserver: Boolean
 
     /**
      * Icon width, as a CSS length. By default the width follows the icon's aspect ratio at 1em

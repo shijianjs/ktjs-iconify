@@ -5,20 +5,28 @@ sidebar_position: 3
 
 # The icon element
 
-`IconifyIconElement` is an `abstract external class` extending `web.html.HTMLElement`; every upstream
-attribute is a Kotlin property, so nothing is written through strings of HTML.
+`IconifyIconElement` is an `abstract external class` extending `web.html.HTMLElement`. The members
+upstream really reflects are Kotlin properties, so nothing is written through strings of HTML; the
+two flags it only reads as attributes are typed attribute accessors instead.
 
 | Member | What it does |
 | --- | --- |
 | `icon` | icon name such as `mdi:home`, or icon data |
 | `mode` | rendering mode: `style`, `bg`, `mask` or `svg` |
 | `inline` | render inline (no shadow DOM) instead of as a block |
-| `noobserver` | disable the mutation observer |
+| `noObserverAttr` | `Attribute<Boolean>`: keep the glyph rendered outside the viewport (upstream reads this attribute, has no property for it) |
+| `ariaHiddenAttr` | `Attribute<Boolean>`: hide the icon from assistive readers, spelled as ARIA text |
 | `width` / `height` | icon dimensions |
 | `rotate` / `flip` | transformations, e.g. `"90deg"` and `"horizontal"` |
 | `preserveAspectRatio` | forwarded to the SVG |
 | `status` | current loading status |
 | `restartAnimation()` | restarts CSS animations after the icon changed |
+
+`noobserver` is deliberately **not** a property: upstream installs generic attribute reflection for
+it, which writes `noobserver="false"` — still a *present* attribute — so the flag could never be
+turned off. `noObserverAttr` writes the bare attribute for `true` and removes it for `false`. Same
+for `aria-hidden`, which is ARIA text rather than an HTML boolean attribute; `ariaHiddenAttr` always
+spells `"true"` / `"false"`.
 
 ```mermaid
 flowchart LR
@@ -29,6 +37,27 @@ flowchart LR
     mode -->|mask| mask["CSS mask over currentColor"]
     mode -->|style| style["upstream default"]
 ```
+
+## Decorative icons
+
+Most icons on a page repeat what the text next to them already says — a marker before a heading, a
+glyph inside a labelled button, a bullet in a list. `createDecorativeIcon` presets the two things
+such an icon always needs and then applies its `configure` block:
+
+```kotlin
+import io.github.shijianjs.ktjs.iconify.createDecorativeIcon
+
+val marker = createDecorativeIcon("lucide:layers") {
+    inlineStyle.apply { fontSize = 18.px }
+}
+```
+
+- `aria-hidden="true"` — the icon is skipped by assistive readers.
+- `noobserver` — the glyph survives being scrolled or folded away. `iconify-icon` drops its own
+  `<svg>` when an `IntersectionObserver` reports the element not visible, yet keeps
+  `status === "rendered"`, so a hidden menu entry comes back blank; this attribute is the opt-out.
+
+`configure` runs last, so either preset can still be overridden.
 
 ## Modes
 

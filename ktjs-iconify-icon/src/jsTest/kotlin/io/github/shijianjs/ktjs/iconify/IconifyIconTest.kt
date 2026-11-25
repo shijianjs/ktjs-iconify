@@ -9,6 +9,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import io.github.shijianjs.ktjs.dom.attribute.ariaHiddenAttr
 import web.dom.document
 import web.html.HTMLUnknownElement
 
@@ -72,7 +73,7 @@ class IconifyIconTest {
             rotate = "90deg"
             flip = "horizontal"
             inline = true
-            noobserver = true
+            noObserverAttr.value = true
         }
 
         assertEquals("iconify-icon", element.tagName.lowercase())
@@ -189,7 +190,7 @@ class IconifyIconTest {
     fun rendersIconFromStorage(): Promise<Unit> {
         assertTrue(addIcon("render:home", homeIcon))
         val element = createIconifyIcon("render:home") {
-            noobserver = true
+            noObserverAttr.value = true
             width = "2em"
             height = "2em"
         }
@@ -209,7 +210,7 @@ class IconifyIconTest {
     fun rendersIconInBackgroundMode(): Promise<Unit> {
         assertTrue(addIcon("render:bg", homeIcon))
         val element = createIconifyIcon("render:bg") {
-            noobserver = true
+            noObserverAttr.value = true
             mode = "bg"
         }
         attach(element)
@@ -226,7 +227,7 @@ class IconifyIconTest {
     fun rendersIconInMaskMode(): Promise<Unit> {
         assertTrue(addIcon("render:mask", homeIcon))
         val element = createIconifyIcon("render:mask") {
-            noobserver = true
+            noObserverAttr.value = true
             mode = "mask"
         }
         attach(element)
@@ -245,7 +246,7 @@ class IconifyIconTest {
         val element = document.createElement(IconifyIconTagName.iconifyIcon)
         registerIconifyIcon()
         element.icon = StringOrIconifyIcon(homeIcon)
-        element.noobserver = true
+        element.noObserverAttr.value = true
         attach(element)
 
         return awaitStatus(element, "rendered").then {
@@ -260,7 +261,7 @@ class IconifyIconTest {
         val serialized =
             """{"body":"<path d=\"M0 0h24v24H0z\"/>","width":24,"height":24}"""
         val element = createIconifyIcon(serialized) {
-            noobserver = true
+            noObserverAttr.value = true
         }
         attach(element)
 
@@ -276,7 +277,7 @@ class IconifyIconTest {
     fun reportsFailedStatusForMissingIcon(): Promise<Unit> {
         assertTrue(addIcon("render:missing", null))
         val element = createIconifyIcon("render:missing") {
-            noobserver = true
+            noObserverAttr.value = true
         }
         attach(element)
 
@@ -287,10 +288,48 @@ class IconifyIconTest {
     }
 
     @Test
+    fun noObserverIsAnAttributeFlag() {
+        val element = createIconifyIcon("mdi:home")
+
+        assertFalse(element.hasAttribute("noobserver"))
+        assertFalse(element.noObserverAttr.value)
+
+        element.noObserverAttr.value = true
+        assertTrue(element.hasAttribute("noobserver"))
+        assertEquals("", element.noObserverAttr.raw)
+        assertTrue(element.noObserverAttr.value)
+
+        element.noObserverAttr.value = false
+        assertFalse(element.hasAttribute("noobserver"))
+    }
+
+    @Test
+    fun createsDecorativeIcon() {
+        val element = createDecorativeIcon("mdi:home")
+
+        // Decoration: the icon is hidden from assistive readers ...
+        assertEquals("true", element.getAttribute("aria-hidden"))
+        // ... and it keeps rendering when its owner hides it, instead of coming back blank.
+        assertTrue(element.hasAttribute("noobserver"))
+        assertEquals("mdi:home", element.icon.unsafeCast<String>())
+    }
+
+    @Test
+    fun decorativeIconStillAllowsOverrides() {
+        val element = createDecorativeIcon("mdi:home") {
+            ariaHiddenAttr.value = false
+            noObserverAttr.value = false
+        }
+
+        assertEquals("false", element.getAttribute("aria-hidden"))
+        assertFalse(element.hasAttribute("noobserver"))
+    }
+
+    @Test
     fun restartsAnimations(): Promise<Unit> {
         assertTrue(addIcon("render:animated", homeIcon))
         val element = createIconifyIcon("render:animated") {
-            noobserver = true
+            noObserverAttr.value = true
         }
         attach(element)
 

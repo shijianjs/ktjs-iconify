@@ -38,6 +38,7 @@ ktjs-docusaurus = "3.10.2-kt.2-SNAPSHOT"
 ktjs-docusaurus-kit = "0.1.0-SNAPSHOT"
 ktjs-demo-kit = "0.1.0-SNAPSHOT"
 ktjs-dom-kit = "0.1.0-SNAPSHOT"
+ktjs-wrapper-kit = "0.1.0-SNAPSHOT"
 
 # `ktjs-docusaurus`'s Gradle plugin: the same version line as the wrapper klib above, but its own
 # `-kt.N` revision, and shipped from `mavenLocal` while the site is developed against a working tree.
@@ -68,6 +69,9 @@ ktjs-docusaurus = { module = "io.github.shijianjs:ktjs-docusaurus", version.ref 
 ktjs-docusaurus-kit = { module = "io.github.shijianjs:ktjs-docusaurus-kit", version.ref = "ktjs-docusaurus-kit" }
 ktjs-demo-kit-js = { module = "io.github.shijianjs:ktjs-demo-kit-js", version.ref = "ktjs-demo-kit" }
 ktjs-dom-kit = { module = "io.github.shijianjs:ktjs-dom-kit", version.ref = "ktjs-dom-kit" }
+# The attribute layer a wrapper library inherits: `Attribute`, the codecs and `observe`, without
+# the kit's npm-backed authoring side.
+ktjs-wrapper-kit = { module = "io.github.shijianjs:ktjs-wrapper-kit", version.ref = "ktjs-wrapper-kit" }
 # The element processor shares the kit's version; `processor` rather than `ksp` so the
 # accessor cannot be confused with the KSP plugin extension.
 ktjs-dom-kit-processor = { module = "io.github.shijianjs:ktjs-dom-kit-ksp", version.ref = "ktjs-dom-kit" }
