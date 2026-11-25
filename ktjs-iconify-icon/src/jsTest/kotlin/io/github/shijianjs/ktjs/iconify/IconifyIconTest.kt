@@ -380,4 +380,70 @@ class IconifyIconTest {
             { error("Expected loadIcon() to fail") },
             { _: Throwable -> }
         )
+
+    /**
+     * The premise "only the attribute works, the property is ignored" is wrong for every field in
+     * `observedAttributes`: upstream's setters write the attribute (`icon`/`inline` by hand, the rest
+     * via its `Object.defineProperty` loop), and the attribute callback re-renders.
+     */
+    @Test
+    fun assignsObservedFieldsThroughProperties(): Promise<Unit> {
+        val first: IconifyIcon = jsObject("{ body: '<g id=\"probe-first\"/>', width: 24, height: 24 }")
+        val second: IconifyIcon = jsObject("{ body: '<g id=\"probe-second\"/>', width: 24, height: 24 }")
+        assertTrue(addIcon("probe:first", first))
+        assertTrue(addIcon("probe:second", second))
+
+        val element = createIconifyIcon("probe:first") { noObserverAttr.value = true }
+        attach(element)
+
+        return awaitUntil { shadowHtml(element).contains("probe-first") }
+            .then {
+                // `icon` has a hand-written setter that writes the attribute.
+                element.icon = StringOrIconifyIcon("probe:second")
+                assertEquals("probe:second", element.getAttribute("icon"))
+                awaitUntil { shadowHtml(element).contains("probe-second") }
+            }
+            .then {
+                // `width` comes from the generic reflection loop; it re-renders too.
+                element.width = "3em"
+                awaitUntil { shadowHtml(element).contains("3em") }
+            }
+            .then {
+                // Same for `mode`.
+                element.mode = "mask"
+                awaitUntil { shadowHtml(element).contains("mask-image") }
+            }
+            .then {
+                val html = shadowHtml(element)
+                assertTrue(html.contains("probe-second"), html)
+                assertTrue(html.contains("mask-image"), html)
+                assertTrue(html.contains("3em"), html)
+                detach(element)
+            }
+    }
+
+    /**
+     * `preserveAspectRatio` is the one observed-by-rendering field with no property: the customisation
+     * getter reads the attribute, so it has to be written as an attribute, and — because it is absent
+     * from `observedAttributes` — it has to be written before the first render.
+     */
+    @Test
+    fun preserveAspectRatioIsAttributeOnly(): Promise<Unit> {
+        assertTrue(addIcon("probe:aspect", homeIcon))
+        val element = createIconifyIcon("probe:aspect") {
+            noObserverAttr.value = true
+            preserveAspectRatioAttr.value = "none"
+        }
+        attach(element)
+
+        return awaitStatus(element, "rendered").then {
+            val html = shadowHtml(element)
+            assertTrue(html.contains("""preserveAspectRatio="none""""), html)
+            assertEquals("none", element.getAttribute("preserveAspectRatio"))
+            // Upstream has no property for it, so no own property appears on the instance either.
+            val ownProperty = js("(element) => element.hasOwnProperty('preserveAspectRatio')")(element) as Boolean
+            assertFalse(ownProperty, "no property upstream")
+            detach(element)
+        }
+    }
 }

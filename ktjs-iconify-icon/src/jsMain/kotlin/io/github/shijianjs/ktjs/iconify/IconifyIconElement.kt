@@ -19,10 +19,15 @@ fun StringOrIconifyIcon(value: IconifyIcon): StringOrIconifyIcon = unsafeCast(va
  * Renders icons from the Iconify API or from locally registered icon data. The rendered icon
  * lives in the element's shadow DOM.
  *
- * Only what upstream really reflects is declared as a property here. The flags it does not (for
- * example `noobserver`) are [io.github.shijianjs.ktjs.dom.attribute.Attribute] accessors in
- * `IconifyAttributes.kt`. `aria-hidden` needs nothing custom: it is the `ARIAMixin` property
- * `ariaHidden: AriaHidden?` that every `HTMLElement` already carries.
+ * Three kinds of member live on this element, and only the first two are properties:
+ *
+ * - **Real properties** — `icon` and `inline` have hand-written getters/setters upstream; assigning
+ *   them writes the matching attribute, and the attribute callback re-renders.
+ * - **Generic reflection** — `mode`, `width`, `height`, `rotate`, `flip` are installed by upstream's
+ *   `Object.defineProperty` loop over `observedAttributes`, so the setter *is* an attribute write
+ *   and a property change re-renders (verified by the browser tests).
+ * - **Attribute-only** — `noobserver` and `preserveAspectRatio` have no property at all. Both are
+ *   typed accessors in `IconifyAttributes.kt`; the KDoc there explains why each needs one.
  *
  * [Online Documentation](https://iconify.design/docs/iconify-icon/)
  */
@@ -71,11 +76,6 @@ abstract external class IconifyIconElement : HTMLElement {
      * Flip: `horizontal`, `vertical`, or both separated by a comma.
      */
     var flip: String?
-
-    /**
-     * Value of the rendered SVG's `preserveAspectRatio` attribute.
-     */
-    var preserveAspectRatio: String?
 
     /**
      * Current icon status: `rendered`, `loading` or `failed`.

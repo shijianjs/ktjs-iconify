@@ -51,12 +51,16 @@ for cases where the component must be loaded before creating elements another wa
 | `icon: dynamic` | Icon name such as `mdi:home`, or icon data |
 | `mode: String?` | Rendering mode: `style`, `bg`, `mask` or `svg` |
 | `inline: Boolean` | Render inline instead of using shadow DOM |
-| `noobserver: Boolean` | Disable the mutation observer |
+| `noObserverAttr: Attribute<Boolean>` | Keep the glyph rendered outside the viewport (attribute only: `noobserver`) |
 | `width`, `height: String?` | Icon dimensions |
 | `rotate: String?`, `flip: String?` | Transformations |
-| `preserveAspectRatio: String?` | SVG `preserveAspectRatio` |
+| `preserveAspectRatioAttr: Attribute<String>` | SVG `preserveAspectRatio` (attribute only, read at render time) |
 | `status: String` | Current loading status |
 | `restartAnimation()` | Restart CSS animations |
+
+`icon` / `inline` have hand-written setters upstream; `mode`, `width`, `height`, `rotate` and `flip`
+come from its generic attribute reflection. All six write the attribute on assignment and re-render.
+`noobserver` and `preserveAspectRatio` have no property at all, hence the two attribute accessors.
 
 ## API functions
 

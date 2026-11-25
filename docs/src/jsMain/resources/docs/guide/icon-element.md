@@ -5,26 +5,34 @@ sidebar_position: 3
 
 # The icon element
 
-`IconifyIconElement` is an `abstract external class` extending `web.html.HTMLElement`. The members
-upstream really reflects are Kotlin properties, so nothing is written through strings of HTML; the
-one flag it only reads as an attribute is a typed attribute accessor instead.
+`IconifyIconElement` is an `abstract external class` extending `web.html.HTMLElement`. Its members
+fall into three groups: the ones with hand-written setters upstream (`icon`, `inline`), the ones its
+generic attribute reflection installs (`mode`, `width`, `height`, `rotate`, `flip`), and the two
+fields it only reads as attributes (`noobserver`, `preserveAspectRatio`). Everything in the first two
+groups is a property whose assignment writes the attribute and re-renders; the last two are typed
+attribute accessors.
 
 | Member | What it does |
 | --- | --- |
 | `icon` | icon name such as `mdi:home`, or icon data |
 | `mode` | rendering mode: `style`, `bg`, `mask` or `svg` |
 | `inline` | render inline (no shadow DOM) instead of as a block |
-| `noObserverAttr` | `Attribute<Boolean>`: keep the glyph rendered outside the viewport (upstream reads this attribute, has no property for it) |
+| `noObserverAttr` | `Attribute<Boolean>`: keep the glyph rendered outside the viewport |
 | `ariaHidden` | `AriaHidden?` inherited from `ARIAMixin`: hide the icon from assistive readers |
 | `width` / `height` | icon dimensions |
 | `rotate` / `flip` | transformations, e.g. `"90deg"` and `"horizontal"` |
-| `preserveAspectRatio` | forwarded to the SVG |
+| `preserveAspectRatioAttr` | `Attribute<String>`: the rendered SVG's `preserveAspectRatio` |
 | `status` | current loading status |
 | `restartAnimation()` | restarts CSS animations after the icon changed |
 
 `noobserver` is deliberately **not** a property: upstream installs generic attribute reflection for
 it, which writes `noobserver="false"` — still a *present* attribute — so the flag could never be
 turned off. `noObserverAttr` writes the bare attribute for `true` and removes it for `false`.
+
+`preserveAspectRatio` has no property either, and it is the one attribute that is *read* by the
+renderer yet missing from `observedAttributes`: write `preserveAspectRatioAttr` before the first
+render, otherwise the current glyph keeps the old value until another observed attribute changes.
+
 `aria-hidden` needs no custom accessor at all: it is the `ariaHidden` property every `HTMLElement`
 inherits, typed as the `AriaHidden` union (`AriaHidden.ariaTrue` with the usual aliased import).
 

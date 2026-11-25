@@ -5,26 +5,34 @@ sidebar_position: 3
 
 # 图标元素
 
-`IconifyIconElement` 是继承 `web.html.HTMLElement` 的 `abstract external class`。上游真正反射成属性的成员
-是 Kotlin 属性，不通过拼 HTML 字符串来写；它只按 attribute 读的那个开关则用类型化的 attribute 访问器。
+`IconifyIconElement` 是继承 `web.html.HTMLElement` 的 `abstract external class`。它的成员分三类：上游手写
+setter 的（`icon`、`inline`）、上游通用 attribute 反射装出来的（`mode`、`width`、`height`、`rotate`、
+`flip`），以及它只按 attribute 读的两个（`noobserver`、`preserveAspectRatio`）。前两类都是属性，赋值时
+会写 attribute 并触发重渲染；后两个则用类型化的 attribute 访问器。
 
 | 成员 | 作用 |
 | --- | --- |
 | `icon` | 图标名（如 `mdi:home`），或图标数据 |
 | `mode` | 渲染模式：`style`、`bg`、`mask`、`svg` |
 | `inline` | 内联渲染（不走 shadow DOM），而不是块级 |
-| `noObserverAttr` | `Attribute<Boolean>`：让图标在视口外也保持渲染（上游只认这个 attribute，没有对应属性） |
+| `noObserverAttr` | `Attribute<Boolean>`：让图标在视口外也保持渲染 |
 | `ariaHidden` | 继承自 `ARIAMixin` 的 `AriaHidden?`：把图标从辅助阅读器里隐藏 |
 | `width` / `height` | 图标尺寸 |
 | `rotate` / `flip` | 变换，例如 `"90deg"` 与 `"horizontal"` |
-| `preserveAspectRatio` | 转发给 SVG |
+| `preserveAspectRatioAttr` | `Attribute<String>`：渲染出的 SVG 的 `preserveAspectRatio` |
 | `status` | 当前加载状态 |
 | `restartAnimation()` | 图标变化后重播 CSS 动画 |
 
 `noobserver` 故意**不**做成属性：上游对它只装了通用的 attribute 反射，`false` 会写成
 `noobserver="false"`——attribute 仍然存在，于是这个开关永远关不掉。`noObserverAttr` 在 `true` 时写裸
-attribute，在 `false` 时删掉它。`aria-hidden` 完全不需要自造访问器：它就是每个 `HTMLElement` 都继承的
-`ariaHidden` 属性，类型是 `AriaHidden` 并集（用别名导入后写 `AriaHidden.ariaTrue`）。
+attribute，在 `false` 时删掉它。
+
+`preserveAspectRatio` 同样没有属性，而且它是唯一一个渲染器会读、却不在 `observedAttributes` 里的
+attribute：要在首次渲染前写 `preserveAspectRatioAttr`，否则当前图形会一直用旧值，直到别的被观察
+attribute 变化。
+
+`aria-hidden` 完全不需要自造访问器：它就是每个 `HTMLElement` 都继承的 `ariaHidden` 属性，类型是
+`AriaHidden` 并集（用别名导入后写 `AriaHidden.ariaTrue`）。
 
 ```mermaid
 flowchart LR

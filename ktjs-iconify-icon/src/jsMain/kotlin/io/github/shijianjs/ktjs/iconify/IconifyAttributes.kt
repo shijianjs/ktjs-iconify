@@ -1,6 +1,7 @@
 package io.github.shijianjs.ktjs.iconify
 
 import io.github.shijianjs.ktjs.dom.attribute.Attribute
+import io.github.shijianjs.ktjs.dom.attribute.attribute
 import io.github.shijianjs.ktjs.dom.attribute.booleanAttribute
 
 /**
@@ -19,3 +20,15 @@ import io.github.shijianjs.ktjs.dom.attribute.booleanAttribute
  */
 val IconifyIconElement.noObserverAttr: Attribute<Boolean>
     get() = booleanAttribute("noobserver")
+
+/**
+ * `preserveAspectRatio` of the rendered `<svg>`.
+ *
+ * The second field upstream reads but never exposes as a property: `getCustomisations()` picks up
+ * `preserveAspectRatio` (and its lowercase spelling) when it renders, yet the attribute is missing
+ * from `observedAttributes`, so changing it does **not** queue a re-render by itself. Set it before
+ * the first render — `createIconifyIcon { preserveAspectRatioAttr.value = "none" }` — or accept that
+ * an existing glyph keeps the old value until some other observed attribute changes.
+ */
+val IconifyIconElement.preserveAspectRatioAttr: Attribute<String>
+    get() = attribute("preserveAspectRatio")

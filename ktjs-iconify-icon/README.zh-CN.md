@@ -51,12 +51,16 @@ addIcon("test:home", data)
 | `icon: dynamic` | 图标名（如 `mdi:home`）或图标数据 |
 | `mode: String?` | 渲染模式：`style`、`bg`、`mask`、`svg` |
 | `inline: Boolean` | 使用内联渲染而不是 shadow DOM |
-| `noobserver: Boolean` | 关闭 mutation observer |
+| `noObserverAttr: Attribute<Boolean>` | 图标在视口外也保持渲染（仅 attribute：`noobserver`） |
 | `width`、`height: String?` | 图标尺寸 |
 | `rotate: String?`、`flip: String?` | 变换 |
-| `preserveAspectRatio: String?` | SVG 的 `preserveAspectRatio` |
+| `preserveAspectRatioAttr: Attribute<String>` | SVG 的 `preserveAspectRatio`（仅 attribute，渲染时读取） |
 | `status: String` | 当前加载状态 |
 | `restartAnimation()` | 重新播放 CSS 动画 |
+
+`icon` / `inline` 上游有手写 setter；`mode`、`width`、`height`、`rotate`、`flip` 来自它的通用 attribute
+反射。这六个赋值时都会写 attribute 并触发重渲染。`noobserver` 与 `preserveAspectRatio` 完全没有属性，
+所以用上面两个 attribute 访问器。
 
 ## API 函数
 
