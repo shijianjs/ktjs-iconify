@@ -36,7 +36,7 @@ kotlin {
             api(project(":ktjs-iconify-utils"))
             // `DownloadOptions` exposes the global `URLSearchParams`, which the public API takes
             // from `web.url` rather than declaring a copy of it.
-            api("org.jetbrains.kotlin-wrappers:kotlin-browser:2026.11.2")
+            api(libs.kotlin.browser)
             implementation(npm("@iconify/tools", upstreamVersion))
         }
         jsTest.dependencies {

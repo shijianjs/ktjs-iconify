@@ -58,24 +58,22 @@ kotlin {
         }
 
         jsMain.dependencies {
-            implementation("org.jetbrains.kotlin-wrappers:kotlin-browser:2026.11.2")
+            implementation(libs.kotlin.browser)
             // The wrappers this page demonstrates.
             implementation(project(":ktjs-iconify-icon"))
             implementation(project(":ktjs-iconify-utils"))
             // The shared demo shell: layout, menu, router, i18n. Published to `mavenLocal` by a
             // working tree of the `ktjs-dom-kit` repository until the release batch.
-            implementation(
-                "io.github.shijianjs:ktjs-demo-kit-js:${providers.gradleProperty("ktjs-demo-kit.version").get()}",
-            )
+            implementation(libs.ktjs.demo.kit.js)
         }
 
         jvmTest.dependencies {
-            implementation("com.microsoft.playwright:playwright:1.61.0")
-            implementation("cn.hutool:hutool-all:5.8.48")
-            implementation("org.junit.jupiter:junit-jupiter:6.1.3")
-            implementation("org.junit-pioneer:junit-pioneer:2.3.0")
+            implementation(libs.playwright)
+            implementation(libs.hutool.all)
+            implementation(libs.junit.jupiter)
+            implementation(libs.junit.pioneer)
             implementation(kotlin("test-junit5"))
-            runtimeOnly("org.junit.platform:junit-platform-launcher:6.1.3")
+            runtimeOnly(libs.junit.platform.launcher)
         }
     }
 }
@@ -122,7 +120,7 @@ tasks.named<Test>("jvmTest") { enabled = false }
  * listing all of them. The prefix spells the tags this demo already uses: `iconify-`.
  */
 dependencies {
-    add("kspJs", "io.github.shijianjs:ktjs-dom-kit-ksp:${providers.gradleProperty("ktjs-dom-kit.version").get()}")
+    add("kspJs", libs.ktjs.dom.kit.processor)
 }
 
 ksp {
