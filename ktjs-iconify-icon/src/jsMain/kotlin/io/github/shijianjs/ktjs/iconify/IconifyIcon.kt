@@ -1,6 +1,7 @@
 package io.github.shijianjs.ktjs.iconify
 
-import io.github.shijianjs.ktjs.dom.attribute.ariaHiddenAttr
+import web.aria.AriaHidden
+import web.aria.`true` as ariaTrue
 import web.dom.document
 
 /**
@@ -36,8 +37,8 @@ fun createIconifyIcon(
  * element needed raw `setAttribute` strings:
  *
  * - `aria-hidden="true"` — the icon repeats what the nearby text already says, so an assistive
- *   reader should skip it. [ariaHiddenAttr] spells the ARIA value instead of taking a raw string
- *   (ARIA is text, not presence: `"'false'"` is a *present* attribute meaning "not hidden").
+ *   reader should skip it. `ariaHidden` is the `ARIAMixin` property every element carries, typed
+ *   `AriaHidden?`, so this is a property assignment rather than a string.
  * - `noobserver` — `iconify-icon` drops its own `<svg>` as soon as its `IntersectionObserver`
  *   reports the element as not visible, yet keeps `status === "rendered"`; a hidden menu entry
  *   then comes back blank on the next open. [noObserverAttr] writes the attribute the way upstream
@@ -53,7 +54,7 @@ fun createDecorativeIcon(
     configure: IconifyIconElement.() -> Unit = {},
 ): IconifyIconElement =
     createIconifyIcon(icon) {
-        ariaHiddenAttr.value = true
+        ariaHidden = AriaHidden.ariaTrue
         noObserverAttr.value = true
         configure()
     }

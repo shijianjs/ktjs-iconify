@@ -21,9 +21,8 @@ fun StringOrIconifyIcon(value: IconifyIcon): StringOrIconifyIcon = unsafeCast(va
  *
  * Only what upstream really reflects is declared as a property here. The flags it does not (for
  * example `noobserver`) are [io.github.shijianjs.ktjs.dom.attribute.Attribute] accessors in
- * `IconifyAttributes.kt`; `aria-hidden` uses wrapper-kit's
- * [io.github.shijianjs.ktjs.dom.attribute.ariaHiddenAttr], which spells the ARIA value instead of
- * writing a bare presence attribute.
+ * `IconifyAttributes.kt`. `aria-hidden` needs nothing custom: it is the `ARIAMixin` property
+ * `ariaHidden: AriaHidden?` that every `HTMLElement` already carries.
  *
  * [Online Documentation](https://iconify.design/docs/iconify-icon/)
  */

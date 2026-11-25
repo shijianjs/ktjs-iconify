@@ -6,7 +6,7 @@ sidebar_position: 3
 # 图标元素
 
 `IconifyIconElement` 是继承 `web.html.HTMLElement` 的 `abstract external class`。上游真正反射成属性的成员
-是 Kotlin 属性，不通过拼 HTML 字符串来写；它只按 attribute 读的两个开关则用类型化的 attribute 访问器。
+是 Kotlin 属性，不通过拼 HTML 字符串来写；它只按 attribute 读的那个开关则用类型化的 attribute 访问器。
 
 | 成员 | 作用 |
 | --- | --- |
@@ -14,7 +14,7 @@ sidebar_position: 3
 | `mode` | 渲染模式：`style`、`bg`、`mask`、`svg` |
 | `inline` | 内联渲染（不走 shadow DOM），而不是块级 |
 | `noObserverAttr` | `Attribute<Boolean>`：让图标在视口外也保持渲染（上游只认这个 attribute，没有对应属性） |
-| `ariaHiddenAttr` | `Attribute<Boolean>`：把图标从辅助阅读器里隐藏，按 ARIA 文本写 |
+| `ariaHidden` | 继承自 `ARIAMixin` 的 `AriaHidden?`：把图标从辅助阅读器里隐藏 |
 | `width` / `height` | 图标尺寸 |
 | `rotate` / `flip` | 变换，例如 `"90deg"` 与 `"horizontal"` |
 | `preserveAspectRatio` | 转发给 SVG |
@@ -23,8 +23,8 @@ sidebar_position: 3
 
 `noobserver` 故意**不**做成属性：上游对它只装了通用的 attribute 反射，`false` 会写成
 `noobserver="false"`——attribute 仍然存在，于是这个开关永远关不掉。`noObserverAttr` 在 `true` 时写裸
-attribute，在 `false` 时删掉它。`aria-hidden` 同理，它是 ARIA 文本而不是 HTML 的 presence 型布尔
-attribute；`ariaHiddenAttr` 总是明确写 `"true"` / `"false"`。
+attribute，在 `false` 时删掉它。`aria-hidden` 完全不需要自造访问器：它就是每个 `HTMLElement` 都继承的
+`ariaHidden` 属性，类型是 `AriaHidden` 并集（用别名导入后写 `AriaHidden.ariaTrue`）。
 
 ```mermaid
 flowchart LR

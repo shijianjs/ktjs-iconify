@@ -7,7 +7,7 @@ sidebar_position: 3
 
 `IconifyIconElement` is an `abstract external class` extending `web.html.HTMLElement`. The members
 upstream really reflects are Kotlin properties, so nothing is written through strings of HTML; the
-two flags it only reads as attributes are typed attribute accessors instead.
+one flag it only reads as an attribute is a typed attribute accessor instead.
 
 | Member | What it does |
 | --- | --- |
@@ -15,7 +15,7 @@ two flags it only reads as attributes are typed attribute accessors instead.
 | `mode` | rendering mode: `style`, `bg`, `mask` or `svg` |
 | `inline` | render inline (no shadow DOM) instead of as a block |
 | `noObserverAttr` | `Attribute<Boolean>`: keep the glyph rendered outside the viewport (upstream reads this attribute, has no property for it) |
-| `ariaHiddenAttr` | `Attribute<Boolean>`: hide the icon from assistive readers, spelled as ARIA text |
+| `ariaHidden` | `AriaHidden?` inherited from `ARIAMixin`: hide the icon from assistive readers |
 | `width` / `height` | icon dimensions |
 | `rotate` / `flip` | transformations, e.g. `"90deg"` and `"horizontal"` |
 | `preserveAspectRatio` | forwarded to the SVG |
@@ -24,9 +24,9 @@ two flags it only reads as attributes are typed attribute accessors instead.
 
 `noobserver` is deliberately **not** a property: upstream installs generic attribute reflection for
 it, which writes `noobserver="false"` — still a *present* attribute — so the flag could never be
-turned off. `noObserverAttr` writes the bare attribute for `true` and removes it for `false`. Same
-for `aria-hidden`, which is ARIA text rather than an HTML boolean attribute; `ariaHiddenAttr` always
-spells `"true"` / `"false"`.
+turned off. `noObserverAttr` writes the bare attribute for `true` and removes it for `false`.
+`aria-hidden` needs no custom accessor at all: it is the `ariaHidden` property every `HTMLElement`
+inherits, typed as the `AriaHidden` union (`AriaHidden.ariaTrue` with the usual aliased import).
 
 ```mermaid
 flowchart LR
