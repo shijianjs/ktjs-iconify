@@ -81,23 +81,6 @@ external interface ExecOptions {
 }
 
 /**
- * `URLSearchParams` global, used for API query parameters.
- *
- * The upstream type is the Node.js/DOM `URLSearchParams`; this interface declares the
- * commonly used subset.
- */
-external interface URLSearchParams {
-    fun append(name: String, value: String)
-    fun delete(name: String)
-    fun get(name: String): String?
-    fun getAll(name: String): Array<String>
-    fun has(name: String): Boolean
-    fun set(name: String, value: String)
-    fun sort()
-    override fun toString(): String
-}
-
-/**
  * Result of a [scanDirectory] callback: `false`, `null` or `undefined` skips the file, `true`
  * includes `subdir + file`, and a string includes the custom value.
  */

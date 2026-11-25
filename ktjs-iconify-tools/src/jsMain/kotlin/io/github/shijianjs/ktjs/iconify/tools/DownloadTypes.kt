@@ -9,6 +9,7 @@ import org.w3c.fetch.RequestInit
 import org.w3c.fetch.Response
 import kotlin.js.JsAny
 import kotlin.js.Promise
+import web.url.URLSearchParams
 
 /**
  * Download source type: `"git"`, `"github"`, `"gitlab"` or `"npm"`.
@@ -530,7 +531,7 @@ external interface APIQueryParams {
     var uri: String
 
     /**
-     * Query parameters.
+     * Query parameters: the global `URLSearchParams`, i.e. `web.url`'s class.
      */
     var params: URLSearchParams?
 
