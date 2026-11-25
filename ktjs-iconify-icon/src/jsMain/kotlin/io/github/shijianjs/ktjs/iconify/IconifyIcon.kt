@@ -1,7 +1,7 @@
 package io.github.shijianjs.ktjs.iconify
 
 import web.aria.AriaHidden
-import web.aria.`true` as ariaTrue
+import web.aria.`true`
 import web.dom.document
 
 /**
@@ -54,7 +54,7 @@ fun createDecorativeIcon(
     configure: IconifyIconElement.() -> Unit = {},
 ): IconifyIconElement =
     createIconifyIcon(icon) {
-        ariaHidden = AriaHidden.ariaTrue
+        ariaHidden = AriaHidden.`true`
         noObserverAttr.value = true
         configure()
     }

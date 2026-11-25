@@ -32,7 +32,7 @@ attribute：要在首次渲染前写 `preserveAspectRatioAttr`，否则当前图
 attribute 变化。
 
 `aria-hidden` 完全不需要自造访问器：它就是每个 `HTMLElement` 都继承的 `ariaHidden` 属性，类型是
-`AriaHidden` 并集（用别名导入后写 `AriaHidden.ariaTrue`）。
+`AriaHidden` 并集（`import web.aria.\`true\`` 之后写 `AriaHidden.\`true\``）。
 
 ```mermaid
 flowchart LR

@@ -34,7 +34,7 @@ renderer yet missing from `observedAttributes`: write `preserveAspectRatioAttr` 
 render, otherwise the current glyph keeps the old value until another observed attribute changes.
 
 `aria-hidden` needs no custom accessor at all: it is the `ariaHidden` property every `HTMLElement`
-inherits, typed as the `AriaHidden` union (`AriaHidden.ariaTrue` with the usual aliased import).
+inherits, typed as the `AriaHidden` union (`import web.aria.\`true\`` then `AriaHidden.\`true\``).
 
 ```mermaid
 flowchart LR

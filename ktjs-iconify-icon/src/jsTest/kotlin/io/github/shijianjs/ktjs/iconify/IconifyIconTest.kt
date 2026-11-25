@@ -10,7 +10,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import web.aria.AriaHidden
-import web.aria.`false` as ariaFalse
+import web.aria.`false`
 import web.dom.document
 import web.html.HTMLUnknownElement
 
@@ -318,7 +318,7 @@ class IconifyIconTest {
     @Test
     fun decorativeIconStillAllowsOverrides() {
         val element = createDecorativeIcon("mdi:home") {
-            ariaHidden = AriaHidden.ariaFalse
+            ariaHidden = AriaHidden.`false`
             noObserverAttr.value = false
         }
 
