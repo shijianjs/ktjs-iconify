@@ -16,7 +16,7 @@ detekt = "2.0.0-alpha.6"
 maven-publish = "0.37.0"
 
 # JetBrains Kotlin/JS type wrappers.
-kotlin-wrappers = "2026.11.2"
+kotlin-wrappers = "2026.11.4"
 
 # Test stack: the browser suite plus the Playwright end-to-end demo suite (JUnit 5
 # with Hutool's static server); `junit-pioneer` carries the in-memory filesystem the
