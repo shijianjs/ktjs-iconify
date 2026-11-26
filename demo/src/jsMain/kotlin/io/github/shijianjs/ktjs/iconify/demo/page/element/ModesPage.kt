@@ -14,7 +14,8 @@ import io.github.shijianjs.ktjs.demo.page.Grid
 import io.github.shijianjs.ktjs.demo.page.SectionBlock
 import io.github.shijianjs.ktjs.dom.element.inlineStyle
 import io.github.shijianjs.ktjs.iconify.createIconifyIcon
-import web.cssom.Color
+import io.github.shijianjs.ktjs.vaadin.lumostyles.LumoCustomProperties
+import web.cssom.`var`
 
 /** One section of mode cards; the mask example is tinted to show that it takes the text colour. */
 internal class ModesPage : DemoPage() {
@@ -30,7 +31,7 @@ internal class ModesPage : DemoPage() {
                 mode = example.mode
                 width = "2.5rem"
                 height = "2.5rem"
-                if (example.mode == "mask") inlineStyle.apply { color = Color("var(--lumo-primary-color)") }
+                if (example.mode == "mask") inlineStyle.apply { color = `var`(LumoCustomProperties.PRIMARY_COLOR) }
             }
             exampleBox(example.name, element)
         }
